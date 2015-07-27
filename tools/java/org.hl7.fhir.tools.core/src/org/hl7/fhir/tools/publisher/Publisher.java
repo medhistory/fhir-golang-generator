@@ -1135,14 +1135,14 @@ public class Publisher implements URIResolver {
   }
 
   private void registerReferencePlatforms() {
-    // javaReferencePlatform = new JavaGenerator(page.getFolders());
-    // delphiReferencePlatform = new DelphiGenerator(page.getFolders());
-    // page.getReferenceImplementations().add(javaReferencePlatform);
-    // page.getReferenceImplementations().add(delphiReferencePlatform);
-    // page.getReferenceImplementations().add(new CSharpGenerator());
-    // page.getReferenceImplementations().add(new XMLToolsGenerator());
-    // page.getReferenceImplementations().add(new JavaScriptGenerator());
-    // page.getReferenceImplementations().add(new EMFGenerator());
+    javaReferencePlatform = new JavaGenerator(page.getFolders());
+    delphiReferencePlatform = new DelphiGenerator(page.getFolders());
+    page.getReferenceImplementations().add(javaReferencePlatform);
+    page.getReferenceImplementations().add(delphiReferencePlatform);
+    page.getReferenceImplementations().add(new CSharpGenerator());
+    page.getReferenceImplementations().add(new XMLToolsGenerator());
+    page.getReferenceImplementations().add(new JavaScriptGenerator());
+    page.getReferenceImplementations().add(new EMFGenerator());
     page.getReferenceImplementations().add(new GoGenerator());
     page.getReferenceImplementations().add(new EmberGenerator());
 
