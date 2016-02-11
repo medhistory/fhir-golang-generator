@@ -37,30 +37,31 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.hl7.fhir.instance.model.Address;
-import org.hl7.fhir.instance.model.Address.AddressUse;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Coding;
-import org.hl7.fhir.instance.model.ContactPoint;
-import org.hl7.fhir.instance.model.ContactPoint.ContactPointSystem;
-import org.hl7.fhir.instance.model.ContactPoint.ContactPointUse;
-import org.hl7.fhir.instance.model.DateTimeType;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.instance.model.Factory;
-import org.hl7.fhir.instance.model.HumanName;
-import org.hl7.fhir.instance.model.HumanName.NameUse;
-import org.hl7.fhir.instance.model.Identifier;
-import org.hl7.fhir.instance.model.InstantType;
-import org.hl7.fhir.instance.model.Period;
-import org.hl7.fhir.instance.model.Quantity;
-import org.hl7.fhir.instance.model.Range;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.Timing;
-import org.hl7.fhir.instance.model.Timing.EventTiming;
-import org.hl7.fhir.instance.model.Timing.TimingRepeatComponent;
-import org.hl7.fhir.instance.model.Timing.UnitsOfTime;
-import org.hl7.fhir.instance.model.Type;
+import org.hl7.fhir.dstu21.model.Address;
+import org.hl7.fhir.dstu21.model.Address.AddressUse;
+import org.hl7.fhir.dstu21.model.CodeableConcept;
+import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.ContactPoint;
+import org.hl7.fhir.dstu21.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu21.model.ContactPoint.ContactPointUse;
+import org.hl7.fhir.dstu21.model.DateTimeType;
+import org.hl7.fhir.dstu21.model.DateType;
+import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu21.model.Factory;
+import org.hl7.fhir.dstu21.model.HumanName;
+import org.hl7.fhir.dstu21.model.HumanName.NameUse;
+import org.hl7.fhir.dstu21.model.Identifier;
+import org.hl7.fhir.dstu21.model.InstantType;
+import org.hl7.fhir.dstu21.model.Period;
+import org.hl7.fhir.dstu21.model.Quantity;
+import org.hl7.fhir.dstu21.model.Range;
+import org.hl7.fhir.dstu21.model.SimpleQuantity;
+import org.hl7.fhir.dstu21.model.StringType;
+import org.hl7.fhir.dstu21.model.Timing;
+import org.hl7.fhir.dstu21.model.Timing.EventTiming;
+import org.hl7.fhir.dstu21.model.Timing.TimingRepeatComponent;
+import org.hl7.fhir.dstu21.model.Timing.UnitsOfTime;
+import org.hl7.fhir.dstu21.model.Type;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.ucum.UcumService;
@@ -412,6 +413,7 @@ public class Convert {
 	  return v.contains("+") || v.contains("-") || v.endsWith("Z");
   }
 
+
 	public DateType makeDateFromTS(Element ts) throws Exception {
 		if (ts == null)
 			return null;
@@ -525,8 +527,8 @@ public class Convert {
 		if (low == null && high == null)
 			return null;
 		Range r = new Range();
-		r.setLow(makeQuantityFromPQ(low, ivlpq.getAttribute("unit")));
-		r.setHigh(makeQuantityFromPQ(high, ivlpq.getAttribute("unit")));
+		r.setLow(makeSimpleQuantityFromPQ(low, ivlpq.getAttribute("unit")));
+		r.setHigh(makeSimpleQuantityFromPQ(high, ivlpq.getAttribute("unit")));
 		return r;
 	}
 	
@@ -547,11 +549,34 @@ public class Convert {
 		units = Utilities.noString(pq.getAttribute("unit")) ? units : pq.getAttribute("unit");
 		if (!Utilities.noString(units)) {
 			if (ucumSvc == null || ucumSvc.validate(units) != null)
-				qty.setUnits(units);
+				qty.setUnit(units);
 			else {
 				qty.setCode(units);
 				qty.setSystem("http://unitsofmeasure.org");
-				qty.setUnits(ucumSvc.getCommonDisplay(units));
+				qty.setUnit(ucumSvc.getCommonDisplay(units));
+			}
+		}
+		return qty;		
+  }
+
+	public SimpleQuantity makeSimpleQuantityFromPQ(Element pq, String units) throws Exception {
+		if (pq == null)
+	    return null;
+		SimpleQuantity qty = new SimpleQuantity();
+		String n = pq.getAttribute("value").replace(",", "").trim();
+		try {
+		  qty.setValue(new BigDecimal(n));
+		} catch (Exception e) {
+			throw new Exception("Unable to process value '"+n+"'", e);
+		}			
+		units = Utilities.noString(pq.getAttribute("unit")) ? units : pq.getAttribute("unit");
+		if (!Utilities.noString(units)) {
+			if (ucumSvc == null || ucumSvc.validate(units) != null)
+				qty.setUnit(units);
+			else {
+				qty.setCode(units);
+				qty.setSystem("http://unitsofmeasure.org");
+				qty.setUnit(ucumSvc.getCommonDisplay(units));
 			}
 		}
 		return qty;		

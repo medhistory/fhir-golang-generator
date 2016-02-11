@@ -34,12 +34,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.definitions.Config;
+import org.hl7.fhir.utilities.Utilities;
 
 public class DelphiCodeGenerator extends OutputStreamWriter {
 
 	// fragments
   public String name;
   public List<String> uses = new ArrayList<String>();
+  public List<String> usesImpl = new ArrayList<String>();
   public List<String> comments = new ArrayList<String>();
   public List<String> precomments = new ArrayList<String>();
   public List<String> enumDefs = new ArrayList<String>();
@@ -60,6 +62,9 @@ public class DelphiCodeGenerator extends OutputStreamWriter {
 	}
 
 	public String escape(String v) {
+	  if (Utilities.noString(v))
+	    return "";
+	  
 	  StringBuilder s = new StringBuilder();
 	  for (char c : v.toCharArray())
 	    if (c == '\'')
@@ -147,6 +152,17 @@ public class DelphiCodeGenerator extends OutputStreamWriter {
     }
     write("implementation\r\n");
     write("\r\n");
+    if (!usesImpl.isEmpty()) {
+      write("uses\r\n");
+      write("  ");
+      for (int i = 0; i < usesImpl.size(); i++) {
+        if (i > 0)
+          write(", ");
+        write(usesImpl.get(i));
+      }
+      write(";\r\n");
+      write("\r\n");
+    }
     for (String s : classImpls) {
       write(s+"\r\n");
     }

@@ -33,13 +33,12 @@ package org.hl7.fhir.convertors;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-import org.hl7.fhir.instance.formats.IParser;
-import org.hl7.fhir.instance.formats.IParser.OutputStyle;
-import org.hl7.fhir.instance.formats.JsonParser;
-import org.hl7.fhir.instance.formats.XmlParser;
-import org.hl7.fhir.instance.model.Bundle;
-import org.hl7.fhir.instance.utils.WorkerContext;
-import org.hl7.fhir.instance.utils.WorkerContextFactory;
+import org.hl7.fhir.dstu21.formats.IParser;
+import org.hl7.fhir.dstu21.formats.IParser.OutputStyle;
+import org.hl7.fhir.dstu21.formats.JsonParser;
+import org.hl7.fhir.dstu21.formats.XmlParser;
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.utils.SimpleWorkerContext;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.ucum.UcumEssenceService;
 
@@ -54,7 +53,7 @@ public class Test {
 	
 	public static void main(String[] args) {
 		try {
-			CCDAConverter c = new CCDAConverter(new UcumEssenceService(UCUM_PATH), WorkerContextFactory.fromPack(Utilities.path(SRC_PATH, "validation.zip")));
+			CCDAConverter c = new CCDAConverter(new UcumEssenceService(UCUM_PATH), SimpleWorkerContext.fromPack(Utilities.path(SRC_PATH, "validation.zip")));
 			Bundle a = c.convert(new FileInputStream(DEF_PATH + "ccda.xml"));
 			String fx = DEF_PATH + "output.xml";
 			IParser x = new XmlParser().setOutputStyle(OutputStyle.PRETTY);

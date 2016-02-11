@@ -37,51 +37,50 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.hl7.fhir.instance.model.AllergyIntolerance;
-import org.hl7.fhir.instance.model.AllergyIntolerance.AllergyIntoleranceCriticality;
-import org.hl7.fhir.instance.model.AllergyIntolerance.AllergyIntoleranceEventComponent;
-import org.hl7.fhir.instance.model.AllergyIntolerance.AllergyIntoleranceSeverity;
-import org.hl7.fhir.instance.model.AllergyIntolerance.AllergyIntoleranceStatus;
-import org.hl7.fhir.instance.model.AllergyIntolerance.AllergyIntoleranceType;
-import org.hl7.fhir.instance.model.Bundle;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Coding;
-import org.hl7.fhir.instance.model.Comparison;
-import org.hl7.fhir.instance.model.Composition;
-import org.hl7.fhir.instance.model.Composition.CompositionAttestationMode;
-import org.hl7.fhir.instance.model.Composition.CompositionAttesterComponent;
-import org.hl7.fhir.instance.model.Composition.SectionComponent;
-import org.hl7.fhir.instance.model.ContactPoint;
-import org.hl7.fhir.instance.model.Device;
-import org.hl7.fhir.instance.model.DomainResource;
-import org.hl7.fhir.instance.model.Encounter;
-import org.hl7.fhir.instance.model.Extension;
-import org.hl7.fhir.instance.model.Factory;
-import org.hl7.fhir.instance.model.Identifier;
-import org.hl7.fhir.instance.model.InstantType;
-import org.hl7.fhir.instance.model.List_;
-import org.hl7.fhir.instance.model.List_.ListEntryComponent;
-import org.hl7.fhir.instance.model.Location;
-import org.hl7.fhir.instance.model.Meta;
-import org.hl7.fhir.instance.model.Narrative;
-import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.Observation;
-import org.hl7.fhir.instance.model.Observation.ObservationRelatedComponent;
-import org.hl7.fhir.instance.model.Observation.ObservationRelationshipType;
-import org.hl7.fhir.instance.model.Observation.ObservationReliability;
-import org.hl7.fhir.instance.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.Organization;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.Period;
-import org.hl7.fhir.instance.model.Practitioner;
-import org.hl7.fhir.instance.model.Procedure;
-import org.hl7.fhir.instance.model.Procedure.ProcedurePerformerComponent;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.ResourceFactory;
-import org.hl7.fhir.instance.utils.NarrativeGenerator;
-import org.hl7.fhir.instance.utils.ToolingExtensions;
-import org.hl7.fhir.instance.utils.WorkerContext;
+import org.hl7.fhir.dstu21.model.AllergyIntolerance;
+import org.hl7.fhir.dstu21.model.AllergyIntolerance.AllergyIntoleranceCriticality;
+import org.hl7.fhir.dstu21.model.AllergyIntolerance.AllergyIntoleranceReactionComponent;
+import org.hl7.fhir.dstu21.model.AllergyIntolerance.AllergyIntoleranceSeverity;
+import org.hl7.fhir.dstu21.model.AllergyIntolerance.AllergyIntoleranceStatus;
+import org.hl7.fhir.dstu21.model.AllergyIntolerance.AllergyIntoleranceType;
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu21.model.CodeableConcept;
+import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.Comparison;
+import org.hl7.fhir.dstu21.model.Composition;
+import org.hl7.fhir.dstu21.model.Composition.CompositionAttestationMode;
+import org.hl7.fhir.dstu21.model.Composition.CompositionAttesterComponent;
+import org.hl7.fhir.dstu21.model.Composition.SectionComponent;
+import org.hl7.fhir.dstu21.model.ContactPoint;
+import org.hl7.fhir.dstu21.model.Device;
+import org.hl7.fhir.dstu21.model.DomainResource;
+import org.hl7.fhir.dstu21.model.Encounter;
+import org.hl7.fhir.dstu21.model.Extension;
+import org.hl7.fhir.dstu21.model.Factory;
+import org.hl7.fhir.dstu21.model.Identifier;
+import org.hl7.fhir.dstu21.model.InstantType;
+import org.hl7.fhir.dstu21.model.ListResource;
+import org.hl7.fhir.dstu21.model.ListResource.ListEntryComponent;
+import org.hl7.fhir.dstu21.model.Location;
+import org.hl7.fhir.dstu21.model.Meta;
+import org.hl7.fhir.dstu21.model.Narrative;
+import org.hl7.fhir.dstu21.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu21.model.Observation;
+import org.hl7.fhir.dstu21.model.Observation.ObservationRelatedComponent;
+import org.hl7.fhir.dstu21.model.Observation.ObservationRelationshipType;
+import org.hl7.fhir.dstu21.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu21.model.Organization;
+import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Period;
+import org.hl7.fhir.dstu21.model.Practitioner;
+import org.hl7.fhir.dstu21.model.Procedure;
+import org.hl7.fhir.dstu21.model.Procedure.ProcedurePerformerComponent;
+import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.dstu21.model.ResourceFactory;
+import org.hl7.fhir.dstu21.utils.IWorkerContext;
+import org.hl7.fhir.dstu21.utils.NarrativeGenerator;
+import org.hl7.fhir.dstu21.utils.ToolingExtensions;
 import org.hl7.fhir.utilities.ucum.UcumService;
 import org.w3c.dom.Element;
 
@@ -187,10 +186,10 @@ public class CCDAConverter {
 	private Map<String, Practitioner> practitionerCache = new HashMap<String, Practitioner>();
 	private Integer refCounter = 0;
 	private UcumService ucumSvc;
-	private WorkerContext context;
+	private IWorkerContext context;
 
 
-	public CCDAConverter(UcumService ucumSvc, WorkerContext context) {
+	public CCDAConverter(UcumService ucumSvc, IWorkerContext context) {
 		super();
 		this.ucumSvc = ucumSvc;
 		this.context = context;
@@ -436,7 +435,7 @@ public class CCDAConverter {
 
 
 	private SectionComponent processProceduresSection(Element section) throws Exception {
-		List_ list = new List_();
+		ListResource list = new ListResource();
 		for (Element entry : cda.getChildren(section, "entry")) {
 			Element procedure = cda.getlastChild(entry);
 
@@ -454,12 +453,12 @@ public class CCDAConverter {
 		SectionComponent s = new Composition.SectionComponent();
 		s.setCode(convert.makeCodeableConceptFromCD(cda.getChild(section,  "code")));
 		// todo: check subject
-		s.setContent(Factory.makeReference(addReference(list, "Procedures", makeUUIDReference())));
+		s.addEntry(Factory.makeReference(addReference(list, "Procedures", makeUUIDReference())));
 		return s;
 
 	}
 
-	private void processProcedure(List_ list, Element procedure, ProcedureType type) throws Exception {
+	private void processProcedure(ListResource list, Element procedure, ProcedureType type) throws Exception {
 		switch (type) {
 		case Procedure : 
 			cda.checkTemplateId(procedure, "2.16.840.1.113883.10.20.22.4.14");
@@ -486,7 +485,7 @@ public class CCDAConverter {
 
 		// SHALL contain exactly one [1..1] code (CONF:7656).
 		// This code @code in a procedure activity SHOULD be selected from LOINC or SNOMED CT and MAY be selected from CPT-4, ICD9 Procedures, ICD10 Procedures
-		p.setType(convert.makeCodeableConceptFromCD(cda.getChild(procedure, "code")));
+		p.setCode(convert.makeCodeableConceptFromCD(cda.getChild(procedure, "code")));
 
 		// SHALL contain exactly one [1..1] statusCode/@code, which SHALL be selected from ValueSet 2.16.840.1.113883.11.20.9.22 ProcedureAct
 		// completed | active | aborted | cancelled - not in FHIR
@@ -510,7 +509,7 @@ public class CCDAConverter {
 
 		//  SHOULD contain zero or more [0..*] targetSiteCode/@code, which SHALL be selected from ValueSet 2.16.840.1.113883.3.88.12.3221.8.9 Body site DYNAMIC (CONF:7683).
 		for (Element e : cda.getChildren(procedure, "targetSiteCode")) 
-			p.addBodySite().setSite(convert.makeCodeableConceptFromCD(e));
+			p.addBodySite(convert.makeCodeableConceptFromCD(e));
 
 		//  MAY contain zero or more [0..*] specimen (CONF:7697). 
 		// todo: add these as extensions when specimens are done. 
@@ -519,7 +518,7 @@ public class CCDAConverter {
 		for (Element e : cda.getChildren(procedure, "performer")) {
 			ProcedurePerformerComponent pp = new ProcedurePerformerComponent();
 			p.getPerformer().add(pp);
-			pp.setPerson(makeReferenceToPractitionerForAssignedEntity(e, p));
+			pp.setActor(makeReferenceToPractitionerForAssignedEntity(e, p));
 		}		
 
 		for (Element participant : cda.getChildren(procedure, "participant")) {
@@ -548,7 +547,7 @@ public class CCDAConverter {
 				p.getExtension().add(n);
 			} else if (cda.hasTemplateId(a, "2.16.840.1.113883.10.20.22.4.19")) {
 				// MAY contain zero or more [0..*] entryRelationship (CONF:7779) such that it SHALL contain exactly one [1..1] Indication (templateId:2.16.840.1.113883.10.20.22.4.19) (CONF:7781).
-				processIndication(p.getIndication(), a);
+				p.setReason(processIndication(a));
 			} else if (cda.hasTemplateId(cda.getlastChild(e), "2.16.840.1.113883.10.20.22.4.16")) {
 				//  MAY contain zero or one [0..1] entryRelationship (CONF:7886) such that it SHALL contain exactly one [1..1] Medication Activity (templateId:2.16.840.1.113883.10.20.22.4.16) (CONF:7888).
 				// todo
@@ -606,7 +605,7 @@ public class CCDAConverter {
 	}
 
 
-	private void processIndication(List<CodeableConcept> l, Element obs) throws Exception {
+	private CodeableConcept processIndication(Element obs) throws Exception {
 		Element v = cda.getChild(obs, "value");
 		if (v == null) {
 			// have to find it by ID
@@ -615,7 +614,9 @@ public class CCDAConverter {
 				v = cda.getChild(obs, "value");
 		}
 		if (v != null)
-			l.add(convert.makeCodeableConceptFromCD(v));
+			return convert.makeCodeableConceptFromCD(v);
+		else
+			return null;
 	}
 
 	private Reference makeReferenceToPractitionerForAssignedEntity(Element assignedEntity, DomainResource r) throws Exception {
@@ -701,7 +702,7 @@ public class CCDAConverter {
 
 
 	private SectionComponent processAdverseReactionsSection(Element section) throws Exception {
-		List_ list = new List_();
+		ListResource list = new ListResource();
 		for (Element entry : cda.getChildren(section, "entry")) {
 			Element concern = cda.getChild(entry, "act");
 			if (cda.hasTemplateId(concern, "2.16.840.1.113883.10.20.22.4.30")) {
@@ -715,12 +716,12 @@ public class CCDAConverter {
 		SectionComponent s = new Composition.SectionComponent();
 		s.setCode(convert.makeCodeableConceptFromCD(cda.getChild(section,  "code")));
 		// todo: check subject
-		s.setContent(Factory.makeReference(addReference(list, "Allergies, Adverse Reactions, Alerts", makeUUIDReference())));
+		s.addEntry(Factory.makeReference(addReference(list, "Allergies, Adverse Reactions, Alerts", makeUUIDReference())));
 		return s;
 	}
 
 
-	private void processAllergyProblemAct(List_ list, Element concern) throws Exception {
+	private void processAllergyProblemAct(ListResource list, Element concern) throws Exception {
 		cda.checkTemplateId(concern, "2.16.840.1.113883.10.20.22.4.30");  
 		// Allergy Problem Act - this is a concern - we treat the concern as information about it's place in the list
 		checkNoNegationOrNullFlavor(concern, "Allergy Problem Act");
@@ -746,7 +747,7 @@ public class CCDAConverter {
 			// the status code is about the concern (e.g. the entry in the list)
 			// possible values: active, suspended, aborted, completed, with an effective time 
 			String s = cda.getStatus(concern);
-			item.getFlag().add(Factory.newCodeableConcept(s, "http://hl7.org/fhir/v3/ActStatus", s));
+			item.setFlag(Factory.newCodeableConcept(s, "http://hl7.org/fhir/v3/ActStatus", s));
 			if (s.equals("aborted")) // only on this condition?
 				item.setDeleted(true);
 
@@ -772,9 +773,9 @@ public class CCDAConverter {
 			// This value SHALL contain @code, which SHALL be selected from ValueSet 2.16.840.1.113883.3.88.12.3221.6.2 Allergy/Adverse Event Type
 			String ss = type.getCoding().get(0).getCode();
 			if (ss.equals("416098002") || ss.equals("414285001"))
-				ai.setType(AllergyIntoleranceType.IMMUNE);
+				ai.setType(AllergyIntoleranceType.ALLERGY);
 			else if (ss.equals("59037007") || ss.equals("235719002"))
-				ai.setType(AllergyIntoleranceType.NONIMMUNE);
+				ai.setType(AllergyIntoleranceType.INTOLERANCE);
 			ai.getExtension().add(Factory.newExtension("http://www.healthintersections.com.au/fhir/extensions/allergy-category", type, false));
 
 			// SHOULD contain zero or one [0..1] participant (CONF:7402) such that it
@@ -796,7 +797,7 @@ public class CCDAConverter {
 					else
 						ai.setStatus(AllergyIntoleranceStatus.RESOLVED);
 				} else if (cda.hasTemplateId(child, "2.16.840.1.113883.10.20.22.4.9")) {
-					ai.getEvent().add(processAdverseReactionObservation(child));
+					ai.getReaction().add(processAdverseReactionObservation(child));
 				}
 			}
 
@@ -807,12 +808,12 @@ public class CCDAConverter {
 
 
 	// this is going to be a contained resource, so we aren't going to generate any narrative
-	private AllergyIntoleranceEventComponent processAdverseReactionObservation(Element reaction) throws Exception {
+	private AllergyIntoleranceReactionComponent processAdverseReactionObservation(Element reaction) throws Exception {
 		checkNoNegationOrNullFlavor(reaction, "Adverse Reaction Observation");
 		checkNoSubject(reaction, "Adverse Reaction Observation");
 
 		// This clinical statement represents an undesired symptom, finding, etc., due to an administered or exposed substance. A reaction can be defined with respect to its	severity, and can have been treated by one or more interventions.
-		AllergyIntoleranceEventComponent ar = new AllergyIntoleranceEventComponent();
+		AllergyIntoleranceReactionComponent ar = new AllergyIntoleranceReactionComponent();
 
 		// SHALL contain exactly one [1..1] id (CONF:7329).
 		for (Element e : cda.getChildren(reaction, "id"))
@@ -849,7 +850,7 @@ public class CCDAConverter {
 
 
 	private SectionComponent processSocialHistorySection(Element section) throws Exception {
-		List_ list = new List_();
+		ListResource list = new ListResource();
 		for (Element entry : cda.getChildren(section, "entry")) {
 			Element observation = cda.getlastChild(entry);
 
@@ -869,14 +870,14 @@ public class CCDAConverter {
 		SectionComponent s = new Composition.SectionComponent();
 		s.setCode(convert.makeCodeableConceptFromCD(cda.getChild(section,  "code")));
 		// todo: check subject
-		s.setContent(Factory.makeReference(addReference(list, "Procedures", makeUUIDReference())));
+		s.addEntry(Factory.makeReference(addReference(list, "Procedures", makeUUIDReference())));
 		return s;
 
 	}
 
 
 
-	private void processSocialObservation(List_ list, Element so,   SocialHistoryType type) throws Exception {
+	private void processSocialObservation(ListResource list, Element so,   SocialHistoryType type) throws Exception {
 		Observation obs = new Observation();
 		addItemToList(list, obs);
 
@@ -961,9 +962,6 @@ public class CCDAConverter {
 				co.setValue(convert.makeDateTimeFromTS(cda.getChild(dd, "value"))); // not legal, see gForge http://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_item_id=3125&start=0 
 			}
 		}
-
-		// lastly, we assume that these are to be marked as reliable observations:
-		obs.setReliability(ObservationReliability.OK);
 	}
 
 
@@ -980,12 +978,12 @@ public class CCDAConverter {
 	}
 
 
-	private ListEntryComponent addItemToList(List_ list, DomainResource ai)
+	private ListEntryComponent addItemToList(ListResource list, DomainResource ai)
 			throws Exception {
 		list.getContained().add(ai);
 		String n = nextRef();
 		ai.setId(n);
-		ListEntryComponent item = new List_.ListEntryComponent();
+		ListEntryComponent item = new ListResource.ListEntryComponent();
 		list.getEntry().add(item);
 		item.setItem(Factory.makeReference("#"+n));
 		return item;
@@ -1000,17 +998,17 @@ public class CCDAConverter {
 
 	private AllergyIntoleranceCriticality readCriticality(String severity) {
 		if ("255604002".equals(severity)) // Mild 
-			return AllergyIntoleranceCriticality.LOW; 
+			return AllergyIntoleranceCriticality.CRITL; 
 		if ("371923003".equals(severity)) //  Mild to moderate 
-			return AllergyIntoleranceCriticality.LOW; 
+			return AllergyIntoleranceCriticality.CRITL; 
 		if ("6736007".equals(severity)) // Moderate
-			return AllergyIntoleranceCriticality.LOW; 
+			return AllergyIntoleranceCriticality.CRITL; 
 		if ("371924009".equals(severity)) // Moderate to severe
-			return AllergyIntoleranceCriticality.HIGH; 
+			return AllergyIntoleranceCriticality.CRITH; 
 		if ("24484000".equals(severity)) // Severe
-			return AllergyIntoleranceCriticality.HIGH; 
+			return AllergyIntoleranceCriticality.CRITH; 
 		if ("399166001".equals(severity)) // Fatal
-			return AllergyIntoleranceCriticality.HIGH; 
+			return AllergyIntoleranceCriticality.CRITH; 
 		return null;
 	}
 
@@ -1033,7 +1031,7 @@ public class CCDAConverter {
 
 
 	private SectionComponent processVitalSignsSection(Element section) throws Exception {
-		List_ list = new List_();
+		ListResource list = new ListResource();
 		for (Element entry : cda.getChildren(section, "entry")) {
 			Element organizer = cda.getlastChild(entry);
 
@@ -1047,12 +1045,12 @@ public class CCDAConverter {
 		SectionComponent s = new Composition.SectionComponent();
 		s.setCode(convert.makeCodeableConceptFromCD(cda.getChild(section,  "code")));
 		// todo: check subject
-		s.setContent(Factory.makeReference(addReference(list, "Vital Signs", makeUUIDReference())));
+		s.addEntry(Factory.makeReference(addReference(list, "Vital Signs", makeUUIDReference())));
 		return s;
 
 	}
 
-	private void processVitalSignsOrganizer(List_ list, Element organizer) throws Exception {
+	private void processVitalSignsOrganizer(ListResource list, Element organizer) throws Exception {
 
 		cda.checkTemplateId(organizer, "2.16.840.1.113883.10.20.22.4.26");
 		checkNoNegationOrNullFlavor(organizer, "Vital Signs Organizer");
@@ -1084,7 +1082,7 @@ public class CCDAConverter {
 	}
 
 
-	private String processVitalSignsObservation(Element comp, List_ list) throws Exception {
+	private String processVitalSignsObservation(Element comp, ListResource list) throws Exception {
 		Element observation = cda.getChild(comp, "observation");
 		cda.checkTemplateId(observation, "2.16.840.1.113883.10.20.22.4.27");
 		checkNoNegationOrNullFlavor(observation, "Vital Signs Observation");

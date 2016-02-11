@@ -39,6 +39,10 @@ import java.util.Map;
 import org.hl7.fhir.definitions.Config;
 import org.hl7.fhir.definitions.model.BindingSpecification;
 import org.hl7.fhir.definitions.model.BindingSpecification.BindingMethod;
+import org.hl7.fhir.dstu21.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu21.model.ValueSet.ConceptDefinitionDesignationComponent;
+import org.hl7.fhir.dstu21.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.dstu21.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.definitions.model.DefinedCode;
 import org.hl7.fhir.definitions.model.DefinedStringPattern;
 import org.hl7.fhir.definitions.model.Definitions;
@@ -47,10 +51,6 @@ import org.hl7.fhir.definitions.model.PrimitiveType;
 import org.hl7.fhir.definitions.model.ProfiledType;
 import org.hl7.fhir.definitions.model.ResourceDefn;
 import org.hl7.fhir.definitions.model.TypeRef;
-import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionDesignationComponent;
-import org.hl7.fhir.instance.model.ValueSet.ConceptReferenceComponent;
-import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.utilities.Utilities;
 
 public class XSDBaseGenerator {
@@ -725,6 +725,11 @@ public class XSDBaseGenerator {
         write("<xs:element name=\"" + e.getName() + "\" type=\"" + rtn + "\" ");
       } else if (types.size() == 0 && e.getElements().size() > 0) {
         String tn = root.getName() + "." + Utilities.capitalize(e.getName());
+        int i = 0;
+        while (structures.containsKey(tn)) {
+          i++;
+          tn = root.getName() + "." + Utilities.capitalize(e.getName())+Integer.toString(i);
+        }
         write("<xs:element name=\"" + e.getName() + "\" type=\"" + tn + "\" ");
         structures.put(tn, e);
         this.types.put(e, tn);

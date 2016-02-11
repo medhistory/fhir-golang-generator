@@ -91,18 +91,21 @@
   Context = MedicationAdministration.dosage
   English = SHALL have at least one of dosage.quantity and dosage.rate[x]
   XPath = exists(f:quantity) or exists(f:rateRatio) or exists(f:rateRange)
+  Expression = quantity or rate[x]
 
  -- Row 2 -----------------------------------
   Id = 2
   Context = MedicationAdministration
   English = Reason not given is only permitted if wasNotGiven is true
   XPath = not(exists(f:reasonNotGiven) and f:wasNotGiven/@value=false())
+  Expression = reasonNotGiven.empty() or wasNotGiven = \'true\'
 
  -- Row 3 -----------------------------------
   Id = 3
   Context = MedicationAdministration
   English = Reason given is only permitted if wasNotGiven is false
   XPath = not(exists(f:reasonGiven) and f:wasNotGiven/@value=true())
+  Expression = reasonGiven.empty() or wasNotGiven = \'false\'
 
 === Sheet Data Elements =====================================
 
@@ -137,6 +140,17 @@
   w5 = status
 
  -- Row 4 -----------------------------------
+  Element = MedicationAdministration.medication[x]
+  Card. = 1..1
+  Type = CodeableConcept|Reference(Medication)
+  Short Label = What was administered
+  Definition = Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.
+  Comments = If only a code is specified, then it needs to be a code for a specific product.  If more information is required, then the use of the medication resource is recommended.  Note: do not use Medication.name to describe the administered medication. When the only available information is a text description of the medication, Medication.code.text should be used
+  v2 Mapping = RXA-5-Administered Code
+  RIM Mapping = Consumeable->AdministerableMedication
+  w5 = what
+
+ -- Row 5 -----------------------------------
   Element = MedicationAdministration.patient
   Card. = 1..1
   Type = Reference(Patient)
@@ -145,16 +159,6 @@
   v2 Mapping = PID-3-Patient ID List
   RIM Mapping = subject->Patient
   w5 = who.focus
-
- -- Row 5 -----------------------------------
-  Element = MedicationAdministration.practitioner
-  Card. = 0..1
-  Type = Reference(Practitioner | Patient | RelatedPerson)
-  Short Label = Who administered substance
-  Definition = The individual who was responsible for giving the medication to the patient.
-  v2 Mapping = RXA-10-Administering Provider / PRT-5-Participation Person: PRT-4-Participation=\'AP\' (RXA-10 is deprecated)
-  RIM Mapping = performer->Role
-  w5 = who.actor
 
  -- Row 6 -----------------------------------
   Element = MedicationAdministration.encounter
@@ -167,47 +171,6 @@
   w5 = context
 
  -- Row 7 -----------------------------------
-  Element = MedicationAdministration.prescription
-  Card. = 0..1
-  Type = Reference(MedicationOrder)
-  Short Label = Order administration performed against
-  Definition = The original request, instruction or authority to perform the administration.
-  v2 Mapping = ORC-2-Placer Order Number / ORC-3-Filler Order Number
-  RIM Mapping = InFullfillmentOf->SubstanceAdministration
-
- -- Row 8 -----------------------------------
-  Element = MedicationAdministration.wasNotGiven
-  Card. = 0..1
-  Is Modifier = Y
-  Type = boolean
-  Short Label = True if medication not administered
-  Definition = Set this to true if the record is saying that the medication was NOT administered.
-  v2 Mapping = RXA-20-Completion Status=\'NA\'
-  RIM Mapping = actionNegationInd
-  Missing Meaning = If this is missing, then the medication was administered
-
- -- Row 9 -----------------------------------
-  Element = MedicationAdministration.reasonNotGiven
-  Card. = 0..*
-  Inv. = 2
-  Type = CodeableConcept
-  Binding = MedicationAdministrationNegationReason
-  Short Label = Reason administration not performed
-  Definition = A code indicating why the administration was not performed.
-  v2 Mapping = RXA-9-Administration Notes / RXA-18 Substance/Treatment Refusal Reason
-  RIM Mapping = Reason->Observation->Value
-
- -- Row 10 -----------------------------------
-  Element = MedicationAdministration.reasonGiven
-  Card. = 0..*
-  Inv. = 3
-  Type = CodeableConcept
-  Binding = MedicationAdministrationReason
-  Short Label = Reason administration performed
-  Definition = A code indicating why the medication was given.
-  v2 Mapping = RXE-27 Give Indication
-
- -- Row 11 -----------------------------------
   Element = MedicationAdministration.effectiveTime[x]
   Card. = 1..1
   Type = dateTime|Period
@@ -218,15 +181,56 @@
   Committee Notes = 2014-0917 HG: Chjanged name from whenGiven to effectiveTime and made datatype choice of period or dataTime
   w5 = when.done
 
+ -- Row 8 -----------------------------------
+  Element = MedicationAdministration.practitioner
+  Card. = 0..1
+  Type = Reference(Practitioner | Patient | RelatedPerson)
+  Short Label = Who administered substance
+  Definition = The individual who was responsible for giving the medication to the patient.
+  v2 Mapping = RXA-10-Administering Provider / PRT-5-Participation Person: PRT-4-Participation=\'AP\' (RXA-10 is deprecated)
+  RIM Mapping = performer->Role
+  w5 = who.actor
+
+ -- Row 9 -----------------------------------
+  Element = MedicationAdministration.prescription
+  Card. = 0..1
+  Type = Reference(MedicationOrder)
+  Short Label = Order administration performed against
+  Definition = The original request, instruction or authority to perform the administration.
+  v2 Mapping = ORC-2-Placer Order Number / ORC-3-Filler Order Number
+  RIM Mapping = InFullfillmentOf->SubstanceAdministration
+
+ -- Row 10 -----------------------------------
+  Element = MedicationAdministration.wasNotGiven
+  Card. = 0..1
+  Is Modifier = Y
+  Type = boolean
+  Short Label = True if medication not administered
+  Definition = Set this to true if the record is saying that the medication was NOT administered.
+  v2 Mapping = RXA-20-Completion Status=\'NA\'
+  RIM Mapping = actionNegationInd
+  Missing Meaning = If this is missing, then the medication was administered
+
+ -- Row 11 -----------------------------------
+  Element = MedicationAdministration.reasonNotGiven
+  Card. = 0..*
+  Inv. = 2
+  Type = CodeableConcept
+  Binding = MedicationAdministrationNegationReason
+  Short Label = Reason administration not performed
+  Definition = A code indicating why the administration was not performed.
+  v2 Mapping = RXA-9-Administration Notes / RXA-18 Substance/Treatment Refusal Reason
+  RIM Mapping = Reason->Observation->Value
+
  -- Row 12 -----------------------------------
-  Element = MedicationAdministration.medication[x]
-  Card. = 1..1
-  Type = CodeableConcept|Reference(Medication)
-  Short Label = What was administered
-  Definition = Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.
-  Comments = If only a code is specified, then it needs to be a code for a specific product.  If more information is required, then the use of the medication resource is recommended.  Note: do not use Medication.name to describe the administered medication. When the only available information is a text description of the medication, Medication.code.text should be used
-  v2 Mapping = RXA-5-Administered Code
-  RIM Mapping = Consumeable->AdministerableMedication
+  Element = MedicationAdministration.reasonGiven
+  Card. = 0..*
+  Inv. = 3
+  Type = CodeableConcept
+  Binding = MedicationAdministrationReason
+  Short Label = Reason administration performed
+  Definition = A code indicating why the medication was given.
+  v2 Mapping = RXE-27 Give Indication
 
  -- Row 13 -----------------------------------
   Element = MedicationAdministration.device
@@ -239,8 +243,8 @@
 
  -- Row 14 -----------------------------------
   Element = MedicationAdministration.note
-  Card. = 0..1
-  Type = string
+  Card. = 0..*
+  Type = Annotation
   Short Label = Information about the administration
   Definition = Extra information about the medication administration that is not conveyed by the other attributes.
 
@@ -251,7 +255,6 @@
   Short Label = Details of how medication was taken
   Definition = Describes the medication dosage information details e.g. dose, rate, site, route, etc.
   RIM Mapping = component->SubstanceAdministrationEvent
-  To Do = The RMIM has priority code on the act relationship.  How do we handle this?
 
  -- Row 16 -----------------------------------
   Element = MedicationAdministration.dosage.text
@@ -344,7 +347,7 @@
   Path = MedicationAdministration.medicationCodeableConcept
 
  -- Row 6 -----------------------------------
-  Name = notgiven
+  Name = wasnotgiven
   Type = token
   Description = Administrations that were not made
   Path = MedicationAdministration.wasNotGiven
