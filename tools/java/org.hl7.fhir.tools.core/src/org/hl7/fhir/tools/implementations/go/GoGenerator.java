@@ -39,8 +39,7 @@ import java.io.Writer;
 import java.util.*;
 
 import org.hl7.fhir.definitions.model.*;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.validation.ValidationMessage;
+import org.hl7.fhir.dstu21.validation.ValidationMessage;
 import org.hl7.fhir.tools.implementations.BaseGenerator;
 import org.hl7.fhir.tools.publisher.FolderManager;
 import org.hl7.fhir.tools.publisher.PlatformGenerator;
