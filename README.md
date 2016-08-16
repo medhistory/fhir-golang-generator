@@ -110,7 +110,7 @@ The conformance statement is also generated in `implementations/go/base/app/conf
 
 ```
 python -m json.tool conformance_statement.json > tmp.json
-mv tmp.json conformance_statement.json && rm tmp.json
+mv tmp.json conformance_statement.json
 ```
 
 After the generated code has been properly formatted, you can copy it to the Intervention Engine [fhir](https://github.com/intervention-engine/fhir) repo to test the changes (and ultimately commit them if they are successful). The following command recursively copies the generated code to the *fhir* repo. Be sure to inspect the changes carefully to ensure that the newly generated code is correct. It is OK if the "date" field is different between statements since this changes every time a new conformance statement is generated.
