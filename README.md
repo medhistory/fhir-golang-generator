@@ -86,19 +86,11 @@ Note that the build may not finish successfully. This is a known problem (usuall
 
 ```
 [java] Produce go Reference Implementation                                        0.396  22sec  568MB
-[java] Couldn't process search parameter phone path: RelatedPerson.telecom(system=phone)
-[java] Couldn't process search parameter email path: RelatedPerson.telecom(system=email)
-[java] Couldn't process search parameter phone path: Practitioner.telecom(system=phone)
-[java] Couldn't process search parameter email path: Practitioner.telecom(system=email)
-[java] Couldn't process search parameter phone path: Person.telecom(system=phone)
-[java] Couldn't process search parameter email path: Person.telecom(system=email)
-[java] Couldn't process search parameter email path: Patient.telecom(system=email)
-[java] Couldn't process search parameter phone path: Patient.telecom(system=phone)
 [java] Produce ember Reference Implementation                                     0.866  23sec  582MB
 ```
 
-Format and Copy the Generated Go Code
--------------------------------------
+Format and Copy the Generated Go Code and Conformance Statement
+---------------------------------------------------------------
 
 The Go code is generated to the relative path `implementations/go/base/app`, but it isn't generated using the conventional Go formatting guidelines. Before copying the generated code to another repository (such as [fhir](https://github.com/intervention-engine/fhir)), you should reformat it using `gofmt`:
 
@@ -106,7 +98,14 @@ The Go code is generated to the relative path `implementations/go/base/app`, but
 gofmt -w ~/development/intervention-engine/fhir-golang-generator/implementations/go/base/app/
 ```
 
-After the generated code has been properly formatted, you can copy it to the Intervention Engine [fhir](https://github.com/intervention-engine/fhir) repo to test the changes (and ultimately commit them if they are successful). The following command recursively copies the generated code to the *fhir* repo. Be sure to inspect the changes carefully to ensure that the newly generated code is correct.
+The conformance statement is also generated in `implementations/go/base/app/conformance/`. The generated statement is valid but unformatted JSON. You can use Python (2.6+) to quickly format this file from the command line. The nicely formatted conformance statement is written to a temporary file then renamed after the formatting is complete.
+
+```
+python -m json.tool conformance_statement.json > tmp.json
+mv tmp.json conformance_statement.json
+```
+
+After the generated code has been properly formatted, you can copy it to the Intervention Engine [fhir](https://github.com/intervention-engine/fhir) repo to test the changes (and ultimately commit them if they are successful). The following command recursively copies the generated code to the *fhir* repo. Be sure to inspect the changes carefully to ensure that the newly generated code is correct. It is OK if the "date" field is different between statements since this changes every time a new conformance statement is generated.
 
 ```
 cp -r ~/development/intervention-engine/fhir-golang-generator/implementations/go/base/app/* $GOPATH/src/github.com/intervention-engine/fhir/

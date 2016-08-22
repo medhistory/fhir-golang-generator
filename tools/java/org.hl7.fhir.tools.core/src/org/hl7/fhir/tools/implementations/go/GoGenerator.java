@@ -37,6 +37,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 import org.hl7.fhir.definitions.model.*;
 import org.hl7.fhir.dstu3.validation.ValidationMessage;
@@ -51,8 +52,10 @@ import org.stringtemplate.v4.STRawGroupDir;
 
 public class GoGenerator extends BaseGenerator implements PlatformGenerator {
 
-    private static final List<String> UNSUPPORTED_SEARCH_PARAMS = Arrays.asList("_query", "_text", "_content");
+    private static final List<String> UNSUPPORTED_SEARCH_PARAMS = Arrays.asList("_query", "_text", "_content", "email", "phone");
 
+    private static final List<SearchParameterDefn.SearchType> UNSUPPORTED_SEARCH_PARAM_TYPES = Arrays.asList(SearchParameterDefn.SearchType.composite);
+ 
     @Override
     public String getName() {
         return "go";
@@ -82,6 +85,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
             put("modelDir", Utilities.path(basedDir, "app", "models"));
             put("searchDir", Utilities.path(basedDir, "app", "search"));
             put("serverDir", Utilities.path(basedDir, "app", "server"));
+            put("conformanceDir", Utilities.path(basedDir, "app", "conformance"));
         }};
 
         createDirStructure(dirs);
@@ -125,6 +129,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         // with no web endpoint.
         generateResourceHelpers(namesAndDefinitions.keySet(), dirs.get("modelDir"), templateGroup);
         generateSearchParameterDictionary(definitions, dirs.get("searchDir"), templateGroup);
+        generateConformanceStatement(definitions, dirs.get("conformanceDir"), templateGroup);
 
         Utilities.copyFileToDirectory(new File(Utilities.path(basedDir, "static", "models", "codeableconcept_ext.go")), new File(dirs.get("modelDir")));
         Utilities.copyFileToDirectory(new File(Utilities.path(basedDir, "static", "models", "operationoutcome_ext.go")), new File(dirs.get("modelDir")));
@@ -238,6 +243,11 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         serverWriter.write("\te.POST(\"/\", batchHandlers...)");
         serverWriter.newLine();
         serverWriter.newLine();
+        serverWriter.write("\t// Conformance Statement");
+        serverWriter.newLine();
+        serverWriter.write("\te.StaticFile(\"metadata\", \"conformance/conformance_statement.json\")");
+        serverWriter.newLine();
+        serverWriter.newLine();
         serverWriter.write("\t// Resources");
         serverWriter.newLine();
         serverWriter.newLine();
@@ -324,6 +334,39 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         controllerWriter.close();
     }
 
+    private void generateConformanceStatement(Definitions definitions, String outputDir, STGroup templateGroup) throws IOException {
+        ST utilTemplate = templateGroup.getInstanceOf("conformance_statement.json");
+
+        // Generate current ISO8601 datetime
+        Date currDate = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        String dateString = format.format(currDate);
+        utilTemplate.add("Date", dateString);
+
+        // List of resources
+        ArrayList<ResourceSearchInfo> searchInfos = new ArrayList<ResourceSearchInfo>(definitions.getResources().size());
+        for (ResourceDefn defn: definitions.getResources().values()) {
+            ResourceSearchInfo searchInfo = new ResourceSearchInfo(defn.getName());
+            searchInfo.addAllSearchParams(getSearchParameterDefinitions(definitions, defn));
+            searchInfo.sortSearchParams(); // Sort the param list so that the final result is deterministic
+            searchInfos.add(searchInfo);
+        }
+        // Sort the resource search infos so that the final result is deterministic
+        Collections.sort(searchInfos, new Comparator<ResourceSearchInfo>() {
+            @Override
+            public int compare(ResourceSearchInfo a, ResourceSearchInfo b) {
+                return a.name.compareTo(b.name);
+            }
+        });
+        utilTemplate.add("ResourceSearchInfos", searchInfos);
+
+        File outputFile = new File(Utilities.path(outputDir, "conformance_statement.json"));
+        Writer controllerWriter = new BufferedWriter(new FileWriter(outputFile));
+        controllerWriter.write(utilTemplate.render());
+        controllerWriter.flush();
+        controllerWriter.close();
+    }
+
     private List<SearchParam> getSearchParameterDefinitions(Definitions definitions, ResourceDefn resource) {
         ArrayList<SearchParam> params = new ArrayList<SearchParam>();
         for (TypeRef ref: resource.getRoot().getTypes()) {
@@ -334,6 +377,15 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
             }
         }
         for (SearchParameterDefn p : resource.getSearchParams().values()) {
+
+            if (UNSUPPORTED_SEARCH_PARAMS.contains(p.getCode())) {
+                continue;
+            }
+
+            if (UNSUPPORTED_SEARCH_PARAM_TYPES.contains(p.getType())) {
+                continue;
+            }
+
             if (p.getPaths().isEmpty() && p.getComposites().isEmpty()) {
                 // We know we don't support _query, _text, or _content, so don't make a big fuss
                 if (! UNSUPPORTED_SEARCH_PARAMS.contains(p.getCode())) {
