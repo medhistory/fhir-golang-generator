@@ -1,7 +1,8 @@
 *.jar
 *.class
-implementations/ember/base/app/
-implementations/go/base/app/
+/fhir-golang-generator.iws
+/implementations/ember/base/app/
+/implementations/go/base/app/
 /implementations/java/org.hl7.fhir.convertors/bin/
 /implementations/java/org.hl7.fhir.convertors/src/org/hl7/fhir/convertors/VersionConvertor.javat
 /implementations/java/org.hl7.fhir.dstu2/bin/
