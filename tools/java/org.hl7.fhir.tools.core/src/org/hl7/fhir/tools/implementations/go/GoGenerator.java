@@ -50,6 +50,7 @@ import org.hl7.fhir.utilities.ZipGenerator;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STRawGroupDir;
+import org.stringtemplate.v4.StringRenderer;
 
 public class GoGenerator extends BaseGenerator implements PlatformGenerator {
 
@@ -88,11 +89,13 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
             put("searchDir", Utilities.path(basedDir, "app", "search"));
             put("serverDir", Utilities.path(basedDir, "app", "server"));
             put("conformanceDir", Utilities.path(basedDir, "app", "conformance"));
+            put("configDir", Utilities.path(basedDir, "app", "config"));
         }};
 
         createDirStructure(dirs);
 
         STGroup templateGroup = new STRawGroupDir(Utilities.path(basedDir, "templates"));
+        templateGroup.registerRenderer(String.class, new StringRenderer());
 
         Map<String, TypeDefn> typeDefs = definitions.getTypes();
         for (String name : typeDefs.keySet()) {
@@ -132,6 +135,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         generateResourceHelpers(namesAndDefinitions.keySet(), dirs.get("modelDir"), templateGroup);
         generateSearchParameterDictionary(definitions, dirs.get("searchDir"), templateGroup);
         generateConformanceStatement(definitions, dirs.get("conformanceDir"), templateGroup);
+        generateIndexesConfig(definitions, dirs.get("configDir"), templateGroup);
 
         Utilities.copyFileToDirectory(new File(Utilities.path(basedDir, "static", "auth", "config.go")), new File(dirs.get("authDir")));
         Utilities.copyFileToDirectory(new File(Utilities.path(basedDir, "static", "auth", "heart_auth.go")), new File(dirs.get("authDir")));
@@ -156,6 +160,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         Utilities.copyFileToDirectory(new File(Utilities.path(basedDir, "static", "server", "request_logger.go")), new File(dirs.get("serverDir")));
         Utilities.copyFileToDirectory(new File(Utilities.path(basedDir, "static", "server", "resource_controller.go")), new File(dirs.get("serverDir")));
         Utilities.copyFileToDirectory(new File(Utilities.path(basedDir, "static", "server", "server_setup.go")), new File(dirs.get("serverDir")));
+        Utilities.copyFileToDirectory(new File(Utilities.path(basedDir, "static", "server", "mongo_indexes.go")), new File(dirs.get("serverDir")));
         Utilities.copyFileToDirectory(new File(Utilities.path(basedDir, "static", "server", "server.go")), new File(Utilities.path(basedDir, "app")));
 
         ZipGenerator zip = new ZipGenerator(destDir + getReference(version));
@@ -231,7 +236,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         ArrayList<ResourceSearchInfo> searchInfos = new ArrayList<ResourceSearchInfo>(definitions.getResources().size());
         for (ResourceDefn defn: definitions.getResources().values()) {
             ResourceSearchInfo searchInfo = new ResourceSearchInfo(defn.getName());
-            searchInfo.addAllSearchParams(getSearchParameterDefinitions(definitions, defn));
+            searchInfo.addAllSearchParams(getSearchParameterDefinitions(definitions, defn, true));
             searchInfo.sortSearchParams(); // Sort the param list so that the final result is deterministic
             searchInfos.add(searchInfo);
         }
@@ -267,7 +272,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         ArrayList<ResourceSearchInfo> searchInfos = new ArrayList<ResourceSearchInfo>(definitions.getResources().size());
         for (ResourceDefn defn: definitions.getResources().values()) {
             ResourceSearchInfo searchInfo = new ResourceSearchInfo(defn.getName());
-            searchInfo.addAllSearchParams(getSearchParameterDefinitions(definitions, defn));
+            searchInfo.addAllSearchParams(getSearchParameterDefinitions(definitions, defn, true));
             searchInfo.sortSearchParams(); // Sort the param list so that the final result is deterministic
             searchInfos.add(searchInfo);
         }
@@ -287,13 +292,67 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         controllerWriter.close();
     }
 
-    private List<SearchParam> getSearchParameterDefinitions(Definitions definitions, ResourceDefn resource) {
+    private void generateIndexesConfig(Definitions definitions, String outputDir, STGroup templateGroup) throws IOException {
+        ST utilTemplate = templateGroup.getInstanceOf("indexes.conf");        
+
+        ArrayList<ResourceSearchInfo> searchInfos = new ArrayList<ResourceSearchInfo>(definitions.getResources().size());
+        for (ResourceDefn defn: definitions.getResources().values()) {
+            ResourceSearchInfo searchInfo = new ResourceSearchInfo(defn.getName());
+            searchInfo.addAllSearchParams(getSearchParameterDefinitions(definitions, defn, false));
+            searchInfos.add(searchInfo);
+        }
+
+        // Go through te search infos to create the set of unique required indexes.
+        // We do this to simplify the data passed to the template and to avoid duplicates.
+        //
+        // For example, a duplicate would arise in the following scenario:
+        // Account has two search parameters "patient" and "subject" that both reference the 
+        // same search path "subject". This would cause the index "accounts.subject.referenceid_1"
+        // to be listed twice in the config file unless we test for these redundant search parameters.
+        ArrayList<ResourceIndexInfo> indexInfos = new ArrayList<ResourceIndexInfo>();
+
+        for (ResourceSearchInfo searchInfo: searchInfos) {
+            ResourceIndexInfo indexInfo = new ResourceIndexInfo(Utilities.pluralizeMe(searchInfo.getName().toLowerCase()));
+            
+            for (SearchParam searchParam: searchInfo.getSearchParams()) {
+                List<SearchPath> paths = searchParam.getPaths();
+
+                if (searchParam.getType().equals(SearchParameterDefn.SearchType.reference) && paths.size() > 0) {
+                    String key = paths.get(0).getPath();
+                    MgoIndex newIndex = new MgoIndex(key);
+
+                    if (!indexInfo.hasIndex(newIndex)) {
+                        indexInfo.addIndex(newIndex);
+                    }
+                }
+            }
+            indexInfo.sortIndexes(); // to ensure the final result is deterministic
+            indexInfos.add(indexInfo);
+        }
+
+        // Sort the resource search infos so that the final result is deterministic
+        Collections.sort(indexInfos, new Comparator<ResourceIndexInfo>() {
+            @Override
+            public int compare(ResourceIndexInfo a, ResourceIndexInfo b) {
+                return a.name.compareTo(b.name);
+            }
+        });
+        utilTemplate.add("ResourceIndexInfos", indexInfos);
+
+        File outputFile = new File(Utilities.path(outputDir, "indexes.conf"));
+        Writer controllerWriter = new BufferedWriter(new FileWriter(outputFile));
+        controllerWriter.write(utilTemplate.render());
+        controllerWriter.flush();
+        controllerWriter.close();
+    }
+
+    private List<SearchParam> getSearchParameterDefinitions(Definitions definitions, ResourceDefn resource, boolean useArrayNotation) {
         ArrayList<SearchParam> params = new ArrayList<SearchParam>();
         for (TypeRef ref: resource.getRoot().getTypes()) {
             if (definitions.getResources().containsKey(ref.getName())) {
-                params.addAll(getSearchParameterDefinitions(definitions, definitions.getResources().get(ref.getName())));
+                params.addAll(getSearchParameterDefinitions(definitions, definitions.getResources().get(ref.getName()), true));
             } else if (definitions.getBaseResources().containsKey(ref.getName())) {
-                params.addAll(getSearchParameterDefinitions(definitions, definitions.getBaseResources().get(ref.getName())));
+                params.addAll(getSearchParameterDefinitions(definitions, definitions.getBaseResources().get(ref.getName()), true));
             }
         }
         for (SearchParameterDefn p : resource.getSearchParams().values()) {
@@ -330,7 +389,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
                         cleanPath = path.replaceAll("\\(0\\)", "");
                     }
                     ElementDefn el = resource.getRoot().getElementForPath(cleanPath, definitions, "Resolving Search Parameter Path", true, true);
-                    path = enhancePath(definitions, resource, path);
+                    path = enhancePath(definitions, resource, path, useArrayNotation);
                     // Special support for id since we store it as _id (TODO: this probably breaks the notion of the "internal" id)
                     if ("_id".equals(param.getName())) {
                         path = "_id";
@@ -376,7 +435,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         return params;
     }
 
-    private String enhancePath(Definitions definitions, ResourceDefn resource, String path) {
+    private String enhancePath(Definitions definitions, ResourceDefn resource, String path, boolean useArrayNotation) {
         StringBuilder newPath = new StringBuilder();
 
         String[] parts = path.split("\\.");
@@ -390,7 +449,8 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
                 }
                 String partialPath = String.join(".", Arrays.copyOfRange(parts, 0, i+1));
                 ElementDefn el = resource.getRoot().getElementForPath(partialPath, definitions, "resolving search parameter path", true, true);
-                if (el.getMaxCardinality() > 1) {
+
+                if (useArrayNotation && el.getMaxCardinality() > 1) {
                     newPath.append(zeroIndexer ? "[0]" : "[]");
                 }
                 newPath.append(parts[i]).append(".");
@@ -403,7 +463,6 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
         }
         return newPath.toString();
     }
-
 
     private static class ResourceSearchInfo {
         private final String name;
@@ -528,6 +587,71 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
 
         public String getType() {
             return type;
+        }
+    }
+
+    /*
+        ResourceIndexInfo defines a list of indexes to be created for a specific 
+        collection in the fhir database. This information is passed to the indexes.conf.st
+        template.
+    */
+    private static class ResourceIndexInfo {
+        private final String name;  // pluralized
+        private final ArrayList<MgoIndex> indexes;
+
+        public ResourceIndexInfo(String name) {
+            this.name = name;
+            this.indexes = new ArrayList<MgoIndex>();
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public ArrayList<MgoIndex> getIndexes() {
+            return indexes;
+        }
+
+        public boolean hasIndex(MgoIndex testIndex) {
+            for (MgoIndex index: indexes) {
+                if (index.getName().equals(testIndex.getName())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void addIndex(MgoIndex index) {
+            indexes.add(index);
+        }
+
+        public void sortIndexes() {
+            Collections.sort(indexes, new Comparator<MgoIndex>() {
+                @Override
+                public int compare(MgoIndex a, MgoIndex b) {
+                    return a.name.compareTo(b.name);
+                }
+            });
+        }
+    }
+
+    /*
+        MgoIndex defines a single index to be created in mongo.
+        In the indexes.conf.st template this definition will create an entry like:
+        <collection_name>.<index_name>_1
+        
+        The index name could potentially contain sub-fields too, e.g. "subject.referenceid".
+        For now we create all indexes in ascending order (hence the "_1")
+    */
+    private static class MgoIndex {
+        private final String name;
+
+        public MgoIndex(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
         }
     }
 
