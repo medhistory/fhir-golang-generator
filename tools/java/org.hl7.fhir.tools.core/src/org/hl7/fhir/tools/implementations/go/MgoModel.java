@@ -3,7 +3,7 @@ package org.hl7.fhir.tools.implementations.go;
 /*
 Contributed by Mitre Corporation
 
-Copyright (c) 2011-2016, HL7, Inc & The MITRE Corporation
+Copyright (c) 2011-2017, HL7, Inc & The MITRE Corporation
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -143,7 +143,6 @@ public class MgoModel {
           st.add("IsResource", isResource(structName));
           fileBlock.ln(st.render());
         }
-
     }
 
     private void populateFieldNameAndSliceIndicatorsForUnmarshaller(ElementDefn elementDefn, List<String> resourceFields, Map<String, Boolean> fieldSliceIndicator) {
@@ -560,6 +559,11 @@ public class MgoModel {
           imports.add("fmt");
         }
 
+        // For custom SetBSON implementation needed to properly umarshal embedded resources.
+        if (name.equals("Bundle") || name.equals("Parameters")) {
+            imports.add("gopkg.in/mgo.v2/bson");
+        }
+
         // If it supports _revincludes, it will need errors too
         if (definitions.getResources().containsKey(elementDefn.getName())) {
             ResourceDefn resource = definitions.getResources().get(elementDefn.getName());
@@ -620,7 +624,7 @@ public class MgoModel {
     }
 
     private static final String COPYRIGHT =
-            "// Copyright (c) 2011-2015, HL7, Inc & The MITRE Corporation\n" +
+            "// Copyright (c) 2011-2017, HL7, Inc & The MITRE Corporation\n" +
             "// All rights reserved.\n" +
             "//\n" +
             "// Redistribution and use in source and binary forms, with or without modification,\n" +
