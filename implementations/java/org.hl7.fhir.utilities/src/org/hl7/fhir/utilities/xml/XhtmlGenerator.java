@@ -28,14 +28,15 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.utilities.xml;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.MarkDownProcessor;
+import org.hl7.fhir.utilities.MarkDownProcessor.Dialect;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xml.XhtmlGeneratorAdorner.XhtmlGeneratorAdornerState;
 import org.w3c.dom.Comment;
@@ -46,7 +47,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
 
-import com.github.rjeschke.txtmark.Processor;
 
 public class XhtmlGenerator {
 
@@ -84,6 +84,8 @@ public class XhtmlGenerator {
     out.write("<p>"+Utilities.escapeXml(desc)+"</p>\r\n"); 
     if (adorn) {
       out.write("<pre class=\"xml\">\r\n");
+      out.write("&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\r\n");
+      out.write("\r\n");
 
       XhtmlGeneratorAdornerState state = null; // adorner == null ? new XhtmlGeneratorAdornerState("", "") : adorner.getState(this, null, null);
 	  	for (int i = 0; i < doc.getChildNodes().getLength(); i++)
@@ -100,7 +102,7 @@ public class XhtmlGenerator {
 		out.flush();
 	}
 
-  private void writeNodePlain(Writer out, Node node, int level) throws Exception {
+  private void writeNodePlain(Writer out, Node node, int level) throws FHIRException, DOMException, IOException  {
     if (node.getNodeType() == Node.ELEMENT_NODE)
       writeElementPlain(out, (Element) node, level);
     else if (node.getNodeType() == Node.TEXT_NODE)
@@ -110,7 +112,7 @@ public class XhtmlGenerator {
     else if (node.getNodeType() == Node.PROCESSING_INSTRUCTION_NODE)
       writeProcessingInstructionPlain(out, (ProcessingInstruction) node);
     else if (node.getNodeType() != Node.ATTRIBUTE_NODE)
-      throw new Exception("Unhandled node type");
+      throw new FHIRException("Unhandled node type");
   }
 
 	private void writeNode(Writer out, Node node, XhtmlGeneratorAdornerState state, int level) throws Exception {
@@ -123,7 +125,7 @@ public class XhtmlGenerator {
 		else if (node.getNodeType() == Node.PROCESSING_INSTRUCTION_NODE)
 			writeProcessingInstruction(out, (ProcessingInstruction) node);
 		else if (node.getNodeType() != Node.ATTRIBUTE_NODE)
-			throw new Exception("Unhandled node type");
+			throw new FHIRException("Unhandled node type");
 	}
 
   private void writeProcessingInstruction(Writer out, ProcessingInstruction node) {
@@ -155,7 +157,7 @@ public class XhtmlGenerator {
   }
 
   private String processMarkdown(String text) {
-    return Processor.process(text);
+    return new MarkDownProcessor(Dialect.COMMON_MARK).process(text, "Xhtml generator");
   }
 
   private void writeText(Writer out, Text node, int level) throws DOMException, IOException {
@@ -174,20 +176,26 @@ public class XhtmlGenerator {
       out.write("<span class=\"xmltagred\">&lt;"+node.getNodeName()+"</span>");
     if (node.hasAttributes()) {
       out.write("<span class=\"xmlattr\">");
-      XhtmlGeneratorAdornerState newstate = adorner == null ? new XhtmlGeneratorAdornerState("", "") : adorner.getState(this, state, node);
+      out.write("<a name=\""+adorner.getNodeId(state, node)+"\"> </a>");
+      
+      XhtmlGeneratorAdornerState newstate = adorner == null ? new XhtmlGeneratorAdornerState(null, "", "") : adorner.getState(this, state, node);
       for (int i = 0; i < node.getAttributes().getLength(); i++) {
+        if (i > 0)
+          out.write(" ");
         if (adorner != null) {
           XhtmlGeneratorAdornerState attrState = adorner.getAttributeMarkup(this, newstate, node, node.getAttributes().item(i).getNodeName(), node.getAttributes().item(i).getTextContent());
-          out.write(" "+node.getAttributes().item(i).getNodeName()+"=\"<span class=\"xmlattrvalue\">"+attrState.getPrefix()+escapeHtml(Utilities.escapeXml(node.getAttributes().item(i).getTextContent()), level)+attrState.getSuffix()+"</span>\"");
+          out.write(node.getAttributes().item(i).getNodeName()+"=\"<span class=\"xmlattrvalue\">"+attrState.getPrefix()+escapeHtml(Utilities.escapeXml(node.getAttributes().item(i).getTextContent()), level)+attrState.getSuffix()+"</span>\"");
         } else
-          out.write(" "+node.getAttributes().item(i).getNodeName()+"=\"<span class=\"xmlattrvalue\">"+escapeHtml(Utilities.escapeXml(node.getAttributes().item(i).getTextContent()), level)+"</span>\"");
+          out.write(node.getAttributes().item(i).getNodeName()+"=\"<span class=\"xmlattrvalue\">"+escapeHtml(Utilities.escapeXml(node.getAttributes().item(i).getTextContent()), level)+"</span>\"");
       }
       out.write("</span>");
 
     }
     if (node.hasChildNodes()) {
       out.write("<span class=\"xmltag\">&gt;</span>");
-      XhtmlGeneratorAdornerState newstate = adorner == null ? new XhtmlGeneratorAdornerState("", "") : adorner.getState(this, state, node);
+      if (!node.hasAttributes())
+        out.write("<a name=\""+adorner.getNodeId(state, node)+"\"> </a>");
+      XhtmlGeneratorAdornerState newstate = adorner == null ? new XhtmlGeneratorAdornerState(null, "", "") : adorner.getState(this, state, node);
       if (newstate.isSuppress())
         out.write("<span class=\"xmlcomment\">&lt;!-- "+escapeHtml(newstate.getSupressionMessage(), level)+" --&gt;</span>");
       else {
@@ -202,11 +210,15 @@ public class XhtmlGenerator {
       else
         out.write("<span class=\"xmltag\">&lt;/"+node.getNodeName()+"&gt;</span>");
     }
-    else 
+    else { 
       out.write("<span class=\"xmltag\">/&gt;</span>");
+      if (!node.hasAttributes())
+        out.write("<a name=\""+adorner.getNodeId(state, node)+"\"> </a>");
+    }
+    out.write("<a name=\""+adorner.getNodeId(state, node)+"-end\"> </a>");
 	}
 	
-  private void writeElementPlain(Writer out, Element node, int level) throws Exception {
+  private void writeElementPlain(Writer out, Element node, int level) throws IOException, FHIRException  {
     out.write("<"+node.getNodeName());
     if (node.hasAttributes()) {
       for (int i = 0; i < node.getAttributes().getLength(); i++) {

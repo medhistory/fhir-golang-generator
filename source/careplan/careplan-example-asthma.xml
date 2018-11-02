@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><CarePlan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir" xsi:schemaLocation="http://hl7.org/fhir ../../schema/careplan.xsd">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CarePlan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir" xsi:schemaLocation="http://hl7.org/fhir ../../schema/careplan.xsd">
   <id value="asthma"/>
   <text>
     <status value="generated"/>
@@ -46,10 +47,8 @@
   <contained>
     <Condition>
       <id value="p1"/>
-      <patient>
-        <reference value="Patient/1"/>
-        <display value="Eve Everywoman"/>
-      </patient>
+      <clinicalStatus value="active"/>
+	  <verificationStatus value="confirmed"/>
       <code>
         <coding>
           <system value="http://snomed.info/sct"/>
@@ -58,7 +57,10 @@
         </coding>
         <text value="Asthma"/>
       </code>
-      <verificationStatus value="confirmed"/>
+      <subject>
+        <reference value="Patient/1"/>
+        <display value="Eve Everywoman"/>
+      </subject>
     </Condition>
   </contained>
   <!-- The medication that the prescription refers to -->
@@ -77,7 +79,7 @@
   </contained>
   <!-- The sliding scale of steroids -->
   <contained>
-    <MedicationOrder>
+    <MedicationRequest>
       <id value="rx1"/>
       <text>
         <status value="generated"/>
@@ -99,7 +101,7 @@
           <repeat>
             <count value="12"/>
             <period value="1"/>
-            <periodUnits value="d"/>
+            <periodUnit value="d"/>
           </repeat>
         </timing>
       </dosageInstruction>
@@ -109,7 +111,7 @@
           <repeat>
             <count value="10"/>
             <period value="1"/>
-            <periodUnits value="d"/>
+            <periodUnit value="d"/>
           </repeat>
         </timing>
         <doseQuantity>
@@ -122,7 +124,7 @@
           <repeat>
             <count value="8"/>
             <period value="1"/>
-            <periodUnits value="d"/>
+            <periodUnit value="d"/>
           </repeat>
         </timing>
         <doseQuantity>
@@ -135,7 +137,7 @@
           <repeat>
             <count value="6"/>
             <period value="1"/>
-            <periodUnits value="d"/>
+            <periodUnit value="d"/>
           </repeat>
         </timing>
         <doseQuantity>
@@ -148,7 +150,7 @@
           <repeat>
             <count value="4"/>
             <period value="1"/>
-            <periodUnits value="d"/>
+            <periodUnit value="d"/>
           </repeat>
         </timing>
         <doseQuantity>
@@ -161,14 +163,14 @@
           <repeat>
             <count value="2"/>
             <period value="1"/>
-            <periodUnits value="d"/>
+            <periodUnit value="d"/>
           </repeat>
         </timing>
         <doseQuantity>
           <value value="1"/>
         </doseQuantity>
       </dosageInstruction>
-    </MedicationOrder>
+    </MedicationRequest>
   </contained>
   <contained>
     <Goal>
@@ -192,31 +194,35 @@
           </valueRange>
         </extension>
       </extension>
-      <subject>
+      <status value="in-progress"/>
+	  <description>
+        <text value="Maintain Peak flow above 500"/>
+      </description>
+	  <subject>
         <reference value="Patient/1"/>
         <display value="Eve Everywoman"/>
       </subject>
-      <description value="Maintain Peak flow above 500"/>
-      <status value="in-progress"/>
     </Goal>
   </contained>
   <contained>
     <Goal>
       <id value="g1"/>
-      <subject>
+      <status value="in-progress"/>
+	  <description>
+        <text value="Eve will aim to record Peak Flow daily. An activity is created to prompt her."/>
+      </description>
+	  <subject>
         <reference value="Patient/1"/>
         <display value="Eve Everywoman"/>
       </subject>
-      <description value="Eve will aim to record Peak Flow daily. An activity is created to prompt her."/>
-      <status value="in-progress"/>
     </Goal>
   </contained>
+  <status value="active"/>
+  <intent value="plan"/>
   <subject>
     <reference value="Patient/1"/>
     <display value="Eve Everywoman"/>
   </subject>
-  <status value="active"/>
-  <modified value="2012-09-10"/>
   <addresses>
     <!-- The concern points to the contained Condition. Other options are to point to a 'real' Condition resource-->
     <reference value="#p1"/>
@@ -232,7 +238,6 @@
   <!-- This activity specifies that the patient take a peak flow daily -->
   <activity>
     <detail>
-      <category><coding><system value="http://hl7.org/fhir/care-plan-activity-category"/><code value="observation"/></coding></category>
       <code>
         <coding>
           <system value="http://snomed.info/sct"/>
@@ -241,11 +246,11 @@
         </coding>
         <text value="Peak Flow"/>
       </code>
-      <prohibited value="false"/>
+      <doNotPerform value="false"/>
       <scheduledTiming>
         <repeat>
           <period value="1"/>
-          <periodUnits value="d"/>
+          <periodUnit value="d"/>
         </repeat>
       </scheduledTiming>
       <performer>
@@ -280,9 +285,9 @@
           </valueQuantity>
         </extension>
       </extension>
-      <category><coding><system value="http://hl7.org/fhir/care-plan-activity-category"/><code value="drug"/></coding></category>
+	  <kind value="MedicationRequest"/>
       <status value="not-started"/>
-      <prohibited value="false"/>
+      <doNotPerform value="false"/>
       <description value="Eve will start oral steroids if the peakflow drops below 350"/>
     </detail>
   </activity>
@@ -307,9 +312,8 @@
           </valueQuantity>
         </extension>
       </extension>
-      <category><coding><system value="http://hl7.org/fhir/care-plan-activity-category"/><code value="encounter"/></coding></category>
       <status value="not-started"/>
-      <prohibited value="false"/>
+      <doNotPerform value="false"/>
       <description value="Get Medical assistance immediately"/>
     </detail>
   </activity>

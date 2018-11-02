@@ -30,8 +30,11 @@ POSSIBILITY OF SUCH DAMAGE.
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.definitions.Config;
@@ -55,33 +58,54 @@ public class JavaFactoryGenerator extends OutputStreamWriter {
   }
   
 	public void generate(String version, Date genDate) throws Exception {
-		write("package org.hl7.fhir.instance.model;\r\n");
+		write("package org.hl7.fhir.r4.model;\r\n");
     write("\r\n/*\r\n"+Config.FULL_LICENSE_CODE+"*/\r\n\r\n");
     write("// Generated on "+Config.DATE_FORMAT().format(genDate)+" for FHIR v"+version+"\r\n\r\n");
+    write("import org.hl7.fhir.exceptions.FHIRException;\r\n");
+    write("\r\n");
 		write("public class ResourceFactory extends Factory {\r\n");
 		write("\r\n");
-		write("    public static Resource createReference(String name) throws Exception {\r\n");
+		write("    public static Resource createResource(String name) throws FHIRException {\r\n");
 		for (String name : resources.keySet()) {
 			write("        if (\""+name+"\".equals(name))\r\n");
 			write("            return new "+javaClassName(resources.get(name))+"();\r\n");
 		}
 		
 		write("        else\r\n");
-		write("            throw new Exception(\"Unknown Resource Name '\"+name+\"'\");\r\n");
+		write("            throw new FHIRException(\"Unknown Resource Name '\"+name+\"'\");\r\n");
 		write("    }\r\n");
 		write("\r\n");
-    write("    public static Element createType(String name) throws Exception {\r\n");
+    write("    public static Element createType(String name) throws FHIRException {\r\n");
     for (String name : types.keySet()) {
       write("        if (\""+name+"\".equals(name))\r\n");
       String t = types.get(name);
-      if (t.contains("<"))
-        write("            return new "+t+"(\""+t.substring(t.indexOf('<')+1).replace(">", "")+"\");\r\n");
-      else
-        write("            return new "+t+"();\r\n");
+      write("            return new "+t+"();\r\n");
     }    
     write("        else\r\n");
-    write("            throw new Exception(\"Unknown Type Name '\"+name+\"'\");\r\n");
+    write("            throw new FHIRException(\"Unknown Type Name '\"+name+\"'\");\r\n");
+    write("    }\r\n\r\n");
+    write("    public static Base createResourceOrType(String name) throws FHIRException {\r\n");
+    List<String> names = new ArrayList<String>();
+    Map<String, String> creates = new HashMap<String, String>();
+    for (String name : resources.keySet()) {
+      names.add(name);
+      creates.put(name, "new "+javaClassName(resources.get(name))+"()");
+    }
+    for (String name : types.keySet()) {
+      names.add(name);
+      String t = types.get(name);
+      creates.put(name, "new "+t+"()");
+    }    
+    write("      switch (name.hashCode()) {\r\n");
+    Collections.sort(names);
+    for (String name : names) {
+      write("        case "+Integer.toString(name.hashCode())+": return "+creates.get(name)+";\r\n");
+    }    
+    write("      default:\r\n");
+    write("        throw new FHIRException(\"Unknown Resource or Type Name '\"+name+\"'\");\r\n");
     write("    }\r\n");
+    write("  }\r\n");
+    write("\r\n");
     write("\r\n");
 		write("}\r\n");
 		write("\r\n");
@@ -91,7 +115,7 @@ public class JavaFactoryGenerator extends OutputStreamWriter {
 	
 	private String javaClassName(String name) {
     if (name.equals("List"))
-      return "List_";
+      return "ListResource";
     else 
       return name;
   }

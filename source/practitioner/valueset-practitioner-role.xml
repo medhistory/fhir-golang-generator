@@ -1,42 +1,31 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
+  <meta>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+  </meta>
   <name value="PractitionerRole"/>
   <status value="draft"/>
   <publisher value="FHIR Project team"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="This example value set defines a set of codes that can be used to indicate the role of a Practitioner."/>
-  <codeSystem>
-    <system value="http://hl7.org/fhir/practitioner-role"/>
-    <caseSensitive value="true"/>
-    <concept>
-      <code value="doctor"/>
-      <display value="Doctor"/>
-    </concept>
-    <concept>
-      <code value="nurse"/>
-      <display value="Nurse"/>
-    </concept>
-    <concept>
-      <code value="pharmacist"/>
-      <display value="Pharmacist"/>
-    </concept>
-    <concept>
-      <code value="researcher"/>
-      <display value="Researcher"/>
-    </concept>
-    <concept>
-      <code value="teacher"/>
-      <display value="Teacher/educator"/>
-    </concept>
-    <concept>
-      <code value="ict"/>
-      <display value="ICT professional"/>
-    </concept>
-  </codeSystem>
+  <copyright value="This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org"/>
+  <compose>
+    <include>
+      <system value="http://terminology.hl7.org/CodeSystem/practitioner-role"/>
+    </include>
+    <include>
+      <system value="http://snomed.info/sct"/>
+      <filter>
+        <property value="concept"/>
+        <op value="is-a"/>
+        <value value="223366009"/>
+      </filter>
+    </include>
+  </compose>
 </ValueSet>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
   <name value="Observation Relationship Types"/>
@@ -6,14 +6,14 @@
   <publisher value="FHIR Project team"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Relationship type between two observations"/>
   <compose>
     <include>
-      <system value="http://hl7.org/fhir/v3/ActRelationshipType"/>
+      <system value="http://terminology.hl7.org/CodeSystem/v3-ActRelationshipType"/>
     <!--   for these codes, we provide an alternative definition. It is consistent with the  
          underlying act relationship definition, but specific to its use in this case   -->
       <concept>
@@ -54,7 +54,7 @@
       </concept>
       <concept>
         <extension url="http://hl7.org/fhir/StructureDefinition/tools-extensions#definition">
-          <valueString value="The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value)"/>
+          <valueString value="The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure, which has no value)"/>
         </extension>
         <code value="INTF"/>
       </concept>

@@ -1,377 +1,354 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Questionnaire xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../publish/questionnaire.xsd">
   <id value="questionnaire-example-cms"/>
+  <url value="http://hl7.org/fhir/Questionnaire/questionnaire-example-cms"/>
   <identifier>
     <!-- There should be a system, but not sure what URI will choose to use -->
     <use value="official"/>
     <value value="0938-070"/>
   </identifier>
-  <status value="published"/>
+  <title value="OACIS-C: All Items - Home Health Patient Tracking Sheet"/>
+  <status value="active"/>
   <date value="2009-08"/>
-  <!-- Expiration date of 12/31/2014 would need to be captured as an extension -->
   <publisher value="Centers for Medicare &amp; Medicaid Services"/>
-  <group>
-    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-instruction">
-      <valueString value="According to the Paperwork Reduction Act of 1995, no persons are required to respond to a collection of information unless it displays a valid OMB control number. The valid OMB control number for this information collection instrument is 0938-0760. The time required to complete this information collection is estimated to average 0.7 minutes per response, including the time to review instructions, search existing data resources, gather the data needed, and complete and review the information collection. If you have comments concerning this form, please write to: CMS, 7500 Security Boulevard, Attn: PRA Reports Clearance Officer, Baltimore, Maryland 21244-1850."/>
-    </extension>
-    <title value="OACIS-C: All Items - Home Health Patient Tracking Sheet"/>
-    <required value="true"/>
-    <group>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0010"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength">
-          <valueInteger value="6"/>
-        </extension>
-        <linkId value="M0010"/>
-        <text value="C M S Certification Number"/>
-        <type value="string"/>
-        <required value="true"/>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0014"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength">
-          <valueInteger value="2"/>
-        </extension>
-        <linkId value="M0014"/>
-        <text value="Branch State"/>
-        <!-- This could have been a choice, but it wasn't set up that way in the form -->
-        <type value="string"/>
-        <required value="true"/>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0018"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength">
-          <valueInteger value="10"/>
-        </extension>
-        <linkId value="M0018"/>
-        <text value="National Provider Identifier (N P I) for the attending physician who has signed the plan of care"/>
-        <type value="string"/>
-        <required value="false"/>
-        <group>
-          <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen">
-            <extension url="question">
-              <valueString value="M0018"/>
-            </extension>
-            <extension url="answered">
-              <valueBoolean value="false"/>
-            </extension>
-          </extension>
-          <question>
-            <type value="choice"/>
-            <required value="true"/>
-            <option>
-              <code value="NA"/>
-              <display value="Not Applicable"/>
-            </option>
-          </question>
-        </group>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0020"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength">
-          <valueInteger value="20"/>
-        </extension>
-        <linkId value="M0020"/>
-        <text value="Patient I D Number"/>
-        <type value="string"/>
-        <required value="true"/>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0030"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
-          <valueString value="month / day / year"/>
-        </extension>
-        <linkId value="M0030"/>
-        <text value="Start of Care Date"/>
-        <type value="date"/>
-        <required value="true"/>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0030"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
-          <valueString value="month / day / year"/>
-        </extension>
-        <linkId value="M0030"/>
-        <text value="Resumption of Care Date"/>
-        <type value="date"/>
-        <required value="true"/>
-        <group>
-          <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen">
-            <extension url="question">
-              <valueString value="M0030"/>
-            </extension>
-            <extension url="answered">
-              <valueBoolean value="false"/>
-            </extension>
-          </extension>
-          <question>
-            <type value="choice"/>
-            <required value="true"/>
-            <option>
-              <code value="NA"/>
-              <display value="Not Applicable"/>
-            </option>
-          </question>
-        </group>
-      </question>
-      <question>
-        <!-- Revisit this if we can treat this question as a group of sub-questions -->
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0040"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
-          <valueString value="First  M I  Last  Suffix"/>
-        </extension>
-        <linkId value="M0040"/>
-        <text value="Patient Name"/>
-        <type value="string"/>
-        <required value="true"/>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0050"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength">
-          <valueInteger value="2"/>
-        </extension>
-        <linkId value="M0050"/>
-        <text value="Patient State of Residence"/>
-        <type value="string"/>
-        <required value="true"/>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0060"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength">
-          <valueInteger value="10"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
-          <valueString value="nnnnn-nnnn"/>
-        </extension>
-        <linkId value="M0060"/>
-        <text value="Patient Zip Code"/>
-        <type value="string"/>
-        <required value="true"/>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0063"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength">
-          <valueInteger value="12"/>
-        </extension>
-        <linkId value="M0063"/>
-        <text value="Medicare Number"/>
-        <type value="string"/>
-        <required value="false"/>
-        <group>
-          <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen">
-            <extension url="question">
-              <valueString value="M0063"/>
-            </extension>
-            <extension url="answered">
-              <valueBoolean value="false"/>
-            </extension>
-          </extension>
-          <question>
-            <type value="choice"/>
-            <required value="true"/>
-            <option>
-              <code value="NA"/>
-              <display value="No Medicare"/>
-            </option>
-          </question>
-        </group>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0064"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength">
-          <valueInteger value="11"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
-          <valueString value="nnn-nn-nnnn"/>
-        </extension>
-        <linkId value="M0064"/>
-        <text value="Social Security Number"/>
-        <type value="string"/>
-        <required value="false"/>
-        <group>
-          <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen">
-            <extension url="question">
-              <valueString value="M0064"/>
-            </extension>
-            <extension url="answered">
-              <valueBoolean value="false"/>
-            </extension>
-          </extension>
-          <question>
-            <type value="choice"/>
-            <required value="true"/>
-            <option>
-              <code value="UK"/>
-              <display value="Unknown or Not Available"/>
-            </option>
-          </question>
-        </group>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0065"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength">
-          <valueInteger value="14"/>
-        </extension>
-        <linkId value="M0065"/>
-        <text value="Medicaid Number"/>
-        <type value="string"/>
-        <required value="false"/>
-        <group>
-          <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen">
-            <extension url="question">
-              <valueString value="M0065"/>
-            </extension>
-            <extension url="answered">
-              <valueBoolean value="false"/>
-            </extension>
-          </extension>
-          <question>
-            <type value="choice"/>
-            <required value="true"/>
-            <option>
-              <code value="NA"/>
-              <display value="No Medicaid"/>
-            </option>
-          </question>
-        </group>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0066"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
-          <valueString value="month / day / year"/>
-        </extension>
-        <linkId value="M0066"/>
-        <text value="Birth Date"/>
-        <type value="date"/>
-        <required value="true"/>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0069"/>
-        </extension>
-        <linkId value="M0069"/>
-        <text value="Gender"/>
+  <item>
+    <linkId value="ROOT"/>
+    <type value="group"/>
+    <item>
+      <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory">
+        <valueCodeableConcept>
+          <coding>
+            <system value="http://hl7.org/fhir/questionnaire-display-category"/>
+            <code value="instructions"/>
+          </coding>
+        </valueCodeableConcept>
+      </extension>
+      <linkId value="INSTR"/>
+      <text value="According to the Paperwork Reduction Act of 1995, no persons are required to respond to a collection of information unless it displays a valid OMB control number. The valid OMB control number for this information collection instrument is 0938-0760. The time required to complete this information collection is estimated to average 0.7 minutes per response, including the time to review instructions, search existing data resources, gather the data needed, and complete and review the information collection. If you have comments concerning this form, please write to: CMS, 7500 Security Boulevard, Attn: PRA Reports Clearance Officer, Baltimore, Maryland 21244-1850."/>
+      <type value="display"/>
+    </item>
+    <item>
+      <linkId value="M0010"/>
+      <text value="C M S Certification Number"/>
+      <type value="string"/>
+      <required value="true"/>
+    </item>
+    <item>
+      <linkId value="M0014"/>
+      <text value="Branch State"/>
+      <type value="string"/>
+      <required value="true"/>
+    </item>
+    <item>
+      <linkId value="M0018"/>
+      <text value="National Provider Identifier (N P I) for the attending physician who has signed the plan of care"/>
+      <type value="string"/>
+      <item>
+        <linkId value="M0018.1"/>
         <type value="choice"/>
         <required value="true"/>
-        <option>
+        <answerOption>
+          <valueCoding>
+            <code value="NA"/>
+            <display value="Not Applicable"/>
+          </valueCoding>
+        </answerOption>
+      </item>
+    </item>
+    <item>
+      <linkId value="M0020"/>
+      <text value="Patient I D Number"/>
+      <type value="string"/>
+      <required value="true"/>
+    </item>
+    <item>
+      <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
+        <valueString value="month / day / year"/>
+      </extension>
+      <linkId value="M0030"/>
+      <text value="Start of Care Date"/>
+      <type value="date"/>
+      <required value="true"/>
+    </item>
+    <item>
+      <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
+        <valueString value="month / day / year"/>
+      </extension>
+      <linkId value="M0030"/>
+      <text value="Resumption of Care Date"/>
+      <type value="date"/>
+      <required value="true"/>
+      <item>
+        <linkId value="M0030.1"/>
+        <type value="choice"/>
+        <required value="true"/>
+        <answerOption>
+          <valueCoding>
+            <code value="NA"/>
+            <display value="Not Applicable"/>
+          </valueCoding>
+        </answerOption>
+      </item>
+    </item>
+    <item>
+      <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
+        <valueString value="First  M I  Last  Suffix"/>
+      </extension>
+      <linkId value="M0040"/>
+      <text value="Patient Name"/>
+      <type value="string"/>
+      <required value="true"/>
+    </item>
+    <item>
+      <linkId value="M0050"/>
+      <text value="Patient State of Residence"/>
+      <type value="string"/>
+      <required value="true"/>
+    </item>
+    <item>
+      <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
+        <valueString value="nnnnn-nnnn"/>
+      </extension>
+      <linkId value="M0060"/>
+      <text value="Patient Zip Code"/>
+      <type value="string"/>
+      <required value="true"/>
+    </item>
+    <item>
+      <linkId value="M0063"/>
+      <text value="Medicare Number"/>
+      <type value="string"/>
+      <item>
+        <linkId value="M0063.1"/>
+        <type value="choice"/>
+        <required value="true"/>
+        <answerOption>
+          <valueCoding>
+            <code value="NA"/>
+            <display value="No Medicare"/>
+          </valueCoding>
+        </answerOption>
+      </item>
+    </item>
+    <item>
+      <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
+        <valueString value="nnn-nn-nnnn"/>
+      </extension>
+      <linkId value="M0064"/>
+      <text value="Social Security Number"/>
+      <type value="string"/>
+      <item>
+        <linkId value="M0064.1"/>
+        <type value="choice"/>
+        <required value="true"/>
+        <answerOption>
+          <valueCoding>
+            <code value="UK"/>
+            <display value="Unknown or Not Available"/>
+          </valueCoding>
+        </answerOption>
+      </item>
+    </item>
+    <item>
+      <linkId value="M0065"/>
+      <text value="Medicaid Number"/>
+      <type value="string"/>
+      <item>
+        <linkId value="M0065.1"/>
+        <type value="choice"/>
+        <required value="true"/>
+        <answerOption>
+          <valueCoding>
+            <code value="NA"/>
+            <display value="No Medicaid"/>
+          </valueCoding>
+        </answerOption>
+      </item>
+    </item>
+    <item>
+      <extension url="http://hl7.org/fhir/StructureDefinition/entryFormat">
+        <valueString value="month / day / year"/>
+      </extension>
+      <linkId value="M0066"/>
+      <text value="Birth Date"/>
+      <type value="date"/>
+      <required value="true"/>
+    </item>
+    <item>
+      <linkId value="M0069"/>
+      <text value="Gender"/>
+      <type value="choice"/>
+      <required value="true"/>
+      <answerOption>
+        <valueCoding>
           <code value="1"/>
           <display value="Male"/>
-        </option>
-        <option>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
           <code value="2"/>
           <display value="Female"/>
-        </option>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0140"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-instructions">
-          <valueString value="Mark all that apply."/>
-        </extension>
-        <linkId value="M0140"/>
-        <text value="Race/Ethnicity"/>
-        <type value="choice"/>
-        <required value="true"/>
-        <repeats value="true"/>
-        <option>
+        </valueCoding>
+      </answerOption>
+    </item>
+    <item>
+      <linkId value="M0140"/>
+      <text value="Race/Ethnicity"/>
+      <type value="choice"/>
+      <required value="true"/>
+      <repeats value="true"/>
+      <answerOption>
+        <valueCoding>
           <code value="1"/>
           <display value="American Indian or Alaska Native"/>
-        </option>
-        <option>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
           <code value="2"/>
           <display value="Asian"/>
-        </option>
-        <option>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
           <code value="3"/>
           <display value="Black or African-American"/>
-        </option>
-        <option>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
           <code value="4"/>
           <display value="Hispanic or Latino"/>
-        </option>
-        <option>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
           <code value="5"/>
           <display value="Native Hawaiian or Pacific Islander"/>
-        </option>
-        <option>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
           <code value="6"/>
           <display value="White"/>
-        </option>
-      </question>
-      <question>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-label">
-          <valueString value="M0150"/>
-        </extension>
-        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-instructions">
-          <valueString value="Mark all that apply."/>
-        </extension>
-        <linkId value="M0150"/>
-        <text value="Current Payment Sources for Home Care"/>
-        <type value="choice"/>
+        </valueCoding>
+      </answerOption>
+    </item>
+    <item>
+      <linkId value="M0150"/>
+      <text value="Current Payment Sources for Home Care"/>
+      <type value="choice"/>
+      <required value="true"/>
+      <repeats value="true"/>
+      <answerOption>
+        <valueCoding>
+          <code value="0"/>
+          <display value="None; no charge for current services"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="1"/>
+          <display value="Medicare (traditional fee-for-service)"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="2"/>
+          <display value="Medicare (HMO/managed care/Advantage plan)"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="3"/>
+          <display value="Medicaid (traditional fee-for-service)"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="4"/>
+          <display value="Medicaid (HMO/managed care)"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="5"/>
+          <display value="Workers' compensation"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="6"/>
+          <display value="Title programs (e.g. Title III, V, or XX)"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="7"/>
+          <display value="Other government (e.g. TriCare, VA, etc.)"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="8"/>
+          <display value="Private insurance"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="9"/>
+          <display value="Private HMO/managed care"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="10"/>
+          <display value="Self-pay"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="11"/>
+          <display value="Other (specify)"/>
+        </valueCoding>
+      </answerOption>
+      <answerOption>
+        <valueCoding>
+          <code value="UK"/>
+          <display value="Unknown"/>
+        </valueCoding>
+      </answerOption>
+      <item>
+        <linkId value="M0140.1"/>
+        <type value="string"/>
+        <enableWhen>
+          <question value="M0150"/>
+          <operator value="exists"/>
+          <answerBoolean value="true"/>
+        </enableWhen>
         <required value="true"/>
-        <repeats value="true"/>
-<option><code value="0"/><display value="None; no charge for current services"/></option>
-<option><code value="1"/><display value="Medicare (traditional fee-for-service)"/></option>
-<option><code value="2"/><display value="Medicare (HMO/managed care/Advantage plan)"/></option>
-<option><code value="3"/><display value="Medicaid (traditional fee-for-service)"/></option>
-<option><code value="4"/><display value="Medicaid (HMO/managed care)"/></option>
-<option><code value="5"/><display value="Workers' compensation"/></option>
-<option><code value="6"/><display value="Title programs (e.g. Title III, V, or XX)"/></option>
-<option><code value="7"/><display value="Other government (e.g. TriCare, VA, etc.)"/></option>
-<option><code value="8"/><display value="Private insurance"/></option>
-<option><code value="9"/><display value="Private HMO/managed care"/></option>
-<option><code value="10"/><display value="Self-pay"/></option>
-<option><code value="11"/><display value="Other (specify)"/></option>
-<option><code value="UK"/><display value="Unknown"/></option>
-<group>
-  <question>
-          <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-enableWhen">
-            <extension url="question">
-              <valueString value="M0150"/>
-            </extension>
-            <extension url="answered">
-              <valueCoding>
-                <code value="11"/>
-              </valueCoding>
-            </extension>
-          </extension>
-    <type value="string"/>
-    <required value="true"/>
-  </question>
-</group>
-      </question>
-    </group>
-    <group>
-      <title value="Items to be Used at Specific Time Points"/>
-    </group>
-  </group>
+      </item>
+    </item>
+  </item>
+  <item>
+    <linkId value="timing"/>
+    <text value="Items to be Used at Specific Time Points"/>
+    <type value="group"/>
+    <item>
+      <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory">
+        <valueCodeableConcept>
+          <coding>
+            <system value="http://hl7.org/fhir/questionnaire-display-category"/>
+            <code value="instructions"/>
+          </coding>
+        </valueCodeableConcept>
+      </extension>
+      <linkId value="footer"/>
+      <text value="According to the Paperwork Reduction Act of 1995, no persons are required to respond to a collection of information unless it displays a valid OMB control number. The valid OMB control number for this information collection instrument is 0938-0760. The time required to complete this information collection is estimated to average 0.7 minutes per response, including the time to review instructions, search existing data resources, gather the data needed, and complete and review the information collection. If you have comments concerning this form, please write to: CMS, 7500 Security Boulevard, Attn: PRA Reports Clearance Officer, Baltimore, Maryland 21244-1850."/>
+      <type value="display"/>
+    </item>
+  </item>
 </Questionnaire>
 <!--
 
@@ -490,7 +467,7 @@ Rate the degree of symptom control for the condition listed in Column 1 using th
 3 - Symptoms poorly controlled; patient needs frequent adjustment in treatment and dose monitoring
 4 - Symptoms poorly controlled; history of re-hospitalizations
 Note that in Column 2 the rating for symptom control of each diagnosis should not be used to determine the
-sequencing of the diagnoses listed in Column 1. These are separate items and sequencing may not coincide.
+sequencing of the diagnoses listed in Column 1. These are separate items and sequencing might not coincide.
 Sequencing of diagnoses should reflect the seriousness of each condition and support the disciplines and services
 provided.
 Column 3: (OPTIONAL) If a V-code is assigned to any row in Column 2, in place of a case mix diagnosis, it may be
@@ -515,7 +492,7 @@ ICD-9-C M and symptom
 control rating for each
 condition.
 Note that the sequencing of
-these ratings may not match
+these ratings might not match
 the sequencing of the
 diagnoses
 Complete if a V-code is
@@ -782,7 +759,7 @@ record in centimeters. If no Stage III or Stage IV pressure ulcers, go to M1320.
 | ___ | ___ | . | ___ | (cm)
 (M1320) Status of Most Problematic (Observable) Pressure Ulcer:
 ⃞ 0 - Newly epithelialized
-⃞ 1 - Fully granulating
+⃞ 1 - Fully granularing
 ⃞ 2 - Early/partial granulation
 ⃞ 3 - Not healing
 ⃞ NA - No observable pressure ulcer
@@ -810,7 +787,7 @@ dressing) [ Go to M1340 ]
 ⃞ 4 - Four or more
 (M1334) Status of Most Problematic (Observable) Stasis Ulcer:
 ⃞ 0 - Newly epithelialized
-⃞ 1 - Fully granulating
+⃞ 1 - Fully granularing
 ⃞ 2 - Early/partial granulation
 ⃞ 3 - Not healing
 (M1340) Does this patient have a Surgical Wound?
@@ -819,7 +796,7 @@ dressing) [ Go to M1340 ]
 ⃞ 2 - Surgical wound known but not observable due to non-removable dressing [ Go to M1350 ]
 (M1342) Status of Most Problematic (Observable) Surgical Wound:
 ⃞ 0 - Newly epithelialized
-⃞ 1 - Fully granulating
+⃞ 1 - Fully granularing
 ⃞ 2 - Early/partial granulation
 ⃞ 3 - Not healing
 (M1350) Does this patient have a Skin Lesion or Open Wound, excluding bowel ostomy, other than those described
@@ -863,7 +840,7 @@ ELIMINATION STATUS
 ⃞ 0 - No
 ⃞ 1 - Yes
 ⃞ NA - Patient on prophylactic treatment
-⃞ UK - Unknown [Omit ―UK‖ option on DC]
+⃞ UK - Unknown [Omit ―UK‖ answerOption on DC]
 (M1610) Urinary Incontinence or Urinary Catheter Presence:
 ⃞ 0 - No incontinence or catheter (includes anuria or ostomy for urinary drainage) [ Go to M1620 ]
 ⃞ 1 - Patient is incontinent
@@ -884,7 +861,7 @@ ELIMINATION STATUS
 ⃞ 4 - On a daily basis
 ⃞ 5 - More often than once daily
 ⃞ NA - Patient has ostomy for bowel elimination
-⃞ UK - Unknown [Omit ―UK‖ option on FU, DC]
+⃞ UK - Unknown [Omit ―UK‖ answerOption on FU, DC]
 (M1630) Ostomy for Bowel Elimination: Does this patient have an ostomy for bowel elimination that (within the last
 14 days): a) was related to an inpatient facility stay, or b) necessitated a change in medical or treatment
 regimen?
@@ -1240,7 +1217,7 @@ agency staff)?
 ⃞ 3 - One to two times per week
 ⃞ 4 - Received, but less often than weekly
 ⃞ 5 - No assistance received
-⃞ UK - Unknown [Omit ―UK‖ option on DC]
+⃞ UK - Unknown [Omit ―UK‖ answerOption on DC]
 THERAPY NEED AND PLAN OF CARE
 (M2200) Therapy Need: In the home health plan of care for the Medicare payment episode for which this assessment
 will define a case mix group, what is the indicated need for therapy visits (total of reasonable and necessary
@@ -1356,7 +1333,7 @@ wound healing
 ⃞ 2 - Rehabilitation facility [ Go to M0903 ]
 ⃞ 3 - Nursing home [ Go to M2440 ]
 ⃞ 4 - Hospice [ Go to M0903 ]
-⃞ NA - No inpatient facility admission [Omit ―NA‖ option on TRN]
+⃞ NA - No inpatient facility admission [Omit ―NA‖ answerOption on TRN]
 (M2420) Discharge Disposition: Where is the patient after discharge from your agency? (Choose only one
 answer.)
 ⃞ 1 - Patient remained in the community (without formal assistive services)

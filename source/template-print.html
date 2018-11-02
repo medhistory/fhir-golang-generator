@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 
-
+<!-- template-print.html -->
       
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -9,7 +9,7 @@
 <body>
 [%file newnavbar%]
 
-<div class="col-9">
+<div class="col-12">
 
 
 <h1>Resource Definition: <%title%></h1>
@@ -22,13 +22,15 @@
 <h2>
 Resource Content
 </h2>
-<a name="uml"> </a>
+<a name="uml"></a>
 <%svg A%>
 
-<a name="def"> </a>
+<a name="def"></a>
 <%xml%>
 
-<p>Alternate definitions: <a href="<%name%>.xsd">Schema</a>, RDF (to do), XMI (to do), <a href="<%name%>.profile.xml">Resource Profile</a></p>
+<p>Alternate definitions: 
+Master Definition (<a href="<%name%>.profile.xml.html">XML</a>, <a href="<%name%>.profile.json.html">JSON</a>),
+<a href="<%name%>.xsd">Schema</a>/<a href="<%name%>.sch">Schematron</a>, <a href="<%name%>.shex.html">ShEx</a> (for <a href="rdf.html">Turtle</a>)</p>
 
 <%tx%>
 
@@ -36,7 +38,7 @@ Resource Content
 
 <%notes%>
 
-<a name="examples"> </a>
+<a name="examples"></a>
 
 <h2>Examples</h2>
 <table class="list">
@@ -45,7 +47,7 @@ Resource Content
 
 <%search%>
 
-<a name="desc"> </a>
+<a name="desc"></a>
 
 <h2>Detailed Descriptions</h2>
 

@@ -38,11 +38,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hl7.fhir.definitions.model.ResourceDefn;
-import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.instance.model.OperationOutcome.IssueType;
-import org.hl7.fhir.instance.validation.ValidationMessage;
-import org.hl7.fhir.instance.validation.ValidationMessage.Source;
 import org.hl7.fhir.utilities.TextFile;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
+import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlDocument;
@@ -76,13 +76,13 @@ public class BookMaker {
     checkCrossLinks();
     
     String src = TextFile.fileToString(page.getFolders().srcDir+"book.html");
-    src = page.processPageIncludes(page.getFolders().srcDir+"book.html", src, "book", null, null, null, "Book", null);
+    src = page.processPageIncludes(page.getFolders().srcDir+"book.html", src, "book", null, null, null, "Book", null, null, null);
     XhtmlDocument doc = new XhtmlParser().parse(src, "html");
     XhtmlNode body = doc.getElement("html").getElement("body");
     addTOC(body);   
     addContent(body);
     addReferenceIds(body);
-    new XhtmlComposer().compose(new FileOutputStream(target+"fhir-book.html"), doc); 
+    new XhtmlComposer(XhtmlComposer.HTML).compose(new FileOutputStream(target+"fhir-book.html"), doc); 
   }
 
   private void checkCrossLinks() {
@@ -134,7 +134,7 @@ public class BookMaker {
 						  if (!found)
 							try {
 								if (new File("c:\\temp\\source.html").exists())
-								  new XhtmlComposer().compose(new FileOutputStream("c:\\temp\\source.html"), pages.get(parts[0]));
+								  new XhtmlComposer(XhtmlComposer.HTML).compose(new FileOutputStream("c:\\temp\\source.html"), pages.get(parts[0]));
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -317,7 +317,7 @@ public class BookMaker {
     //    list.add("MessageHeader");
     //    list.add("DocumentHeader");
     //    list.add("ValueSet");
-    //    list.add("Conformance");
+    //    list.add("CapabilityStatement");
     //    list.add("Agent");
     //    list.add("Animal");
     //    list.add("AssessmentScale");

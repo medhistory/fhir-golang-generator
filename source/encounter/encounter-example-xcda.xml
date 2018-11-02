@@ -7,20 +7,24 @@
     <value value="1234213.52345873"/>
   </identifier>
   <status value="finished"/>
-  <class value="outpatient"/>
-  <patient>
+    <class>
+        <system value="http://terminology.hl7.org/CodeSystem/v3-ActCode"/>
+        <code value="AMB"/> <!-- outpatient -->
+        <display value="ambulatory"/>
+    </class>
+  <subject>
     <reference value="Patient/xcda"/>
-  </patient>
+  </subject>
   <participant>
     <individual>
       <reference value="Practitioner/xcda1"/>
     </individual>
   </participant>
-  <reason>
+  <reasonCode>
     <coding>
       <system value="http://ihe.net/xds/connectathon/eventCodes"/>
       <code value="T-D8200"/>
       <display value="Arm"/>
     </coding>
-  </reason>
+  </reasonCode>
 </Encounter>

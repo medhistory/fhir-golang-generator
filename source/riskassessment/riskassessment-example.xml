@@ -49,12 +49,16 @@
       </table>
     </div>
   </text>
-  <date value="2006-01-13T23:01:00Z"/>
+  <status value="final"/>
   <method>
     <coding>
       <code value="BRCAPRO"/>
     </coding>
   </method>
+  <subject>
+    <reference value="Patient/b248b1b2-1686-4b94-9936-37d7a5f94b51"/>
+  </subject>
+  <occurrenceDateTime value="2006-01-13T23:01:00Z"/>
   <basis>
     <reference value="List/prognosis"/>
   </basis>
@@ -212,4 +216,7 @@
       </high>
     </whenRange>
   </prediction>
+  <note>
+    <text value="High degree of certainty"/>
+  </note>
 </RiskAssessment>

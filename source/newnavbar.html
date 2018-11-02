@@ -10,7 +10,7 @@
 					<img src="<%level%>./assets/images/hl7-logo.png" width="42" height="50" alt="visit the hl7 website"/>
 				</a> 
 			</div>       	
-			<!--hl7-search-->
+			<%search-header%> 
 		</div>
 		<div class="container"><!-- container -->
 	</div></div><!-- /segment-header -->	
@@ -20,8 +20,7 @@
 		<div id="stripe"> </div>
 		<div class="container"><!-- container -->
  <!-- HEADER CONTENT -->
- 	      		
- 	      		      		
+ 	      		 	      		      		
 			<nav class="navbar navbar-inverse">
 				<div class="container">
 					<button data-target=".navbar-inverse-collapse" data-toggle="collapse" class="navbar-toggle" type="button">
@@ -32,13 +31,19 @@
 					<a href="<%level%>index.html" class="navbar-brand hidden">FHIR</a>
 					<div class="nav-collapse collapse navbar-inverse-collapse">
 						<ul class="nav navbar-nav">
-<%navlist%>
+              <li><a href="<%level%>./index.html">Home</a></li>
+              <li><a href="<%level%>./modules.html">Getting Started</a></li>
+              <li><a href="<%level%>./documentation.html">Documentation</a></li>
+              <li><a href="<%level%>./resourcelist.html">Resources</a></li>
+              <li><a href="<%level%>./profilelist.html">Profiles</a></li>
+              <li><a href="<%level%>./extensibility-registry.html">Extensions</a></li>
+              <li><a href="<%level%>./operationslist.html">Operations</a></li>
+              <li><a href="<%level%>./terminologies-systems.html">Terminologies</a></li>
 						</ul>
 					</div><!-- /.nav-collapse -->
 				</div><!-- /.container -->
 			</nav><!-- /.navbar -->
       		
-				
 <!-- /HEADER CONTENT -->				
 		</div><!-- /container -->
 	</div><!-- /segment-navbar -->

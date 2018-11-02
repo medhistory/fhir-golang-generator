@@ -1,25 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
-  <name value="Contract Action Codes"/>
+  <meta>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+  </meta>
+  <name value="ContractActionCodes"/>
+  <title value="Contract Action Codes"/>
   <status value="draft"/>
   <publisher value="Financial Management"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="This value set includes sample Contract Action codes."/>
   <copyright value="This is an example set."/>
-  <codeSystem>
-    <system value="http://www.hl7.org/fhir/contractaction"/>
-    <caseSensitive value="true"/>
-    <concept>
-      <code value="action-a"/>
-    </concept>
-    <concept>
-      <code value="action-b"/>
-    </concept>
-  </codeSystem>
+  <compose>
+    <include>
+      <system value="http://terminology.hl7.org/CodeSystem/contractaction"/>
+    </include>
+  </compose>
 </ValueSet>

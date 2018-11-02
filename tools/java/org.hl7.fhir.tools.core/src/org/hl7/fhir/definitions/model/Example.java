@@ -35,6 +35,7 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.hl7.fhir.r4.elementmodel.Element;
 import org.hl7.fhir.utilities.CSFileInputStream;
 import org.hl7.fhir.utilities.CSVProcessor;
 import org.hl7.fhir.utilities.Utilities;
@@ -53,6 +54,8 @@ public class Example {
   private String resourceName;
   private Set<Example> inbounds = new HashSet<Example>();
   private String ig;
+  private String exampleFor;
+  private Element element;
   
   
   public enum ExampleType {
@@ -204,6 +207,32 @@ public class Example {
 
   public void setIg(String ig) {
     this.ig = ig;
+  }
+
+
+  public void setExampleFor(String value) {
+    this.exampleFor = value;
+    
+  }
+
+
+  public String getExampleFor() {
+    return exampleFor;
+  }
+
+
+  public Element getElement() {
+    return element;
+  }
+
+
+  public void setElement(Element element) {
+    this.element = element;
+  }
+
+
+  public boolean hasXml() {
+    return xml != null;
   }
   
   

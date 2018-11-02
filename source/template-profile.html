@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 
-
+<!-- template-profile.html -->
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -9,11 +9,14 @@
 <body>
 <%file newnavbar%>
 
-<div class="col-9">
+<div class="col-12">
 
 <%profileheader base%>
 <h3><%title%></h3>
-<%draft-note%>
+<table class="<%fmm-style%>">
+ <tr><td><%wg%></td><td><%fmm%></td><td><%sstatus%><!--!ns!--></td><td><%profile-context%></td></tr>
+</table>
+
 <p>
 The official URL for this profile is:
 </p>
@@ -32,13 +35,13 @@ This profile was published on <%date%> <%status%> by <%author%>.
 
 <%profile.datadictionary%>
 
-<a name="profile"> </a>
+<a name="profile"></a>
 <h4>
 Formal Views of Profile Content
 </h4>
 
 <p>
-<a href="<%level%>profiling.html">Description of Profiles, Differentials, Snapshots, and how the XML and JSON presentations work</a>.
+<a href="<%level%>profiling.html#representation">Description of Profiles, Differentials, Snapshots, and how the XML and JSON presentations work</a>.
 </p>
 
 <div id="tabs">
@@ -88,7 +91,7 @@ Formal Views of Profile Content
  <div id="tabs-json">
   <div id="json">
    <div id="json-inner">
-    <p>todo</p>
+    <%json%>
    </div>
   </div>
  </div>
@@ -123,16 +126,17 @@ Formal Views of Profile Content
   <div id="all-json">
    <p><b>JSON Template</b></p>
    <div id="all-json-inner">
-    <p>todo</p>
+    <%json%>
    </div>
   </div>
  </div>
 </div>
   
 <p>&nbsp;</p>  
-<p>Other representations of profile: <%schematron%></p>
+<p>Alternate definitions: Master Definition (<a href="<%name%>.profile.xml.html">XML</a>, <a href="<%name%>.profile.json.html">JSON</a>), <%schematron%></p>
 
-<a name="tx"> </a>
+
+<a name="tx"></a>
 <%profile.tx%>
 
 <%profile.inv%>

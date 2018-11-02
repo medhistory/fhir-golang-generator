@@ -33,12 +33,15 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hl7.fhir.definitions.Config;
 import org.hl7.fhir.definitions.model.DefinedCode;
 import org.hl7.fhir.definitions.model.Definitions;
 import org.hl7.fhir.definitions.model.ResourceDefn;
+import org.hl7.fhir.tools.publisher.BuildWorkerContext;
 import org.hl7.fhir.utilities.CSFile;
 import org.hl7.fhir.utilities.IniFile;
 import org.hl7.fhir.utilities.TextFile;
@@ -48,10 +51,12 @@ public class SchemaGenerator {
 
   private String genDate;
   private String version;
+  private BuildWorkerContext workerContext;
 
-  public void generate(Definitions definitions, IniFile ini, String tmpResDir, String xsdDir, String dstDir, String srcDir, String version, String genDate, boolean forCodeGeneration) throws Exception {
+  public void generate(Definitions definitions, IniFile ini, String tmpResDir, String xsdDir, String dstDir, String srcDir, String version, String genDate, boolean forCodeGeneration, BuildWorkerContext workerContext) throws Exception {
 	  this.genDate = genDate;
 	  this.version = version;
+	  this.workerContext = workerContext;
 
 	  if (!forCodeGeneration) {
 	    File dir = new CSFile(xsdDir);
@@ -64,10 +69,11 @@ public class SchemaGenerator {
 	    }
 	  }
 
-	  XSDBaseGenerator xsdb = new XSDBaseGenerator(new OutputStreamWriter(new FileOutputStream(new CSFile(xsdDir+"fhir-base.xsd")), "UTF-8"), forCodeGeneration);
+	  XSDBaseGenerator xsdb = new XSDBaseGenerator(new OutputStreamWriter(new FileOutputStream(new CSFile(xsdDir+"fhir-base.xsd")), "UTF-8"), forCodeGeneration, workerContext);
 	  xsdb.setDefinitions(definitions);
 	  xsdb.generate(version, genDate, true);
 	  xsdb.getWriter().close();
+    Set<String> allenums = new HashSet<String>();
 
     List<String> names = new ArrayList<String>();
     names.addAll(definitions.getResources().keySet());
@@ -75,7 +81,7 @@ public class SchemaGenerator {
     Collections.sort(names);
     for (String name : names) {
       ResourceDefn root = definitions.getResourceByName(name);
-		  XSDGenerator sgen = new XSDGenerator(new OutputStreamWriter(new FileOutputStream(new CSFile(xsdDir+root.getName().toLowerCase()+".xsd")), "UTF-8"), definitions, forCodeGeneration);
+		  XSDGenerator sgen = new XSDGenerator(new OutputStreamWriter(new FileOutputStream(new CSFile(xsdDir+root.getName().toLowerCase()+".xsd")), "UTF-8"), definitions, forCodeGeneration, workerContext, allenums);
 		  sgen.setDataTypes(definitions.getKnownTypes());
 		  sgen.generate(root.getRoot(), version, genDate, true);
 		  sgen.getWriter().close();
@@ -93,7 +99,7 @@ public class SchemaGenerator {
 	      + "xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" targetNamespace=\"http://hl7.org/fhir\" elementFormDefault=\"qualified\" version=\""+version+"\">\r\n");
 	  single.write("  <!-- Note: When using this schema with some tools, it may also be necessary to declare xmlns:xml=\"http://www.w3.org/XML/1998/namespace\", however this causes performance issues with other tools and thus is not in the base schemas. -->\r\n");
 
-    xsdb = new XSDBaseGenerator(single, forCodeGeneration);
+    xsdb = new XSDBaseGenerator(single, forCodeGeneration, workerContext);
     xsdb.setDefinitions(definitions);
     xsdb.generate(version, genDate, false);
  
@@ -116,9 +122,10 @@ public class SchemaGenerator {
 //    single.write("  </xs:complexType>\r\n");
 //    single.write("  <xs:element name=\"Binary\" type=\"Binary\"/>\r\n");
 //  
+    allenums = new HashSet<String>();
     for (String name : names) {
       ResourceDefn root = definitions.getResourceByName(name);
-      XSDGenerator sgen = new XSDGenerator(single, definitions, forCodeGeneration);
+      XSDGenerator sgen = new XSDGenerator(single, definitions, forCodeGeneration, workerContext, allenums);
       sgen.setDataTypes(definitions.getKnownTypes());
       sgen.generate(root.getRoot(), version, genDate, false);
     }
@@ -132,9 +139,8 @@ public class SchemaGenerator {
 		  TextFile.stringToFile(xsd, xsdDir + n);
 	  }
 
-    if (!forCodeGeneration) {
       produceCombinedSchema(definitions, xsdDir, dstDir, srcDir);
-      
+    if (!forCodeGeneration) {      
       File dir = new CSFile(xsdDir);
       File[] list = dir.listFiles();
       for (File f : list) {
@@ -214,13 +220,15 @@ public class SchemaGenerator {
         }
         StringBuilder enums = new StringBuilder();
         for (DefinedCode c : values) {
-          enums.append("        <xs:enumeration value=\""+c.getCode()+"\">\r\n");
-          enums.append("          <xs:annotation>\r\n");
-          enums.append("            <xs:documentation xml:lang=\"en\">"+Utilities.escapeXml(c.getDefinition())+"</xs:documentation>\r\n");
-          for (String l : c.getLangs().keySet())
-            enums.append("            <xs:documentation xml:lang=\""+l+"\">"+Utilities.escapeXml(c.getLangs().get(l))+"</xs:documentation>\r\n");
-          enums.append("          </xs:annotation>\r\n");
-          enums.append("        </xs:enumeration>\r\n");
+        	if (!c.getAbstract()) {
+	          enums.append("        <xs:enumeration value=\""+c.getCode()+"\">\r\n");
+	          enums.append("          <xs:annotation>\r\n");
+	          enums.append("            <xs:documentation xml:lang=\"en\">"+Utilities.escapeXml(c.getDefinition())+"</xs:documentation>\r\n");
+	          for (String l : c.getLangs().keySet())
+	            enums.append("            <xs:documentation xml:lang=\""+l+"\">"+Utilities.escapeXml(c.getLangs().get(l))+"</xs:documentation>\r\n");
+	          enums.append("          </xs:annotation>\r\n");
+	          enums.append("        </xs:enumeration>\r\n");
+	        }
         }
         src = s1+enums.toString()+s3;
       }

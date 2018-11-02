@@ -1,26 +1,21 @@
 package org.hl7.fhir.rdf;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
-import org.hl7.fhir.instance.model.OperationOutcome;
-import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.instance.model.OperationOutcome.IssueType;
-import org.hl7.fhir.instance.validation.ValidationMessage;
-import org.hl7.fhir.instance.validation.ValidationMessage.Source;
-import org.hl7.fhir.utilities.Utilities;
-
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Model;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
+import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 
 /**
  * The purpose of this class is twofold:
@@ -49,14 +44,14 @@ public class RDFValidator {
   
   public void validate(String filename) throws Exception {
     Model m = RDFDataMgr.loadModel(filename);
-    System.out.println(Integer.toString(m.getGraph().size())+" triples in RDF file "+filename);
+//    System.out.println(Integer.toString(m.getGraph().size())+" triples in RDF file "+filename);
     model = model == null ? m : model.union(m);
-    FileOutputStream strm = new FileOutputStream(Utilities.changeFileExt(filename, ".rdf.xml"));
-    try {
-      RDFDataMgr.write(strm, m, RDFFormat.RDFXML_PLAIN);
-    } finally {
-      strm.close();
-    }
+//    FileOutputStream strm = new FileOutputStream(Utilities.changeFileExt(filename, ".rdf.xml"));
+//    try {
+//      RDFDataMgr.write(strm, m, RDFFormat.RDFXML_PLAIN);
+//    } finally {
+//      strm.close();
+//    }
   }
   
   public List<ValidationMessage> assertion(String sparql, String id, String rowType, String message, String description, IssueSeverity level) {

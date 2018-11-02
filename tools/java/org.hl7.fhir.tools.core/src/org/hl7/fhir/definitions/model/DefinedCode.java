@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.Utilities;
 
 /*
@@ -39,6 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 public class DefinedCode {
 
   private String id;
+	private boolean abstract_;
 	private String code;
 	private String definition;
 	private String comment;
@@ -71,14 +72,22 @@ public class DefinedCode {
 	public String getCode() {
 		return code;
 	}
-	public void setCode(String code) {
+	public DefinedCode setCode(String code) {
 		this.code = code;
+		return this;
+	}
+	public boolean getAbstract() {
+		return abstract_;
+	}
+	public void setAbstract(boolean abstract_) {
+		this.abstract_ = abstract_;
 	}
 	public String getDefinition() {
 		return definition;
 	}
-	public void setDefinition(String definition) {
+	public DefinedCode setDefinition(String definition) {
 		this.definition = definition;
+		return this;
 	}
 	public boolean hasDefinition() {
 		return definition != null && !definition.equals("");
@@ -168,6 +177,14 @@ public class DefinedCode {
 
   public boolean hasDisplay() {
     return !Utilities.noString(display);
+  }
+
+  public String getJsonType() {
+    return null;
+  }
+
+  public String getRegex() {
+    return null;
   }
   
   

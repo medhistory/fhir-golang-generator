@@ -35,6 +35,7 @@ public class PrimitiveType extends DefinedCode {
   private String v2;
   private String v3;
   private String regEx;
+  private String jsonType;
 
   public PrimitiveType() {
     super();
@@ -54,12 +55,24 @@ public class PrimitiveType extends DefinedCode {
   }
 
   
-  public void setRegEx(String value)
+  public void setJsonType(String value) {
+    jsonType = value;
+    
+  }
+
+  @Override
+  public String getJsonType() {
+    return jsonType;
+  }
+
+  
+  public void setRegex(String value)
   {
 	regEx = value;  
   }
 
-  public String getRegEx()
+  @Override
+  public String getRegex()
   {
 	  return regEx;
   }

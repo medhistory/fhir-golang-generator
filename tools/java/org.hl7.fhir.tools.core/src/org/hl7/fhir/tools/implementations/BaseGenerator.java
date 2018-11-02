@@ -42,21 +42,14 @@ public abstract class BaseGenerator implements PlatformGenerator {
     return true;
   }
 
-  @Override
-  public boolean canSign() {
-    return false;
+  protected String buildId;
+
+  public String getBuildId() {
+    return buildId;
   }
 
-  @Override
-  public void sign(String filename, boolean atom, String type) throws Exception {
-    throw new Exception("this should not be called");
-    
+  public void setBuildId(String buildId) {
+    this.buildId = buildId;
   }
 
-  @Override
-  public void verify(String filename) throws Exception {
-    throw new Exception("this should not be called");
-  }
-
- 
 }

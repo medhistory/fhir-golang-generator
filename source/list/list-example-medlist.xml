@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<List xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ..\..\schema\list.xsd">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<List xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../schema/list.xsd">
   <id value="med-list"/>
   <text>
     <status value="generated"/>
@@ -8,6 +8,8 @@
       <p>Cancel Morphine Sulphate</p>
     </div>
   </text>
+  <status value="current"/>
+  <mode value="changes"/>
   <code>
     <coding>
       <system value="http://snomed.info/sct"/>
@@ -16,12 +18,10 @@
     </coding>
     <text value="Medication Review"/>
   </code>
+  <date value="2013-11-20T23:10:23+11:00"/>
   <source>
     <reference value="Patient/example"/>
   </source>
-  <status value="current"/>
-  <date value="2013-11-20T23:10:23+11:00"/>
-  <mode value="changes"/>
   <!-- 
       in a real medications list, we'd actually have medication resources.
       but this an example to demonstrate a changes list, so we'll just use 

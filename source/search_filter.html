@@ -9,25 +9,25 @@
 <body>
 [%file newnavbar%]
 
-<div class="col-9">
+<div class="col-12">
 
-<a name="base"> </a>
+<a name="base"></a>
 <h3>_filter Parameter</h3>
-<table class="cols"><tr><td id="wg"><a _target="blank" href="[%wg fhir%]">[%wgt fhir%]</a> Work Group</td><td id="fmm"><a href="resource.html#maturity">Maturity Level</a>: N/A</td><td id="ballot"><a href="help.html#status">Ballot Status</a>: <a href="history.html#pubs">DSTU 2</a></td></tr></table>
+<table class="colstu"><tr><td id="wg"><a _target="blank" href="[%wg fhir%]">[%wgt fhir%]</a> Work Group</td><td id="fmm"><a href="versions.html#maturity">Maturity Level</a>: 2</td><td id="ballot"><a href="ballot-intro.html#process">Ballot Status</a>:<!--!ns!--><a href="versions.html#std-process">Trial Use</a></td></tr></table>
 
-<a name="intro"> </a>
+<a name="intro"></a>
 <h4>Introduction</h4>
 <p>
 <code>_filter</code> is a parameter that can be used with the <a href="search.html">Search Operation</a>.
 It uses the same set of standard parameters defined for the resources, and provides a syntax
-for expressing a set of query expressions on the underlying resources. 
+for expressing a set of query expressions on the underlying resources.
 </p>
 
 <p>Examples of filters:</p>
 <ul>
 <li>Patient: name co "pet" - all patients with the characters "pet" in a given or family name</li>
 <li>Patient: given eq "peter" and birthdate ge 2014-10-10 - all patients with a given name of peter, born on or after 10-Oct 2014</li>
-<li>Observation: name eq http://loinc.org|1234-5 - all observations with the loinc code "1234-5"</li>
+<li>Observation: code eq http://loinc.org|1234-5 - all observations with the loinc code "1234-5"</li>
 <li>Observation: subject.name co "pet" - all observations on a patient with the characters "pet" in a given or family name</li>
 <li>Observation: related[type eq "has-component"].target pr true - all observations that have component observations (note: this uses one of the search parameters defined for this mechanism, see below)</li>
 <li>Observation: related[type eq has-component].target re Observation/4 - all observations that have Observation/v as a component</li>
@@ -45,26 +45,27 @@ The _filter syntax has the following features:
 <li>The name is one of the defined search parameters that are used with the other search mechanism, with some special exemptions defined below.</li>
 </ul>
 <p>
-Note: The only difference between a "string" value and a "token" 
-value is that a string can contain spaces and ) and ]. There is 
+Note: The only difference between a "string" value and a "token"
+value is that a string can contain spaces and ) and ]. There is
 otherwise no significant difference between them.
 </p>
 <p>
 Formal grammar for the syntax:
 </p>
 <pre>
-filter       = paramExp / logExp / ("not") "(" filter ")"
-logExp       = filter ("and" / "or" filter)+
-paramExp     = paramPath SP compareOp SP compValue
-compareOp    = (see table below)
-compValue    = string / numberOrDate / token
-string       = json string
-token        = any sequence of non-whitespace characters (by Unicode rules) except "]" and ")"
-paramPath    = paramName (("[" filter "]") "." paramPath)
-paramName    = ALPHA (nameChar)*
-nameChar     = "_" / "-" / DIGIT / ALPHA
-numberOrDate = DIGIT (DateChar)*
-dateChar     = DIGIT / "T" / "-" / "." / "+"
+filter        = paramExp / logExp / ("not") "(" filter ")"
+logExp        = filter ("and" / "or" filter)+
+paramExp      = paramPath SP compareOp SP compValue
+compareOp     = (see table below)
+compValue     = string / numberOrDate / token
+string        = json string
+token         = any sequence of non-whitespace characters (by Unicode rules) except "]" and ")"
+paramPath     = paramName (("[" filter "]") "." paramPath)
+paramName     = nameCharStart (nameChar)*
+nameCharStart = "_" / ALPHA
+nameChar      = "_" / "-" / DIGIT / ALPHA
+numberOrDate  = DIGIT (DateChar)*
+dateChar      = DIGIT / "T" / "-" / "." / "+"
 </pre>
 
 <p>Notes about using the syntax:</p>
@@ -75,9 +76,9 @@ dateChar     = DIGIT / "T" / "-" / "." / "+"
 <li>Rhe date format is a standard XML (i.e. XSD) dateTime (including timezone).</li>
 </ul>
 
-<a name="ops"> </a>
+<a name="ops"></a>
 <h4>Operators</h4>
-<p>This table summarises the comparison operations available:</p>
+<p>This table summarizes the comparison operations available:</p>
 
 <table class="grid">
 <tbody>
@@ -111,7 +112,7 @@ dateChar     = DIGIT / "T" / "-" / "." / "+"
 </tr>
  <tr>
 	<td>ap</td>
-	<td>A value in the set isis approximately the same as this value.<br/> 
+	<td>A value in the set isis approximately the same as this value.<br/>
 	Note that the recommended value for the approximation is 10% of the stated value (or for a date, 10% of the gap between now and the date), but systems may choose other values where appropriate</td>
  </tr>
 <tr>
@@ -153,7 +154,7 @@ dateChar     = DIGIT / "T" / "-" / "." / "+"
 </tbody>
 </table>
 <p>
-For detailed rules about the operators eq, ne, le, ge, lt, gt, sa, and eb see 
+For detailed rules about the operators eq, ne, le, ge, lt, gt, sa, and eb see
 <a href="search.html#prefix">Search Prefixes</a>.
 </p>
 
@@ -281,7 +282,7 @@ For detailed rules about the operators eq, ne, le, ge, lt, gt, sa, and eb see
 <li>For convenience, the codes "loinc", "snomed", "rxnorm" and "ucum" are predefined and can be used in place of their associated full namespace.</li>
 </ul>
 
-<a name="params"> </a>
+<a name="params"></a>
 <h4>Additional Parameters</h4>
 
 <p>
@@ -314,13 +315,13 @@ Some additional parameters are defined for the filter parameter (<i>to do: move 
 <p>target = relatesTo</p></td>
 </tr>
 <tr>
-<td>DiagnosticOrder</td>
+<td>ServiceRequest</td>
 <td>event</td>
 <td><p>status = event-status<br />
 date = event-date</p></td>
 </tr>
 <tr>
-<td>DiagnosticOrder</td>
+<td>ServiceRequest</td>
 <td>item</td>
 <td><p>status = item-status</p>
 <p>code = item-code</p>
@@ -328,7 +329,7 @@ date = event-date</p></td>
 <p>event = item-event</p></td>
 </tr>
 <tr>
-<td>DiagnosticOrder</td>
+<td>ServiceRequest</td>
 <td>item-event</td>
 <td><p>status = item-past-status<br />
 date = item-date<br />
@@ -343,7 +344,7 @@ actor = actor</p></td>
 <li>The first column is the resource type against which this name can be used.</li>
 <li>The second column is the parameter name that is used.</li>
 <li>The third column defines the names that can be used in the chained parameter, and in the filter, and shows which existing search parameters they equate to.</li>
-<li>For example, you could search on Observation for '_filter=related[type eq has-component].target re url'. "type" refers to the 
+<li>For example, you could search on Observation for '_filter=related[type eq has-component].target re url'. "type" refers to the
 search parameter "related-type", and "target" to the search parameter "related-target".</li>
 </ul>
 
@@ -352,4 +353,3 @@ search parameter "related-type", and "target" to the search parameter "related-t
 [%file newfooter%]
 </body>
 </html>
-

@@ -33,6 +33,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,13 +51,13 @@ public class ZipGenerator {
 	FileOutputStream dest;
 	ZipOutputStream out;
 
-	public ZipGenerator(String filename) throws Exception {
+	public ZipGenerator(String filename) throws FileNotFoundException  {
 		dest = new FileOutputStream(filename);
 		out = new ZipOutputStream(new BufferedOutputStream(dest));
     out.setLevel(Deflater.BEST_COMPRESSION);
 	}
 
-	public void close() throws Exception {
+	public void close() throws IOException  {
 		out.close();
 	}
 
@@ -89,32 +90,31 @@ public class ZipGenerator {
 		}
 	}
 
-	public void addFolder(String actualDir, String statedDir, boolean omitIfExists) throws Exception {
+	public void addFolder(String actualDir, String statedDir, boolean omitIfExists) throws IOException  {
 		File fd = new CSFile(actualDir);
 		String files[] = fd.list();
 		for (String f : files) {
 			if (new CSFile(Utilities.path(actualDir, f)).isDirectory())
-				addFolder(Utilities.path(actualDir, f), Utilities.pathReverse(statedDir, f), omitIfExists);
+				addFolder(Utilities.path(actualDir, f), Utilities.pathURL(statedDir, f), omitIfExists);
 			else
-				addFileName(Utilities.pathReverse(statedDir, f), Utilities.path(actualDir, f), omitIfExists);
+				addFileName(Utilities.pathURL(statedDir, f), Utilities.path(actualDir, f), omitIfExists);
 		}
 	}
 
-  public void addFolder(String actualDir, String statedDir, boolean omitIfExists, String noExt) throws Exception {
+  public void addFolder(String actualDir, String statedDir, boolean omitIfExists, String noExt) throws IOException  {
     File fd = new CSFile(actualDir);
     String files[] = fd.list();
     for (String f : files) {
       if (new CSFile(Utilities.path(actualDir, f)).isDirectory())
-        addFolder(Utilities.path(actualDir, f), Utilities.pathReverse(statedDir, f), omitIfExists, noExt);
-      else if (!f.endsWith(noExt))
-        addFileName(Utilities.pathReverse(statedDir, f), Utilities.path(actualDir, f), omitIfExists);
+        addFolder(Utilities.path(actualDir, f), Utilities.pathURL(statedDir, f), omitIfExists, noExt);
+      else if (noExt == null || !f.endsWith(noExt))
+        addFileName(Utilities.pathURL(statedDir, f), Utilities.path(actualDir, f), omitIfExists);
     }
   }
 
-	public void addFiles(String actualDir, String statedDir, String ext, String noExt)
-			throws Exception {
+	public void addFiles(String actualDir, String statedDir, String ext, String noExt) throws FileNotFoundException, IOException {
 		byte data[] = new byte[BUFFER];
-		statedDir.replace("\\", "/");
+		statedDir = statedDir.replace("\\", "/");
 		File f = new CSFile(actualDir);
 
 		String files[] = f.list();
@@ -134,14 +134,42 @@ public class ZipGenerator {
 		}
 	}
 
-	public void addFileSource(String path, String cnt, boolean omitIfExists) throws Exception {
+  public void addFilesFiltered(String actualDir, String statedDir, String ext, String[] noExt) throws FileNotFoundException, IOException {
+    byte data[] = new byte[BUFFER];
+    statedDir = statedDir.replace("\\", "/");
+    File f = new CSFile(actualDir);
+
+    String files[] = f.list();
+    for (int i = 0; i < files.length; i++) {
+      if ( new CSFile(actualDir + files[i]).isFile() && ((ext == null || files[i].endsWith(ext)))) {
+        boolean ok = true;
+        for (String n : noExt) {
+          ok = ok && !files[i].endsWith(n);
+        }
+        if (ok) {
+          FileInputStream fi = new FileInputStream(actualDir + files[i]);
+          BufferedInputStream origin = new BufferedInputStream(fi, BUFFER);
+          ZipEntry entry = new ZipEntry(statedDir + files[i]);
+          names.add(statedDir + files[i]);
+          out.putNextEntry(entry);
+          int count;
+          while ((count = origin.read(data, 0, BUFFER)) != -1) {
+            out.write(data, 0, count);
+          }
+          origin.close();
+        }
+      }
+    }
+  }
+
+	public void addFileSource(String path, String cnt, boolean omitIfExists) throws IOException  {
 		File tmp = Utilities.createTempFile("tmp", ".tmp");
 		TextFile.stringToFile(cnt, tmp.getAbsolutePath());
 		addFileName(path, tmp.getAbsolutePath(), omitIfExists);
 		tmp.delete();
 	}
 
-	public void addFileName(String statedPath, String actualPath, boolean omitIfExists) throws Exception {
+	public void addFileName(String statedPath, String actualPath, boolean omitIfExists) throws IOException  {
 	  if (!omitIfExists || !names.contains(statedPath)) {
 	    byte data[] = new byte[BUFFER];
 	    FileInputStream fi = new FileInputStream(actualPath);
@@ -157,7 +185,7 @@ public class ZipGenerator {
 	  }
 	}
 
-  public void addBytes(String statedPath, byte[] content, boolean omitIfExists) throws Exception {
+  public void addBytes(String statedPath, byte[] content, boolean omitIfExists) throws IOException  {
     if (!omitIfExists || !names.contains(statedPath)) {
       byte data[] = new byte[BUFFER];
       InputStream fi = new ByteArrayInputStream(content);
@@ -173,7 +201,7 @@ public class ZipGenerator {
     }
   }
 
-  public void addMimeTypeFile(String statedPath, String actualPath) throws Exception {
+  public void addMimeTypeFile(String statedPath, String actualPath) throws IOException  {
   //  byte data[] = new byte[BUFFER];
     CRC32 crc = new CRC32();
     
@@ -199,7 +227,7 @@ public class ZipGenerator {
     out.setLevel(Deflater.BEST_COMPRESSION);
   }
 
-  public void addStream(String statedPath, InputStream fi, boolean omitIfExists) throws Exception {
+  public void addStream(String statedPath, InputStream fi, boolean omitIfExists) throws IOException  {
     if (!omitIfExists || !names.contains(statedPath)) {
       byte data[] = new byte[BUFFER];
       BufferedInputStream origin = new BufferedInputStream(fi, BUFFER);

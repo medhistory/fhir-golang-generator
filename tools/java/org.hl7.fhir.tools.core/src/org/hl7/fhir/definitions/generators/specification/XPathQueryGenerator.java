@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.hl7.fhir.definitions.model.Definitions;
 import org.hl7.fhir.definitions.model.ElementDefn;
-import org.hl7.fhir.definitions.model.TypeRef;
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
 import org.hl7.fhir.tools.publisher.QaTracker;
 import org.hl7.fhir.utilities.Logger;
 import org.hl7.fhir.utilities.Utilities;
@@ -38,15 +38,14 @@ public class XPathQueryGenerator {
       String path[] = splitPath(ppath);
       if (path[path.length -1].endsWith("[x]")) {
         ElementDefn defn = definitions.getElementDefn(path[0]);
-        ElementDefn ed = defn.getElementForPath(ppath, definitions, "Search parameter xpath generation", true);
+        ElementDefn ed = defn.getElementForPath(ppath, definitions, "Search parameter xpath generation", true, false);
         for (TypeRef tr : ed.getTypes()) {
           buildPath(b, path, ed.getName().substring(0, ed.getName().length()-3)+Utilities.capitalize(tr.getName()));          
         }
       } else 
         buildPath(b, path, path[path.length-1]);
-      return b.toString();
     }
-    return null;
+    return b.toString();
   }
 
   private String[] splitPath(String ppath) {

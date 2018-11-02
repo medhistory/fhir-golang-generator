@@ -1,34 +1,6 @@
 package org.hl7.fhir.definitions.model;
-import org.hl7.fhir.instance.model.ImplementationGuide.ImplementationGuidePackageResourceComponent;
-/*
-Copyright (c) 2011+, HL7, Inc
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, 
-are permitted provided that the following conditions are met:
-
- * Redistributions of source code must retain the above copyright notice, this 
-   list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions and the following disclaimer in the documentation 
-   and/or other materials provided with the distribution.
- * Neither the name of HL7 nor the names of its contributors may be used to 
-   endorse or promote products derived from this software without specific 
-   prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-POSSIBILITY OF SUCH DAMAGE.
-
-*/
-import org.hl7.fhir.instance.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
+import org.hl7.fhir.r4.model.StructureDefinition;
 
 // publishing details about a profile + the profile
 public class ConstraintStructure {
@@ -39,24 +11,33 @@ public class ConstraintStructure {
   private ResourceDefn defn; // temporary, until we get around to building the resource 
   private ImplementationGuideDefn usage;
   private String owner; // id of the AP that owns this
-  private ImplementationGuidePackageResourceComponent resourceInfo;
+  private ImplementationGuideDefinitionResourceComponent resourceInfo;
+  private WorkGroup wg;
+  private String fmm;
+  private boolean experimental;
     
-  public ConstraintStructure(StructureDefinition resource, ImplementationGuideDefn usage) {
+  public ConstraintStructure(StructureDefinition resource, ImplementationGuideDefn usage, WorkGroup wg, String fmm, boolean experimental) {
     this.id = resource.getId();
     this.title = resource.getName();
     this.resource = resource;
     if (usage == null)
       throw new Error("No usage on profile on "+resource.getName());
     this.usage = usage;
+    this.wg = wg;
+    this.fmm = fmm;
+    this.experimental = experimental;
   }
 
-  public ConstraintStructure(String id, String title, ResourceDefn defn, ImplementationGuideDefn usage) {
+  public ConstraintStructure(String id, String title, ResourceDefn defn, ImplementationGuideDefn usage, WorkGroup wg, String fmm, boolean experimental) {
     this.id = id;
     this.title = title;
     this.defn = defn;
     this.usage = usage;
     if (usage == null)
       throw new Error("No usage on profile "+id+" ("+title+"):");
+    this.wg = wg;
+    this.fmm = fmm;
+    this.experimental = experimental;
   }
 
   public String getTitle() {
@@ -107,13 +88,29 @@ public class ConstraintStructure {
     this.owner = owner;
   }
 
-  public void setResourceInfo(ImplementationGuidePackageResourceComponent resourceInfo) {
+  public void setResourceInfo(ImplementationGuideDefinitionResourceComponent resourceInfo) {
     this.resourceInfo = resourceInfo;
     
   }
 
-  public ImplementationGuidePackageResourceComponent getResourceInfo() {
+  public ImplementationGuideDefinitionResourceComponent getResourceInfo() {
     return resourceInfo;
+  }
+
+  public WorkGroup getWg() {
+    return wg;
+  }
+
+  public void setWg(WorkGroup wg) {
+    this.wg = wg;
+  }
+
+  public String getFmm() {
+    return fmm;
+  }
+
+  public void setFmm(String fmm) {
+    this.fmm = fmm;
   }
 
   

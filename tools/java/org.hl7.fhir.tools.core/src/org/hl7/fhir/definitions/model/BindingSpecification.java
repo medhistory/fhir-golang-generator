@@ -31,15 +31,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.fhir.ucum.Utilities;
 import org.hl7.fhir.definitions.generators.specification.ToolResourceUtilities;
-import org.hl7.fhir.instance.model.Enumerations.BindingStrength;
-import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.instance.model.UriType;
-import org.hl7.fhir.instance.model.ValueSet;
-import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.instance.model.ValueSet.ConceptReferenceComponent;
-import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.instance.utils.ToolingExtensions;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r4.terminologies.CodeSystemUtilities;
+import org.hl7.fhir.r4.terminologies.ValueSetUtilities;
+import org.hl7.fhir.r4.utils.ToolingExtensions;
 
 /**
  * A concept domain - a use of terminology in FHIR.
@@ -53,13 +56,12 @@ import org.hl7.fhir.instance.utils.ToolingExtensions;
 public class BindingSpecification {
   
   public static final String DEFAULT_OID_CS = "2.16.840.1.113883.4.642.1.";
-  public static final String DEFAULT_OID_VS = "2.16.840.1.113883.4.642.2.";
+  public static final String DEFAULT_OID_VS = "2.16.840.1.113883.4.642.3.";
   
   public enum BindingMethod {
     Unbound,
     CodeList, 
     ValueSet,
-    Reference,
     Special
   }
   
@@ -86,11 +88,9 @@ public class BindingSpecification {
   private String description;
   private String reference;
   private ValueSet valueSet;
-  
-  
-  // to get rid of:
-  private String id; // to generate the OID
-  
+  private String maxReference;
+  private ValueSet maxValueSet;
+    
   // to move into valueset 
 	private String definition;
   private String uri; // used as the official value set identifier if provided, else one will be synthesized. For when code list is actually a value set defined elsewhere
@@ -101,7 +101,7 @@ public class BindingSpecification {
   private String csOid;
   private String vsOid;
 //  private List<DefinedCode> childCodes;
-  private ConformanceResourceStatus status;
+  private PublicationStatus status;
   private List<DefinedCode> allCodes;
   
 
@@ -121,13 +121,6 @@ public class BindingSpecification {
     return usageContext;
   }
 
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
 
   public String getName() {
     return name;
@@ -348,13 +341,15 @@ public class BindingSpecification {
 
   public void setVsOid(String vsOid) {
     this.vsOid = vsOid;
+    if (!Utilities.noString(vsOid) && valueSet != null) 
+      ValueSetUtilities.setOID(valueSet, vsOid);
   }
 
-  public ConformanceResourceStatus getStatus() {
+  public PublicationStatus getStatus() {
     return status;
   }
 
-  public void setStatus(ConformanceResourceStatus status) {
+  public void setStatus(PublicationStatus status) {
     this.status = status;
   }
 
@@ -365,43 +360,33 @@ public class BindingSpecification {
   public void setValueSet(ValueSet valueSet) {
     this.valueSet = valueSet;
     ToolResourceUtilities.updateUsage(valueSet, usageContext);
+    if (!Utilities.noString(vsOid)) 
+      ValueSetUtilities.setOID(valueSet, vsOid);
   }
 
-  public List<DefinedCode> getAllCodes(Map<String, ValueSet> codeSystems, Map<String, ValueSet> valueSets, boolean wantComplete) throws Exception {
+  public List<DefinedCode> getAllCodes(Map<String, CodeSystem> codeSystems, Map<String, ValueSet> valueSets, boolean wantComplete) throws Exception {
     if (allCodes == null || allCodes.size() == 0 || wantComplete) {
       allCodes = new ArrayList<DefinedCode>();
       if (valueSet != null) {
-        if (wantComplete)
-          valueSet.setUserData(ToolResourceUtilities.NAME_VS_USE_MARKER, true);
+        valueSet.setUserData(ToolResourceUtilities.NAME_VS_USE_MARKER, true);
         getAllCodesForValueSet(codeSystems, valueSets, wantComplete, valueSet);
       }   
     }
     return allCodes;
   }
 
-  private void getAllCodesForValueSet(Map<String, ValueSet> codeSystems, Map<String, ValueSet> valueSets, boolean wantComplete, ValueSet vs) throws Exception {
-    if (vs.hasCodeSystem()) 
-      for (ConceptDefinitionComponent c : vs.getCodeSystem().getConcept())
-        processCode(c, vs.getCodeSystem().getSystem(), null);
+  private void getAllCodesForValueSet(Map<String, CodeSystem> codeSystems, Map<String, ValueSet> valueSets, boolean wantComplete, ValueSet vs) throws Exception {
     if (vs.hasCompose()) {
-      for (UriType ci : vs.getCompose().getImport()) {
-        if (valueSets != null) {
-          ValueSet vs1 = valueSets.get(ci.getValue());
-          if (vs1 != null) {
-            getAllCodesForValueSet(codeSystems, valueSets, wantComplete, vs1);
-          } else if (wantComplete)
-            throw new Exception("Unable to resolve valueset "+ci.asStringValue());
-        } else if (wantComplete)
-          throw new Exception("Unable to expand value set "); 
-      }
       for (ConceptSetComponent cc : vs.getCompose().getInclude()) {
         if (cc.hasFilter() && wantComplete)
           throw new Exception("Filters are not supported in this context (getting all codes for code generation");
+        if (cc.hasValueSet() && wantComplete)
+          throw new Exception("Value Sets are not supported in this context (getting all codes for code generation");
         if (!cc.hasConcept()) {
           if (codeSystems != null) {
-            ValueSet vs1 = codeSystems.get(cc.getSystem());
-            if (vs1 != null) {
-              getAllCodesForValueSet(codeSystems, valueSets, wantComplete, vs1);
+            CodeSystem cs1 = codeSystems.get(cc.getSystem());
+            if (cs1 != null) {
+              getAllCodesForCodeSystem(cs1);
             } else if (wantComplete)
               throw new Exception("Unable to resolve code system "+cc.getSystem());
           } else if (wantComplete)
@@ -413,6 +398,11 @@ public class BindingSpecification {
     }
   }
 
+  private void getAllCodesForCodeSystem(CodeSystem cs) throws Exception {
+    for (ConceptDefinitionComponent c : cs.getConcept())
+      processCode(cs, c, cs.getUrl(), null);
+  }
+  
   private void processCode(ConceptReferenceComponent c, String system) {
     DefinedCode code = new DefinedCode();
     code.setCode(c.getCode());
@@ -421,22 +411,42 @@ public class BindingSpecification {
     allCodes.add(code);
   }
 
-  private void processCode(ConceptDefinitionComponent c, String system, String parent) {
+  private void processCode(CodeSystem cs, ConceptDefinitionComponent c, String system, String parent) {
     DefinedCode code = new DefinedCode();
     code.setCode(c.getCode());
     code.setDisplay(c.getDisplay());
-    code.setComment(ToolingExtensions.getComment(c));
+    code.setComment(ToolingExtensions.getCSComment(c));
     code.setDefinition(c.getDefinition());
     code.setParent(parent);
     code.setSystem(system);
+    code.setAbstract(CodeSystemUtilities.isNotSelectable(cs, c));
     allCodes.add(code);
     for (ConceptDefinitionComponent cc : c.getConcept())
-      processCode(cc, system, c.getCode());
+      processCode(cs, cc, system, c.getCode());
   }
 
   public boolean isShared() {
     return shared;
+  }
+
+  public String getMaxReference() {
+    return maxReference;
+  }
+
+  public void setMaxReference(String maxReference) {
+    this.maxReference = maxReference;
+  }
+
+  public ValueSet getMaxValueSet() {
+    return maxValueSet;
+  }
+
+  public void setMaxValueSet(ValueSet maxValueSet) {
+    this.maxValueSet = maxValueSet;
+  }
+
+  public boolean hasMax() {
+    return maxValueSet != null || maxReference != null;
   }  
-  
-  
+    
 }

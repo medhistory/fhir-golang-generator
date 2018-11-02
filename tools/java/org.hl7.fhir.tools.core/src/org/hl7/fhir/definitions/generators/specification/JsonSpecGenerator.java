@@ -12,18 +12,17 @@ import org.hl7.fhir.definitions.model.Definitions;
 import org.hl7.fhir.definitions.model.ElementDefn;
 import org.hl7.fhir.definitions.model.Invariant;
 import org.hl7.fhir.definitions.model.ProfiledType;
-import org.hl7.fhir.definitions.model.TypeRef;
-import org.hl7.fhir.instance.model.ElementDefinition;
-import org.hl7.fhir.instance.model.ElementDefinition.ElementDefinitionConstraintComponent;
-import org.hl7.fhir.instance.model.ElementDefinition.ElementDefinitionSlicingComponent;
-import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.instance.model.PrimitiveType;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.StructureDefinition;
-import org.hl7.fhir.instance.model.Type;
-import org.hl7.fhir.instance.model.UriType;
-import org.hl7.fhir.instance.model.ValueSet;
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionConstraintComponent;
+import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingComponent;
+import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent;
+import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.utils.TypesUtilities;
+import org.hl7.fhir.r4.utils.TypesUtilities.WildcardInformation;
 import org.hl7.fhir.tools.publisher.PageProcessor;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
@@ -50,7 +49,7 @@ public class JsonSpecGenerator extends OutputStreamWriter {
     if (bs == null)
       return "terminologies.html#unbound";
     if (bs.getValueSet() != null) 
-      return bs.getValueSet().getUserString("path");
+      return bs.getValueSet().hasUserData("external.url") ? bs.getValueSet().getUserString("external.url") : bs.getValueSet().getUserString("path");
     else if (!Utilities.noString(bs.getReference()))
       return bs.getReference();      
     else 
@@ -70,6 +69,43 @@ public class JsonSpecGenerator extends OutputStreamWriter {
   public void generateExtension(StructureDefinition ed) throws Exception {
     write("<pre class=\"spec\">\r\n");
 
+    generateExtensionInner(ed, true);
+
+    write("</pre>\r\n");
+    flush();
+    close();
+  }
+
+  private void generateExtensionInner(StructureDefinition ed, boolean extensionDefinition) throws IOException, Exception {
+    ElementDefinition root = ed.getSnapshot().getElement().get(0);
+    String rn = ed.getSnapshot().getElement().get(0).getIsModifier() ? "modifierExtension" : "extension";
+    write("{ // <span style=\"color: navy; opacity: 0.8\">" + Utilities.escapeXml(ed.getName()) + "</span>\r\n");
+    
+    List<ElementDefinition> children = getChildren(ed.getSnapshot().getElement(), ed.getSnapshot().getElement().get(0));
+    boolean complex = isComplex(children) && extensionDefinition;
+    if (!complex)
+      write("  // from Element: <a href=\""+prefix+"extensibility.html\">extension</a>\r\n");
+    
+    int c = 0;
+    int l = lastChild(children);
+    for (ElementDefinition child : children)
+      if (child.hasSlicing())
+        generateCoreElemSliced(ed.getSnapshot().getElement(), child, children, 2, rn, false, child.getType().get(0), ++c == l, complex);
+      else if (wasSliced(child, children))
+        ; // nothing
+      else if (child.getType().size() == 1)
+        generateCoreElem(ed.getSnapshot().getElement(), child, 2, rn, false, child.getType().get(0), ++c == l, complex);
+      else {
+        write("<span style=\"color: Gray\">// value[x]: <span style=\"color: navy; opacity: 0.8\">" +Utilities.escapeXml(child.getShort()) + "</span>. One of these "+Integer.toString(child.getType().size())+":</span>\r\n");
+        for (TypeRefComponent t : child.getType())
+          generateCoreElem(ed.getSnapshot().getElement(), child, 2, rn, false, t, ++c == l, false);
+      }
+    write("  }\r\n");
+  }
+
+  public void generate(StructureDefinition ed) throws Exception {
+    write("<pre class=\"spec\">\r\n");
+
     generateInner(ed, true);
 
     write("</pre>\r\n");
@@ -79,7 +115,7 @@ public class JsonSpecGenerator extends OutputStreamWriter {
 
   private void generateInner(StructureDefinition ed, boolean extensionDefinition) throws IOException, Exception {
     ElementDefinition root = ed.getSnapshot().getElement().get(0);
-    String rn = ed.getSnapshot().getElement().get(0).getIsModifier() ? "modifierExtension" : "extension";
+    String rn = ed.getSnapshot().getElement().get(0).getPath();
     write("{ // <span style=\"color: navy; opacity: 0.8\">" + Utilities.escapeXml(ed.getName()) + "</span>\r\n");
     
     List<ElementDefinition> children = getChildren(ed.getSnapshot().getElement(), ed.getSnapshot().getElement().get(0));
@@ -137,7 +173,7 @@ public class JsonSpecGenerator extends OutputStreamWriter {
 
     
     write("{<span style=\"float: right\"><a title=\"Documentation for this format\" href=\""+prefix+"json.html\"><img src=\""+prefix+"help.png\" alt=\"doco\"/></a></span>\r\n");
-    if (rn != null) {
+    if (definitions.hasResource(root.getName()) || Utilities.existsInList(root.getName(), "Parameters")) {
       write("  \"resourceType\" : \"");
       if (defPage == null)
         write("<span title=\"" + Utilities.escapeXml(root.getDefinition())
@@ -151,7 +187,7 @@ public class JsonSpecGenerator extends OutputStreamWriter {
         write("</b></span>\",\r\n");
       else
         write("</b></a>\",\r\n");
-    }
+    } 
 
     if ((root.getName().equals(rn) || "[name]".equals(rn)) && resource) {
       if (!Utilities.noString(root.typeCode())) {
@@ -160,7 +196,10 @@ public class JsonSpecGenerator extends OutputStreamWriter {
           write("  // from <a href=\""+prefix+"domainresource.html\">DomainResource</a>: <a href=\""+prefix+"narrative.html#Narrative\">text</a>, <a href=\""+prefix+"references.html#contained\">contained</a>, <a href=\""+prefix+"extensibility.html\">extension</a>, and <a href=\""+prefix+"extensibility.html#modifierExtension\">modifierExtension</a>\r\n");
       }
     } else if (!resource) {
-      write("  // from Element: <a href=\""+prefix+"extensibility.html\">extension</a>\r\n");
+      if (root.typeCode().equals("BackboneElement"))
+        write("  // from BackboneElement: <a href=\""+prefix+"extensibility.html\">extension</a>, <a href=\""+prefix+"extensibility.html\">modifierExtension</a>\r\n");
+      else
+        write("  // from Element: <a href=\""+prefix+"extensibility.html\">extension</a>\r\n");
     }
 //    if (root.getName().equals("Extension")) {
 //      ElementDefn urld = root.getElements().get(0);
@@ -215,14 +254,20 @@ public class JsonSpecGenerator extends OutputStreamWriter {
         for (TypeRef t : elem.getTypes())
           generateCoreElemDetails(elem, indent, rootName, pathName, backbone, last, width, en.replace("[x]", nameForType(t.getName())), t, false);
       } else {
-        List<TypeRef> tr = getWildcardTypes();
+        List<WildcardInformation> tr = TypesUtilities.wildcards();
         write("<span style=\"color: Gray\">// "+en+": <span style=\"color: navy; opacity: 0.8\">" + docPrefix(width, indent, elem)+Utilities.escapeXml(elem.getShortDefn()) + "</span>. One of these "+Integer.toString(tr.size())+":</span>\r\n");
-        for (TypeRef t : tr)
-          generateCoreElemDetails(elem, indent, rootName, pathName, backbone, last, width, en.replace("[x]", upFirst(t.getName())), t, false);	      
+        for (WildcardInformation t : tr)
+          generateCoreElemDetails(elem, indent, rootName, pathName, backbone, last, width, en.replace("[x]", upFirst(t.getTypeName())), toTypeRef(t), false);	      
       }
     } else {
       generateCoreElemDetails(elem, indent, rootName, pathName, backbone, last, width, en, elem.getTypes().isEmpty() ? null : elem.getTypes().get(0), true);
     }
+  }
+
+  private TypeRef toTypeRef(WildcardInformation t) {
+    TypeRef r = new TypeRef();
+    r.setName(t.getTypeName());
+    return r;
   }
 
   private CharSequence nameForType(String type) {
@@ -230,34 +275,6 @@ public class JsonSpecGenerator extends OutputStreamWriter {
       return definitions.getConstraints().get(type).getBaseType();
     else 
       return Utilities.capitalize(type);
-  }
-
-  private List<TypeRef> getWildcardTypes() {
-    List<TypeRef> tr = new ArrayList<TypeRef>();
-    tr.add(new TypeRef().setName("integer"));
-    tr.add(new TypeRef().setName("decimal"));
-    tr.add(new TypeRef().setName("dateTime"));
-    tr.add(new TypeRef().setName("date"));
-    tr.add(new TypeRef().setName("instant"));
-    tr.add(new TypeRef().setName("string"));
-    tr.add(new TypeRef().setName("uri"));
-    tr.add(new TypeRef().setName("boolean"));
-    tr.add(new TypeRef().setName("code"));
-    tr.add(new TypeRef().setName("base64Binary"));
-    tr.add(new TypeRef().setName("Coding"));
-    tr.add(new TypeRef().setName("CodeableConcept"));
-    tr.add(new TypeRef().setName("Attachment"));
-    tr.add(new TypeRef().setName("Identifier"));
-    tr.add(new TypeRef().setName("Quantity"));
-    tr.add(new TypeRef().setName("Range"));
-    tr.add(new TypeRef().setName("Period"));
-    tr.add(new TypeRef().setName("Ratio"));
-    tr.add(new TypeRef().setName("HumanName"));
-    tr.add(new TypeRef().setName("Address"));
-    tr.add(new TypeRef().setName("ContactPoint"));
-    tr.add(new TypeRef().setName("Schedule"));
-    tr.add(new TypeRef().setName("Reference"));
-    return tr;
   }
 
   private void generateCoreElemDetails(ElementDefn elem, int indent, String rootName, String pathName, boolean backbone, boolean last, int width, String en, TypeRef type, boolean doco) throws Exception {
@@ -313,7 +330,7 @@ public class JsonSpecGenerator extends OutputStreamWriter {
     } else if (type.isXhtml()) {
       // element contains xhtml
       write("\"(Escaped XHTML)\"");
-    } else if (definitions.getPrimitives().containsKey(type.getName())) {
+    } else if (definitions.getPrimitives().containsKey(type.getName()) && !type.hasParams()) {
       if (!(type.getName().equals("integer") || type.getName().equals("boolean") || type.getName().equals("decimal")))
         write("\"");
       write("&lt;<span style=\"color: darkgreen\"><a href=\"" + prefix+(dtRoot + definitions.getSrcFile(type.getName())+ ".html#" + type.getName()) + "\">" + type.getName()+ "</a></span>&gt;");
@@ -382,22 +399,21 @@ public class JsonSpecGenerator extends OutputStreamWriter {
       en = en.replace("[x]", upFirst(type.getCode()));
     boolean unbounded = elem.hasMax() && elem.getMax().equals("*");
 
-    if (!unbounded)
-      throw new Exception("slicing on non-lists not supported yet");
-    
     String indentS = "";
     for (int i = 0; i < indent; i++) {
       indentS += "  ";
     }
     write(indentS);
+    List<ElementDefinition> slices = getSlices(elem, children);
+    boolean hasContent = slices.size() > 0;
+    
     write("\"<a href=\"" + (defPage + "#" + pathName + "." + en)+ "\" title=\"" + Utilities .escapeXml(getEnhancedDefinition(elem)) 
     + "\" class=\"dict\"><span style=\"text-decoration: underline\">"+en+"</span></a>\" : ");
-    write("[ // <span style=\"color: navy\">"+describeSlicing(elem.getSlicing())+"</span>");
+    write("[ // <span style=\"color: navy\">"+describeSlicing(elem.getSlicing())+"</span> "+(hasContent ? "" : "]"));
 //    write(" <span style=\"color: Gray\">//</span>");
 //    writeCardinality(elem);
     write("\r\n");
     
-    List<ElementDefinition> slices = getSlices(elem, children);
     int c = 0;
     for (ElementDefinition slice : slices) {
       write(indentS+"  ");
@@ -435,11 +451,13 @@ public class JsonSpecGenerator extends OutputStreamWriter {
         write("  },\r\n");
 
     }
-    write(indentS);
-    if (last)
-      write("]\r\n");
-    else
-      write("],\r\n");
+    if (hasContent) {
+      write(indentS);
+      if (last)
+        write("]\r\n");
+      else
+        write("],\r\n");
+    }
   }
 
   private int lastChild(List<ElementDefinition> extchildren) {
@@ -460,10 +478,10 @@ public class JsonSpecGenerator extends OutputStreamWriter {
 
   private String describeSlicing(ElementDefinitionSlicingComponent slicing) {
     CommaSeparatedStringBuilder csv = new CommaSeparatedStringBuilder();
-    for (StringType d : slicing.getDiscriminator()) {
-      csv.append(d.getValue());
+    for (ElementDefinitionSlicingDiscriminatorComponent d : slicing.getDiscriminator()) {
+      csv.append(d.getType().toCode()+":"+d.getPath());
     }
-    String s = slicing.getOrdered() ? " in any order" : " in the specified order" + slicing.getRules().getDisplay();
+    String s = slicing.getOrdered() ? " in any order, " : " in the specified order, " + (slicing.hasRules() ? slicing.getRules().getDisplay() : "");
     return " sliced by "+csv.toString()+" "+s;
   }
 
@@ -530,6 +548,18 @@ public class JsonSpecGenerator extends OutputStreamWriter {
         } else
           write("("+type.getProfile()+")");
       }
+      if (type.hasTargetProfile()) {
+        if (type.getTargetProfile().get(0).getValue().startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+          String t = type.getTargetProfile().get(0).getValue().substring(40);
+          if (definitions.hasType(t))
+            write("(<span style=\"color: darkgreen\"><a href=\"" + prefix+(dtRoot + definitions.getSrcFile(t)+ ".html#" + t) + "\">" + t+ "</a></span>)");
+          else if (definitions.hasResource(t))
+            write("(<span style=\"color: darkgreen\"><a href=\"" + prefix+dtRoot + t.toLowerCase()+ ".html\">" + t+ "</a></span>)");
+          else
+            write("("+t+")");
+        } else
+          write("("+type.getTargetProfile()+")");
+      }
       write(" }");
     } 
 
@@ -550,11 +580,9 @@ public class JsonSpecGenerator extends OutputStreamWriter {
       if (elem.hasBinding() && elem.getBinding().hasValueSet()) {
         ValueSet vs = resolveValueSet(elem.getBinding().getValueSet());
         if (vs != null)
-          write("<span style=\"color: navy; opacity: 0.8\"><a href=\""+prefix+vs.getUserData("filename")+".html\" style=\"color: navy\">" + Utilities.escapeXml(elem.getShort()) + "</a></span>");
-        else if (elem.getBinding().getValueSet() instanceof UriType)
-          write("<span style=\"color: navy; opacity: 0.8\"><a href=\""+((UriType)elem.getBinding().getValueSet()).getValue()+".html\" style=\"color: navy\">" + Utilities.escapeXml(elem.getShort()) + "</a></span>");          
+          write("<span style=\"color: navy; opacity: 0.8\"><a href=\""+prefix+vs.getUserData("path")+"\" style=\"color: navy\">" + Utilities.escapeXml(elem.getShort()) + "</a></span>");
         else
-          write("<span style=\"color: navy; opacity: 0.8\"><a href=\""+((Reference)elem.getBinding().getValueSet()).getReference()+".html\" style=\"color: navy\">" + Utilities.escapeXml(elem.getShort()) + "</a></span>");          
+          write("<span style=\"color: navy; opacity: 0.8\"><a href=\""+elem.getBinding().getValueSet()+".html\" style=\"color: navy\">" + Utilities.escapeXml(elem.getShort()) + "</a></span>");          
       } else
         write("<span style=\"color: navy; opacity: 0.8\">" + Utilities.escapeXml(elem.getShort()) + "</span>");
     }
@@ -578,24 +606,8 @@ public class JsonSpecGenerator extends OutputStreamWriter {
     }
   }
 
-  private ValueSet resolveValueSet(Type reference) {
-    //            else if (bs.getReference().startsWith("http://hl7.org/fhir")) {
-    //              if (bs.getReference().startsWith("http://hl7.org/fhir/v3/vs/")) {
-    //                AtomEntry<ValueSet> vs = page.getValueSets().get(bs.getReference()); // night be null in a partial build
-    //                write("<a href=\""+(vs == null ? "??" : vs.getLinks().get("path").replace(File.separatorChar, '/'))+"\" style=\"color: navy; opacity: 0.8\">" + Utilities.escapeXml(elem.getShortDefn()) + "</a>");
-    //              } else if (bs.getReference().startsWith("http://hl7.org/fhir/v2/vs/")) {
-    //                  AtomEntry<ValueSet> vs = page.getValueSets().get(bs.getReference());
-    //                  write("<a href=\""+(vs == null ? "??" : vs.getLinks().get("path").replace(File.separatorChar, '/'))+"\" style=\"color: navy; opacity: 0.8\">" + Utilities.escapeXml(elem.getShortDefn())+ "</a>");
-    //              } else if (bs.getReference().startsWith("http://hl7.org/fhir/vs/")) {
-    //                BindingSpecification bs1 = page.getDefinitions().getBindingByReference("#"+bs.getReference().substring(23), bs);
-    //                if (bs1 != null)
-    //                  write("<a href=\""+bs.getReference().substring(23)+".html\" style=\"color: navy; opacity: 0.8\">" + Utilities.escapeXml(elem.getShortDefn()) + "</a>");
-    //                else
-    //                  write("<a href=\"valueset-"+bs.getReference().substring(23)+".html\" style=\"color: navy; opacity: 0.8\">" + Utilities.escapeXml(elem.getShortDefn()) + "</a>");
-    //              } else
-    //                throw new Exception("Internal reference "+bs.getReference()+" not handled yet");
-    // TODO Auto-generated method stub
-    return null;
+  private ValueSet resolveValueSet(String reference) {
+    return page.getValueSets().get(reference);
   }
 
   private String tail(String path) {
@@ -712,7 +724,7 @@ public class JsonSpecGenerator extends OutputStreamWriter {
           if (p.equals("Any")) {
             write("<a href=\"" + prefix+"resourcelist.html" + "\">" + p + "</a>");								
           }
-          else if (t.getName().equals("Reference") && t.getParams().size() == 1 && !Utilities.noString(t.getProfile()))
+          else if (isReference(t.getName()) && t.getParams().size() == 1 && !Utilities.noString(t.getProfile()))
             write("<a href=\""+prefix+t.getProfile()+"\"><span style=\"color: DarkViolet\">@"+t.getProfile().substring(1)+"</span></a>");     
           else
             write("<a href=\"" + prefix+(dtRoot + definitions.getSrcFile(p)
@@ -728,6 +740,10 @@ public class JsonSpecGenerator extends OutputStreamWriter {
     //}
     write("</span>");
     return w;
+  }
+
+  private boolean isReference(String name) {
+    return name.equals("Reference") || name.equals("canonical") ;
   }
 
     /*

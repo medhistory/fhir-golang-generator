@@ -4,27 +4,27 @@ package org.hl7.fhir.definitions.parsers;
  Copyright (c) 2011+, HL7, Inc
  All rights reserved.
 
- Redistribution and use in source and binary forms, with or without modification, 
+ Redistribution and use in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
 
- * Redistributions of source code must retain the above copyright notice, this 
+ * Redistributions of source code must retain the above copyright notice, this
  list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice, 
- this list of conditions and the following disclaimer in the documentation 
+ * Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation
  and/or other materials provided with the distribution.
- * Neither the name of HL7 nor the names of its contributors may be used to 
- endorse or promote products derived from this software without specific 
+ * Neither the name of HL7 nor the names of its contributors may be used to
+ endorse or promote products derived from this software without specific
  prior written permission.
 
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
- IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
- INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
- NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
  */
@@ -32,21 +32,13 @@ package org.hl7.fhir.definitions.parsers;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.definitions.generators.specification.ProfileGenerator;
@@ -54,6 +46,7 @@ import org.hl7.fhir.definitions.generators.specification.ToolResourceUtilities;
 import org.hl7.fhir.definitions.generators.specification.XPathQueryGenerator;
 import org.hl7.fhir.definitions.model.BindingSpecification;
 import org.hl7.fhir.definitions.model.BindingSpecification.BindingMethod;
+import org.hl7.fhir.definitions.model.CommonSearchParameter;
 import org.hl7.fhir.definitions.model.ConstraintStructure;
 import org.hl7.fhir.definitions.model.DefinedCode;
 import org.hl7.fhir.definitions.model.Definitions;
@@ -66,7 +59,6 @@ import org.hl7.fhir.definitions.model.Example.ExampleType;
 import org.hl7.fhir.definitions.model.ImplementationGuideDefn;
 import org.hl7.fhir.definitions.model.Invariant;
 import org.hl7.fhir.definitions.model.LogicalModel;
-import org.hl7.fhir.definitions.model.MappingSpace;
 import org.hl7.fhir.definitions.model.Operation;
 import org.hl7.fhir.definitions.model.Operation.OperationExample;
 import org.hl7.fhir.definitions.model.OperationParameter;
@@ -74,70 +66,81 @@ import org.hl7.fhir.definitions.model.Profile;
 import org.hl7.fhir.definitions.model.Profile.ConformancePackageSourceType;
 import org.hl7.fhir.definitions.model.ResourceDefn;
 import org.hl7.fhir.definitions.model.SearchParameterDefn;
+import org.hl7.fhir.definitions.model.SearchParameterDefn.CompositeDefinition;
 import org.hl7.fhir.definitions.model.SearchParameterDefn.SearchType;
 import org.hl7.fhir.definitions.model.TypeDefn;
-import org.hl7.fhir.definitions.model.TypeRef;
 import org.hl7.fhir.definitions.model.W5Entry;
-import org.hl7.fhir.instance.formats.FormatUtilities;
-import org.hl7.fhir.instance.formats.IParser;
-import org.hl7.fhir.instance.formats.JsonParser;
-import org.hl7.fhir.instance.formats.XmlParser;
-import org.hl7.fhir.instance.model.Base64BinaryType;
-import org.hl7.fhir.instance.model.BooleanType;
-import org.hl7.fhir.instance.model.CodeType;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Constants;
-import org.hl7.fhir.instance.model.ContactPoint.ContactPointSystem;
-import org.hl7.fhir.instance.model.DateTimeType;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.DecimalType;
-import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.instance.model.Enumerations.SearchParamType;
-import org.hl7.fhir.instance.model.Factory;
-import org.hl7.fhir.instance.model.IdType;
-import org.hl7.fhir.instance.model.Identifier;
-import org.hl7.fhir.instance.model.InstantType;
-import org.hl7.fhir.instance.model.IntegerType;
-import org.hl7.fhir.instance.model.OidType;
-import org.hl7.fhir.instance.model.Period;
-import org.hl7.fhir.instance.model.PositiveIntType;
-import org.hl7.fhir.instance.model.Quantity;
-import org.hl7.fhir.instance.model.Quantity.QuantityComparator;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.SearchParameter;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.StructureDefinition;
-import org.hl7.fhir.instance.model.StructureDefinition.ExtensionContext;
-import org.hl7.fhir.instance.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.instance.model.TimeType;
-import org.hl7.fhir.instance.model.Type;
-import org.hl7.fhir.instance.model.UnsignedIntType;
-import org.hl7.fhir.instance.model.UriType;
-import org.hl7.fhir.instance.model.UuidType;
-import org.hl7.fhir.instance.model.ValueSet;
-import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetContactComponent;
-import org.hl7.fhir.instance.terminologies.ValueSetUtilities;
-import org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult;
-import org.hl7.fhir.instance.utils.ProfileUtilities;
-import org.hl7.fhir.instance.utils.ProfileUtilities.ProfileKnowledgeProvider;
-import org.hl7.fhir.instance.utils.ToolingExtensions;
-import org.hl7.fhir.instance.validation.ValidationMessage;
+import org.hl7.fhir.definitions.model.WorkGroup;
+import org.hl7.fhir.definitions.validation.ExtensionDefinitionValidator;
+import org.hl7.fhir.definitions.validation.FHIRPathUsage;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.igtools.spreadsheets.CodeSystemConvertor;
+import org.hl7.fhir.igtools.spreadsheets.MappingSpace;
+import org.hl7.fhir.igtools.spreadsheets.TypeParser;
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
+import org.hl7.fhir.r4.conformance.ProfileUtilities;
+import org.hl7.fhir.r4.conformance.ProfileUtilities.ProfileKnowledgeProvider;
+import org.hl7.fhir.r4.formats.FormatUtilities;
+import org.hl7.fhir.r4.formats.IParser;
+import org.hl7.fhir.r4.formats.IParser.OutputStyle;
+import org.hl7.fhir.r4.formats.JsonParser;
+import org.hl7.fhir.r4.formats.XmlParser;
+import org.hl7.fhir.r4.model.Base64BinaryType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Constants;
+import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Factory;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.OidType;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.PositiveIntType;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Quantity.QuantityComparator;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition.ExtensionContextType;
+import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionContextComponent;
+import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
+import org.hl7.fhir.r4.model.TimeType;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.UrlType;
+import org.hl7.fhir.r4.model.UuidType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.terminologies.CodeSystemUtilities;
+import org.hl7.fhir.r4.terminologies.ValueSetUtilities;
+import org.hl7.fhir.r4.utils.ToolingExtensions;
+import org.hl7.fhir.tools.converters.MarkDownPreProcessor;
 import org.hl7.fhir.tools.publisher.BuildWorkerContext;
 import org.hl7.fhir.utilities.CSFile;
 import org.hl7.fhir.utilities.CSFileInputStream;
 import org.hl7.fhir.utilities.IniFile;
 import org.hl7.fhir.utilities.Logger;
-import org.hl7.fhir.utilities.Logger.LogMessageType;
+import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.XLSXmlParser;
-import org.hl7.fhir.utilities.XLSXmlParser.Sheet;
-import org.hl7.fhir.utilities.xml.XMLUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.xls.XLSXmlNormaliser;
+import org.hl7.fhir.utilities.xls.XLSXmlParser;
+import org.hl7.fhir.utilities.xls.XLSXmlParser.Sheet;
 
 import com.trilead.ssh2.crypto.Base64;
 
@@ -155,29 +158,36 @@ public class SpreadsheetParser {
 	private String folder;
 	private Logger log;
 	private String sheetname;
-	private BindingNameRegistry registry;
+	private OIDRegistry registry;
   private String dataTypesFolder;
-  private String version; 
+  private FHIRVersion version;
   private BuildWorkerContext context;
   private Calendar genDate;
   private boolean isAbstract;
-  private Map<String, BindingSpecification> bindings = new HashMap<String, BindingSpecification>(); 
-  private Map<String, StructureDefinition> extensionDefinitions = new HashMap<String, StructureDefinition>();
+  private Map<String, BindingSpecification> bindings = new HashMap<String, BindingSpecification>();
   private ProfileKnowledgeProvider pkp;
   private ImplementationGuideDefn ig;
   private String txFolder;
   private boolean isLogicalModel;
   private IniFile ini;
-  private String committee;
-  private TabDelimitedSpreadSheet tabfmt;
+  private WorkGroup committee;
   private Map<String, ConstraintStructure> profileIds;
   private List<ValueSet> valuesets = new ArrayList<ValueSet>();
+  private List<FHIRPathUsage> fpUsages;
+  private Map<String, CodeSystem> codeSystems;
+  private Map<String, ConceptMap> maps;
+  private Map<String, WorkGroup> workgroups;  
+  private ResourceDefn template;
+  private String templateTitle;
+  private List<String> errors = new ArrayList<String>();
   
-	public SpreadsheetParser(String usageContext, InputStream in, String name,	Definitions definitions, String root, Logger log, BindingNameRegistry registry, String version, BuildWorkerContext context, Calendar genDate, boolean isAbstract, Map<String, StructureDefinition> extensionDefinitions, ProfileKnowledgeProvider pkp, boolean isType, IniFile ini, String committee, Map<String, ConstraintStructure> profileIds) throws Exception {
+	public SpreadsheetParser(String usageContext, InputStream in, String name, String filename, Definitions definitions, String root, Logger log, OIDRegistry registry, FHIRVersion version, BuildWorkerContext context, Calendar genDate, boolean isAbstract, ProfileKnowledgeProvider pkp, boolean isType, IniFile ini, WorkGroup committee, Map<String, ConstraintStructure> profileIds, List<FHIRPathUsage> fpUsages, Map<String, ConceptMap> maps, boolean exceptionIfExcelNotNormalised) throws Exception {
 	  this.usageContext = usageContext;
 		this.name = name;
-  	xls = new XLSXmlParser(in, name);	
+  	xls = new XLSXmlParser(in, filename);
+    new XLSXmlNormaliser(filename, exceptionIfExcelNotNormalised).go();
 		this.definitions = definitions;
+		this.workgroups = definitions.getWorkgroups();
 		this.mappings = definitions.getMapTypes();
 		if (name.indexOf('-') > 0)
 			title = name.substring(0, name.indexOf('-'));
@@ -194,20 +204,23 @@ public class SpreadsheetParser {
 		this.context = context;
 		this.genDate = genDate;
 		this.isAbstract = isAbstract;
-		this.extensionDefinitions = extensionDefinitions;
 		this.pkp = pkp;
 		this.ini = ini;
 		this.committee = committee;
-		tabfmt = new TabDelimitedSpreadSheet();
-		tabfmt.setFileName(((CSFileInputStream) in).getPath(), Utilities.changeFileExt(((CSFileInputStream) in).getPath(), ".sheet.txt"));
+		this.fpUsages = fpUsages;
 		this.profileIds = profileIds;
+		this.codeSystems = definitions.getCodeSystems();
+		this.maps = maps;
 	}
 
-  public SpreadsheetParser(String usageContext, InputStream in, String name,  ImplementationGuideDefn ig, String root, Logger log, BindingNameRegistry registry, String version, BuildWorkerContext context, Calendar genDate, boolean isAbstract, Map<String, StructureDefinition> extensionDefinitions, ProfileKnowledgeProvider pkp, boolean isType, String committee, Map<String, MappingSpace> mappings, Map<String, ConstraintStructure> profileIds) throws Exception {
+  public SpreadsheetParser(String usageContext, InputStream in, String name, String filename, ImplementationGuideDefn ig, String root, Logger log, OIDRegistry registry, FHIRVersion version, BuildWorkerContext context, Calendar genDate, boolean isAbstract, ProfileKnowledgeProvider pkp, boolean isType, WorkGroup committee, Map<String, MappingSpace> mappings, Map<String, ConstraintStructure> profileIds, Map<String, CodeSystem> codeSystems, Map<String, ConceptMap> maps, Map<String, WorkGroup> workgroups, boolean exceptionIfExcelNotNormalised) throws Exception {
     this.usageContext = usageContext;
     this.name = name;
-    xls = new XLSXmlParser(in, name); 
+    this.registry = registry;
+    xls = new XLSXmlParser(in, filename);
+    new XLSXmlNormaliser(filename, exceptionIfExcelNotNormalised).go();
     this.definitions = null;
+    this.workgroups = workgroups;
     this.mappings = mappings;
     this.ig = ig;
     if (name.indexOf('-') > 0)
@@ -225,18 +238,17 @@ public class SpreadsheetParser {
     this.context = context;
     this.genDate = genDate;
     this.isAbstract = isAbstract;
-    this.extensionDefinitions = extensionDefinitions;
     this.pkp = pkp;
     this.committee = committee;
-    this.tabfmt = new TabDelimitedSpreadSheet(); 
-    tabfmt.setFileName(((CSFileInputStream) in).getPath(), Utilities.changeFileExt(((CSFileInputStream) in).getPath(), ".sheet.txt"));
     this.profileIds = profileIds;
+    this.codeSystems = codeSystems;
+    this.maps = maps;
   }
 
 
 	public TypeDefn parseCompositeType() throws Exception {
 		isProfile = false;
-		return parseCommonTypeColumns().getRoot();
+		return parseCommonTypeColumns(false).getRoot();
 	}
 
 	private Sheet loadSheet(String name) {
@@ -253,31 +265,43 @@ public class SpreadsheetParser {
     else
       return "inv";
   }
-	
-	private ResourceDefn parseCommonTypeColumns() throws Exception {
+
+	private ResourceDefn parseCommonTypeColumns(boolean isResource) throws Exception {
 		ResourceDefn resource = new ResourceDefn();
-		
+
 		Sheet sheet = loadSheet("Bindings");
 		if (sheet != null)
 			readBindings(sheet);
-			
+
 		sheet = loadSheet("Invariants");
 		Map<String,Invariant> invariants = null;
 		if (sheet != null)
 			invariants = readInvariants(sheet, title, "Invariants");
-		
+
 		sheet = loadSheet("Data Elements");
 		if (sheet == null)
 		  throw new Exception("No Sheet found for Data Elements");
-    tabfmt.sheet("Data Elements");
 		for (int row = 0; row < sheet.rows.size(); row++) {
 		  processLine(resource, sheet, row, invariants, false, null, row == 0);
+		}
+    StandardsStatus ss = StandardsStatus.TRIAL_USE; // default...
+    String s = ini.getStringProperty("normative", resource.getName());
+    if (!Utilities.noString(s))
+      ss = StandardsStatus.NORMATIVE;
+    resource.setStatus(ss);
+		
+		resource.addHints(checkIgnoredColumns(sheet));
+		if (template != null) {
+		  resource.setTemplate(template.getRoot());
+		  copySearchParameters(resource);
+		  copyInvariants(resource);
+		  template = null;
 		}
     parseMetadata(resource);
 
 		if (invariants != null) {
 		  for (Invariant inv : invariants.values()) {
-		    if (Utilities.noString(inv.getContext())) 
+		    if (Utilities.noString(inv.getContext()))
 		      throw new Exception("Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" has no context");
 		    else {
 		      ElementDefn ed = findContext(resource.getRoot(), inv.getContext(), "Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" Context");
@@ -289,33 +313,86 @@ public class SpreadsheetParser {
           }
 		      else if (inv.getXpath().contains("\""))
 		        throw new Exception("Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" ("+inv.getEnglish()+") contains a \" character");
+          if (Utilities.noString(inv.getExpression())) {
+				// This has been disabled for now, per Lloyd McKenzie's request via Skype - jamesagnew
+            //throw new Exception("Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" ("+inv.getEnglish()+") has no Expression statement (in FHIRPath format)");
+          } else {
+            fpUsages.add(new FHIRPathUsage(inv.getContext(), isResource ? resource.getName() : "DomainResource", inv.getContext(), null, inv.getExpression(), inv.getXpath()));
+          }
 		    }
 		  }
 		}
-		
+
 		//TODO: Will fail if type has no root. - GG: so? when could that be
 		// EK: Future types. But those won't get there.
 		if( bindings != null)
 			resource.getRoot().getNestedBindings().putAll(bindings);
-		
-		scanNestedTypes(resource, resource.getRoot(), resource.getName());
-    tabfmt.close();
+
+    scanNestedTypes(resource, resource.getRoot(), resource.getName());
+    resolveElementReferences(resource, resource.getRoot());
 
 		return resource;
 	}
-	
-	
-	private void parseMetadata(ResourceDefn resource) throws Exception {
+
+
+	private List<String> checkIgnoredColumns(Sheet sheet) {
+	  List<String> res = new ArrayList<String>();
+    for (String col : sheet.columns) {
+      if (!hasMappingColumn(col) &&  sheet.hasColumnContent(col)) {
+        // its a column we ignored...
+        if (col.toLowerCase().contains("mapping") && !Utilities.existsInList(col, "??? Mapping", "OpenEHR Mapping", "RIM Mapping (old)", "Notes on mapping")) {
+//          System.out.println("Ignored Column "+col+" in sheet "+sheet.title+" in "+name);  
+          res.add("Ignored Column "+col+" in sheet "+sheet.title+" in "+name);
+        }
+      }
+    }
+    return res;
+  }
+
+  private boolean hasMappingColumn(String col) {
+    for (String n : mappings.keySet()) {
+      if (col.equals(mappings.get(n).getColumnName()))
+        return true;
+    }
+    return false;
+  }
+
+  private void copySearchParameters(ResourceDefn resource) {
+    for (SearchParameterDefn sps : template.getSearchParams().values()) {
+      if (sps.getPaths().size() == 0  || hasPath(resource, sps.getPaths().get(0))) {
+        SearchParameterDefn spt = new SearchParameterDefn(sps, template.getName(), resource.getName(), templateTitle, resource.getName(), resource.getStatus());
+        resource.getSearchParams().put(spt.getCode(), spt);
+      }
+    }
+  }
+
+  private void copyInvariants(ResourceDefn resource) {
+    String abb = ini.getStringProperty("tla", resource.getName());
+    if (abb == null)
+      abb = ini.getStringProperty("tla", resource.getName().toLowerCase());
+    for (String n : template.getRoot().getInvariants().keySet()) {
+      Invariant inv = template.getRoot().getInvariants().get(n);
+      resource.getRoot().getInvariants().put(n.replace("inv", abb), new Invariant(inv, template.getName(), resource.getName(), templateTitle, abb));
+    }
+  }
+
+  private boolean hasPath(ResourceDefn resource, String path) {
+    String[] nodes = path.split("\\.");
+    String tail = nodes[1];
+    for (ElementDefn element : resource.getRoot().getElements()) {
+      if (element.getName().equals(tail))
+        return true;
+    }
+    return false;
+  }
+
+  private void parseMetadata(ResourceDefn resource) throws Exception {
     Sheet sheet = loadSheet("Instructions");
-    
+
     if (sheet != null) {
       for (int row = 0; row < sheet.rows.size(); row++) {
         if (sheet.rows.get(row).size() >= 2 && "entered-in-error-status".equals(sheet.rows.get(row).get(0)))
           resource.setEnteredInErrorStatus(sheet.rows.get(row).get(1));
-        if (sheet.rows.get(row).size() >= 2 && "fmm".equals(sheet.rows.get(row).get(0)))
-          resource.setFmmLevel(sheet.rows.get(row).get(1));
-        if (sheet.rows.get(row).size() >= 2 && "fmm-no-warnings".equals(sheet.rows.get(row).get(0)))
-          resource.setFmmLevelNoWarnings(sheet.rows.get(row).get(1));
         if (sheet.rows.get(row).size() >= 2 && "proposed-order".equals(sheet.rows.get(row).get(0)))
           resource.setProposedOrder(sheet.rows.get(row).get(1));
       }
@@ -328,59 +405,57 @@ public class SpreadsheetParser {
 		for( ElementDefn element : root.getElements() )
 		{
 			if( element.hasNestedElements() )
-			{	
+			{
 				String nestedTypeName;
-				
+
 				ElementDefn newCompositeType = new ElementDefn();
-		
+
 				// If user has given an explicit name, use it, otherwise  automatically
 				// generated name for this nested type
-				if( element.typeCode().startsWith("=") ) 
+				if( element.typeCode().startsWith("=") )
 				{
 				  if (isProfile)
 				    throw new Exception("Cannot use '=' types in profiles on "+parentName);
-				  
+
 				  element.setStatedType(element.typeCode().substring(1));
 					nestedTypeName = element.typeCode().substring(1);
-				} 
-				else 
+				}
+				else
 				{
 					nestedTypeName = parentName + Utilities.capitalize(element.getName());
 				}
-			
+
 		    newCompositeType.setAnonymousTypedGroup(true);
-		    
+
 				// Add Component to the actually generated name to avoid
 				// confusing between the element name and the element's type
 				newCompositeType.setName(nestedTypeName+"Component");
 				newCompositeType.setDefinition("A nested type in " + parent.getName() + ": "
 								+ element.getDefinition() );
 				newCompositeType.getElements().addAll(element.getElements());
-			
+
 				if( parent.getRoot().getNestedTypes().containsKey(nestedTypeName) )
-					throw new Exception("Nested type " + nestedTypeName + 
+					throw new Exception("Nested type " + nestedTypeName +
 							" already exist in resource " + parent.getName());
-				
+
 				parent.getRoot().getNestedTypes().put(nestedTypeName, newCompositeType );
 
 				// Clear out the name of the local type, so old code
 				// will not see a change.
 				element.getTypes().clear();
 				element.setDeclaredTypeName(newCompositeType.getName());
-				
+
 				scanNestedTypes( parent, element, nestedTypeName);
 			}
-			
-			resolveElementReferences(parent, element);
 		}
 	}
-	
+
 	private void resolveElementReferences(ResourceDefn parent, ElementDefn root)
-			throws Exception 
+			throws Exception
 	{
 		for (TypeRef ref : root.getTypes()) {
 			if (ref.isElementReference()) {
-				ElementDefn referredElement = parent.getRoot().getElementByName(ref.getName().substring(1));
+				ElementDefn referredElement = parent.getRoot().getElementByName(definitions, ref.getName().substring(1), true, false, null);
 
 				if (referredElement == null)
 					throw new Exception("Element reference " + ref.getName()+ " cannot be found in type " + parent.getName());
@@ -392,24 +467,28 @@ public class SpreadsheetParser {
 				ref.setResolvedTypeName(referredElement.getDeclaredTypeName());
 			}
 		}
+    for( ElementDefn element : root.getElements() ) {
+      resolveElementReferences(parent, element);
+    }
 	}
-	
-	
-	public ResourceDefn parseResource() throws Exception {
-	  isProfile = false;
-	  ResourceDefn root = parseCommonTypeColumns();
 
+
+	public ResourceDefn parseResource(boolean isTemplate) throws Exception {
+	  isProfile = false;
+	  ResourceDefn root = parseCommonTypeColumns(true);
+	  
+    
 	  readInheritedMappings(root, loadSheet("Inherited Mappings"));
-	  readEvents(loadSheet("Events"));
+//	  readEvents(loadSheet("Events"), root);
 	  readSearchParams(root, loadSheet("Search"), false);
 	  if (xls.getSheets().containsKey("Profiles"))
-	    readPackages(root, loadSheet("Profiles")); 
+	    readPackages(root, loadSheet("Profiles"));
 	  else
-	    readPackages(root, loadSheet("Packages")); 
-    readExamples(root, loadSheet("Examples"));
+	    readPackages(root, loadSheet("Packages"));
+	  if (!isTemplate)
+	    readExamples(root, loadSheet("Examples"));
 	  readOperations(root.getOperations(), loadSheet("Operations"));
 
-	  tabfmt.close();
 	  return root;
 	}
 
@@ -430,53 +509,28 @@ public class SpreadsheetParser {
   private void readOperations(List<Operation> oplist, Sheet sheet) throws Exception {
 	  Map<String, Operation> ops = new HashMap<String, Operation>();
     Map<String, OperationParameter> params = new HashMap<String, OperationParameter>();
-	  
-	  if (sheet != null) {
-      tabfmt.sheet("Examples");
-      tabfmt.column("Name");
-      tabfmt.column("Use");
-      tabfmt.column("Documentation");
-      tabfmt.column("Type");
-      tabfmt.column("Example.Request");
-      tabfmt.column("Example.Response");
-      tabfmt.column("Title");
-      tabfmt.column("Footer");
-      tabfmt.column("Profile");
-      tabfmt.column("Min");
-      tabfmt.column("Max");
-      tabfmt.column("Binding");
-        
-      for (int row = 0; row < sheet.rows.size(); row++) {
-        tabfmt.row();
-        tabfmt.cell(sheet.getColumn(row, "Name"));
-        tabfmt.cell(sheet.getColumn(row, "Use"));
-        tabfmt.cell(sheet.getColumn(row, "Documentation"));
-        tabfmt.cell(sheet.getColumn(row, "Type"));
-        tabfmt.cell(sheet.getColumn(row, "Example.Request"));
-        tabfmt.cell(sheet.getColumn(row, "Example.Response"));
-        tabfmt.cell(sheet.getColumn(row, "Title"));
-        tabfmt.cell(sheet.getColumn(row, "Footer"));
-        tabfmt.cell(sheet.getColumn(row, "Profile"));
-        tabfmt.cell(sheet.getColumn(row, "Min"));
-        tabfmt.cell(sheet.getColumn(row, "Max"));
-        tabfmt.cell(sheet.getColumn(row, "Binding"));
 
+	  if (sheet != null) {
+
+
+      for (int row = 0; row < sheet.rows.size(); row++) {
         String name = sheet.getColumn(row, "Name");
-        
-        String use = sheet.getColumn(row, "Use"); 
+
+        String use = sheet.getColumn(row, "Use");
         String doco = sheet.getColumn(row, "Documentation");
         String type = sheet.getColumn(row, "Type");
         List<OperationExample> examples = loadOperationExamples(sheet.getColumn(row, "Example.Request"), sheet.getColumn(row, "Example.Response"));
-        
+        List<OperationExample> examples2 = loadOperationExamples(sheet.getColumn(row, "Example2.Request"), sheet.getColumn(row, "Example2.Response"));
+
 				if (name != null && !name.equals("") && !name.startsWith("!")) {
 	        if (!name.contains(".")) {
 	          if (!type.equals("operation"))
               throw new Exception("Invalid type on operation "+type+" at " +getLocation(row));
 	          if (!name.toLowerCase().equals(name))
               throw new Exception("Invalid name on operation "+name+" - must be all lower case (use dashes) at " +getLocation(row));
-	            
+
 	          params.clear();
-	          
+
 	          boolean system = false;
 	          boolean istype = false;
 	          boolean instance = false;
@@ -488,10 +542,15 @@ public class SpreadsheetParser {
 	              istype = true;
 	            else if ("instance".equalsIgnoreCase(c))
 	              instance = true;
-	            else 
+	            else
 	              throw new Exception("unknown operation use code "+c+" at "+getLocation(row));
 	          }
-	          Operation op = new Operation(name, system, istype, instance, sheet.getColumn(row, "Type"), sheet.getColumn(row, "Title"), doco, sheet.getColumn(row, "Footer"), examples);
+	          Operation op = new Operation(name, system, istype, instance, sheet.getColumn(row, "Type"), sheet.getColumn(row, "Title"), doco, 
+	              sheet.getColumn(row, "Footer"), examples, parseBoolean(sheet.getColumn(row, "Idempotent"), row,  false));
+	          op.setStandardsStatus(StandardsStatus.fromCode(sheet.getColumn(row, "Standards-Status")));
+            op.setFooter2(sheet.getColumn(row, "Footer2"));
+            op.setFmm(sheet.getColumn(row, "fmm"));
+	          op.getExamples2().addAll(examples2);
             oplist.add(op);
             ops.put(name, op);
 	        } else {
@@ -510,7 +569,7 @@ public class SpreadsheetParser {
               OperationParameter param = params.get(context);
               if (param == null)
                 throw new Exception("Tuple parameter '"+context+"' not found at "+getLocation(row));
-              if (!param.getType().equals("Tuple"))
+              if (!param.getFhirType().equals("Tuple"))
                 throw new Exception("Tuple parameter '"+context+"' type must be Tuple at "+getLocation(row));
               plist = param.getParts();
 	          } else {
@@ -524,7 +583,7 @@ public class SpreadsheetParser {
             String profile = sheet.getColumn(row, "Profile");
             String min = sheet.getColumn(row, "Min");
             String max = sheet.getColumn(row, "Max");
-            OperationParameter p = new OperationParameter(pname, use, doco, Integer.parseInt(min), max, type, profile);
+            OperationParameter p = new OperationParameter(pname, use, doco, Integer.parseInt(min), max, type, sheet.getColumn(row, "Search Type"), profile);
             String bs = sheet.getColumn(row, "Binding");
             if (!Utilities.noString(bs))
               p.setBs(bindings.get(bs));
@@ -539,13 +598,13 @@ public class SpreadsheetParser {
 
   private List<OperationExample> loadOperationExamples(String req, String resp) throws Exception {
     List<OperationExample> results = new ArrayList<Operation.OperationExample>();
-    if (!Utilities.noString(req)) 
-      for (String s : TextFile.fileToString(Utilities.path(folder, req)).split("\r\n--------------------------------------\r\n")) 
+    if (!Utilities.noString(req))
+      for (String s : TextFile.fileToString(Utilities.path(folder, req)).split("\r\n--------------------------------------\r\n"))
         results.add(convertToExample(s, false));
-    if (!Utilities.noString(resp)) 
-      for (String s : TextFile.fileToString(Utilities.path(folder, resp)).split("\r\n--------------------------------------\r\n")) 
+    if (!Utilities.noString(resp))
+      for (String s : TextFile.fileToString(Utilities.path(folder, resp)).split("\r\n--------------------------------------\r\n"))
         results.add(convertToExample(s, true));
-  
+
     return results;
   }
 
@@ -565,6 +624,15 @@ public class SpreadsheetParser {
         String title = url.substring(url.indexOf(" ")+1);
         url= url.substring(0, url.indexOf(" "));
         content.append("<a href=\""+url+"\">See "+Utilities.escapeXml(title)+"</a>\r\n");
+      } else if (l.startsWith("$includexj ")) {
+        int indent = 0;
+        String filename = l.substring(11).trim();
+        if (filename.contains(" ")) {
+          indent = Integer.parseInt(filename.substring(0, filename.indexOf(" ")));
+          filename = filename.substring(filename.indexOf(" ")).trim();
+        }
+        String json = new JsonParser().setOutputStyle(OutputStyle.PRETTY).composeString(new XmlParser().parse(new FileInputStream(Utilities.path(folder, filename))));
+        process(content, indent, json);
       } else if (l.startsWith("$include ")) {
         int indent = 0;
         String filename = l.substring(9).trim();
@@ -607,23 +675,13 @@ public class SpreadsheetParser {
 	  throw new Exception("Unknown Example Type '" + s + "': " + getLocation(row));
 	}
 
-	  
+
 	private void readPackages(ResourceDefn defn, Sheet sheet) throws Exception {
 
     if (sheet != null) {
-      tabfmt.sheet("Profiles");
-      tabfmt.column("Name");
-      tabfmt.column("IG Name");
-      tabfmt.column("Filename");
-      tabfmt.column("Type");
-      
+
       for (int row = 0; row < sheet.rows.size(); row++) {
-        tabfmt.row();
-        tabfmt.cell(sheet.getColumn(row, "Name"));
-        tabfmt.cell(sheet.getColumn(row, "IG Name"));
-        tabfmt.cell(sheet.getColumn(row, "Filename"));
-        tabfmt.cell(sheet.getColumn(row, "Type"));
-        
+
         String name = sheet.getColumn(row, "Name");
         if (name != null && !name.equals("") && !name.startsWith("!")) {
           Profile pack = new Profile(sheet.getColumn(row, "IG Name"));
@@ -631,17 +689,19 @@ public class SpreadsheetParser {
             throw new Exception("Missing IG Name at "+getLocation(row));
           if (!definitions.getIgs().containsKey(pack.getCategory()))
             throw new Exception("IG Name '"+pack.getCategory()+"' is not registered in [igs] in fhir.ini at "+getLocation(row));
-          ImplementationGuideDefn ig = definitions.getIgs().get(pack.getCategory());  
-          if (!Utilities.noString(ig.getSource())) 
+          ImplementationGuideDefn ig = definitions.getIgs().get(pack.getCategory());
+          if (!Utilities.noString(ig.getSource()))
             throw new Exception("Implementation Guides that have their own structured definition cannot be registered directly in a source spreadsheet ("+name+")");
           pack.setTitle(name);
           pack.setSource(checkFile(sheet, row, "Source", false, sheet.getColumn(row, "Filename"))); // todo-profile
-            
+
           String type = sheet.getColumn(row, "Type");
           if ("bundle".equalsIgnoreCase(type))
             pack.setSourceType(ConformancePackageSourceType.Bundle);
           else if ("spreadsheet".equalsIgnoreCase(type))
             pack.setSourceType(ConformancePackageSourceType.Spreadsheet);
+          else if ("structuredefinition".equalsIgnoreCase(type))
+            pack.setSourceType(ConformancePackageSourceType.StructureDefinition);
           else
             throw new Exception("Unknown source type: "+type+" at "+getLocation(row));
           String example = checkFile(sheet, row, "Example", true, null); // todo-profile
@@ -658,7 +718,7 @@ public class SpreadsheetParser {
     String name = sheet.getColumn(row, column);
     if (Utilities.noString(name))
       name = defaultValue;
-    
+
     if (Utilities.noString(name)) {
       if (!canBeNull)
         throw new Exception("Missing filename for '"+column+"' at "+getLocation(row));
@@ -672,27 +732,11 @@ public class SpreadsheetParser {
 
 
   private Map<String,Invariant> readInvariants(Sheet sheet, String id, String sheetName) throws Exception {
-    tabfmt.sheet(sheetName);
-    tabfmt.column("Id");
-    tabfmt.column("Requirements");
-    tabfmt.column("Context");
-    tabfmt.column("English");
-    tabfmt.column("XPath");
-    tabfmt.column("Severity");
-    tabfmt.column("RDF");
 
     Map<String,Invariant> result = new HashMap<String,Invariant>();
 		for (int row = 0; row < sheet.rows.size(); row++) {
 			Invariant inv = new Invariant();
 
-	    tabfmt.row();
-			tabfmt.cell(sheet.getColumn(row, "Id"));
-			tabfmt.cell(sheet.getColumn(row, "Requirements"));
-			tabfmt.cell(sheet.getColumn(row, "Context"));
-			tabfmt.cell(sheet.getColumn(row, "English"));
-			tabfmt.cell(sheet.getColumn(row, "XPath"));
-			tabfmt.cell(sheet.getColumn(row, "Severity"));
-			tabfmt.cell(sheet.getColumn(row, "RDF"));
 
 			String s = sheet.getColumn(row, "Id");
 			if (!s.startsWith("!")) {
@@ -700,12 +744,15 @@ public class SpreadsheetParser {
 			  inv.setRequirements(sheet.getColumn(row, "Requirements"));
 			  inv.setContext(sheet.getColumn(row, "Context"));
 			  inv.setEnglish(sheet.getColumn(row, "English"));
-			  inv.setXpath(sheet.getColumn(row, "XPath"));
+        inv.setXpath(sheet.getColumn(row, "XPath"));
+        inv.setExpression(sheet.getColumn(row, "Expression"));
+        inv.setExplanation(sheet.getColumn(row, "Explanation"));
+        if (Utilities.noString(inv.getExpression()))
+          throw new Exception("missing expression "+ getLocation(row));
+
 			  inv.setSeverity(sheet.getColumn(row, "Severity"));
         inv.setTurtle(sheet.getColumn(row, "RDF"));
 
-			  if (!Utilities.noString(sheet.getColumn(row,  "Schematron")))
-			    log.log("Value found for schematron "+getLocation(row), LogMessageType.Hint);  
 			  inv.setOcl(sheet.getColumn(row, "OCL"));
 			  if (s.equals("") || result.containsKey(s))
 			    throw new Exception("duplicate or missing invariant id "
@@ -713,28 +760,14 @@ public class SpreadsheetParser {
 			  result.put(s, inv);
 			}
 		}
-		
+
 		return result;
 	}
 
   /* for profiles that have a "search" tab not tied to a structure */
   private void readSearchParams(Profile pack, Sheet sheet, String prefix) throws Exception {
-    tabfmt.sheet("Search");
-    tabfmt.column("Name");
-    tabfmt.column("Type");
-    tabfmt.column("Description");
-    tabfmt.column("Path");
-    tabfmt.column("Target Types");
-    tabfmt.column("Path Usage");
-    
+
     for (int row = 0; row < sheet.rows.size(); row++) {
-      tabfmt.row();
-      tabfmt.cell(sheet.getColumn(row, "Name"));
-      tabfmt.cell(sheet.getColumn(row, "Type"));
-      tabfmt.cell(sheet.getColumn(row, "Description"));
-      tabfmt.cell(sheet.getColumn(row, "Path"));
-      tabfmt.cell(sheet.getColumn(row, "Target Types"));
-      tabfmt.cell(sheet.getColumn(row, "Path Usage"));
 
       if (!sheet.hasColumn(row, "Name"))
         throw new Exception("Search Param has no name "+ getLocation(row));
@@ -747,8 +780,21 @@ public class SpreadsheetParser {
           throw new Exception("Search Param "+pack.getTitle()+"/"+n+" includes relative time "+ getLocation(row));
 //        if (!n.toLowerCase().equals(n))
 //          throw new Exception("Search Param "+pack.getTitle()+"/"+n+" must be all lowercase "+ getLocation(row));
+        sp.setVersion(Constants.VERSION);
         sp.setName(n);
         sp.setCode(n);
+        sp.setMultipleAnd(true);
+        sp.setMultipleOr(true);
+
+        if (pack.getProfiles().size() > 0 && pack.getProfiles().get(0).getResource() != null) {
+          sp.setStatus(pack.getProfiles().get(0).getResource().getStatus());
+          sp.setExperimental(pack.getProfiles().get(0).getResource().getExperimental());
+        } else {
+          // we just guess
+          sp.setStatus(PublicationStatus.DRAFT);
+          sp.setExperimental(true);
+        }
+
         String d = sheet.getColumn(row, "Description");
         sp.setType(SearchParamType.fromCode(sheet.getColumn(row, "Type")));
         List<String> pn = new ArrayList<String>();
@@ -760,21 +806,22 @@ public class SpreadsheetParser {
         ResourceDefn root2 = null;
         if (!path.startsWith("#")) {
           path = path.substring(0, path.indexOf('.'));
-          sp.setBase(path);
-          if (!pkp.isResource(sp.getBase()))
+          if (!pkp.isResource(path))
             throw new Exception("Ilegal Search Parameter path "+sheet.getColumn(row, "Path"));
+          sp.addBase(path);
           sp.setId(pack.getId()+"-"+path+"-"+sp.getName());
           if (definitions != null) { // igtodo (and below)
             root2 = definitions.getResourceByName(path);
             if (root2 == null)
               throw new Exception("Search Param "+pack.getTitle()+"/"+n+" has an invalid path (resource not found)");
-            sp.setBase(root2.getName());
-            if (!pkp.isResource(sp.getBase()))
+            if (!pkp.isResource(root2.getName()))
               throw new Exception("Ilegal Search Parameter path "+sheet.getColumn(row, "Path"));
+            sp.getBase().clear();
+            sp.addBase(root2.getName());
             sp.setId(pack.getId()+"-"+(root2 == null ? "all" : root2.getName())+"-"+sp.getName());
           }
         }
-        if (!Utilities.noString(sheet.getColumn(row, "Target Types"))) 
+        if (!Utilities.noString(sheet.getColumn(row, "Target Types")))
           throw new Exception("Search Param "+pack.getTitle()+"/"+n+" has manually specified targets (not allowed)");
 
         if (root2 != null && root2.getSearchParams().containsKey(n))
@@ -784,6 +831,7 @@ public class SpreadsheetParser {
           throw new Exception("not supported");
         } else {
           String[] pl = sheet.getColumn(row, "Path").split("\\|");
+          String xp = sheet.getColumn(row, "XPath");
           for (String pi : pl) {
             String p = pi.trim();
             ElementDefn e = null;
@@ -795,9 +843,9 @@ public class SpreadsheetParser {
               if (ex == null)
                 throw new Exception("Search Param "+pack.getTitle()+"/"+n+" refers to unknown extension '"+p+"' "+ getLocation(row));
               e = definitions.getElementDefn("Extension");
-              if (ex.getContextType() != ExtensionContext.RESOURCE || !ex.hasContext())
-                throw new Exception("Search Param "+pack.getTitle()+"/"+n+" refers to an extension that is not tied to a particular resource path '"+p+"' "+ getLocation(row));
-              path = ex.getContext().get(0).getValue();
+              if (ex.getContext().size() != 1 || ex.getContext().get(0).getType() != ExtensionContextType.ELEMENT)
+                throw new Exception("Search Param "+pack.getTitle()+"/"+n+" refers to an extension with multiple contexts, not not an element context - not supported '"+p+"' "+ getLocation(row));
+              path = ex.getContext().get(0).getExpression();
               if (Utilities.noString(path))
                 throw new Exception("Search Param "+pack.getTitle()+"/"+n+" has no path");
               if (path.contains("."))
@@ -809,12 +857,11 @@ public class SpreadsheetParser {
               if (root2 != null && root2.getSearchParams().containsKey(n))
                 throw new Exception("Search Param "+root2.getName()+"/"+n+": duplicate name "+ getLocation(row));
               sp.setId(pack.getId()+"-"+path+"-"+sp.getName());
-             
-              for (StringType t : ex.getContext()) 
-                pn.add(t.getValue()+".extension{"+ex.getUrl()+"}");
+
+                pn.add(ex.getContext().get(0).getExpression()+".extension{"+ex.getUrl()+"}");
             } else if (p.contains(".extension{")) {
               String url = extractExtensionUrl(p);
-              StructureDefinition ex = extensionDefinitions.get(url); // not created yet?
+              StructureDefinition ex = context.fetchResource(StructureDefinition.class, url); // not created yet?
               if (ex == null)
                 ex = context.getExtensionStructure(null, url);
               if (ex == null)
@@ -825,8 +872,14 @@ public class SpreadsheetParser {
                 e = definitions.getElementDefn("Extension");
               pn.add(p);
             } else if (!p.startsWith("!") && !p.startsWith("Extension{") && root2 != null ) {
-              e = root2.getRoot().getElementForPath(p, definitions, "search param", true); 
+              e = root2.getRoot().getElementForPath(p, definitions, "search param", true, true);
             }
+            if (e == null && Utilities.noString(d))
+              throw new Exception("unable to resolve sarch param " + p);
+              
+            if (e == null)
+              sp.setExpression(p);
+            
             if (Utilities.noString(d) && e != null)
               d = e.getShortDefn();
             if (d == null)
@@ -840,38 +893,24 @@ public class SpreadsheetParser {
             sp.setDescription(d);
           }
 
-          sp.setXpath(new XPathQueryGenerator(definitions, log, null).generateXpath(pn));
+          sp.setXpath(Utilities.noString(xp) ? new XPathQueryGenerator(definitions, log, null).generateXpath(pn) : xp);
           sp.setXpathUsage(readSearchXPathUsage(sheet.getColumn(row, "Path Usage"), row));
         }
         sp.setUrl("http://hl7.org/fhir/SearchParameter/"+sp.getId());
         if (definitions != null)
           definitions.addNs(sp.getUrl(), "Search Parameter " +sp.getName(), pack.getId()+".html#search");
-        if (context.getSearchParameters().containsKey(sp.getUrl()))
+        if (context.getSearchParameter(sp.getUrl()) != null)
           throw new Exception("Duplicated Search Parameter "+sp.getUrl());
-        context.getSearchParameters().put(sp.getUrl(), sp);
+        context.cacheResource(sp);
         pack.getSearchParameters().add(sp);
       }
     }
   }
-  
+
   private void readSearchParams(ResourceDefn root2, Sheet sheet, boolean forProfile) throws Exception {
     if (sheet != null) {
-      tabfmt.sheet("Search");
-      tabfmt.column("Name");
-      tabfmt.column("Type");
-      tabfmt.column("Description");
-      tabfmt.column("Path");
-      tabfmt.column("Target Types");
-      tabfmt.column("Path Usage");
-      
+
       for (int row = 0; row < sheet.rows.size(); row++) {
-        tabfmt.row();
-        tabfmt.cell(sheet.getColumn(row, "Name"));
-        tabfmt.cell(sheet.getColumn(row, "Type"));
-        tabfmt.cell(sheet.getColumn(row, "Description"));
-        tabfmt.cell(sheet.getColumn(row, "Path"));
-        tabfmt.cell(sheet.getColumn(row, "Target Types"));
-        tabfmt.cell(sheet.getColumn(row, "Path Usage"));
 
         if (!sheet.hasColumn(row, "Name"))
           throw new Exception("Search Param has no name "+ getLocation(row));
@@ -889,19 +928,26 @@ public class SpreadsheetParser {
           String d = sheet.getColumn(row, "Description");
           SearchType t = readSearchType(sheet.getColumn(row, "Type"), row);
           SearchParameter.XPathUsageType pu = readSearchXPathUsage(sheet.getColumn(row, "Path Usage"), row);
-          
-          if (Utilities.noString(sheet.getColumn(row, "Path")) && !root2.getName().equals("Resource")) 
+
+          if (Utilities.noString(sheet.getColumn(row, "Path")) && !root2.getName().equals("Resource") && !root2.getName().equals("DomainResource"))
             throw new Exception("Search Param "+root2.getName()+"/"+n+" has no path at "+ getLocation(row));
-            
-          
-          List<String> pn = new ArrayList<String>(); 
+
+
           SearchParameterDefn sp = null;
           if (t == SearchType.composite) {
-            String[] pl = sheet.getColumn(row, "Path").split("\\&");
-            if (Utilities.noString(d)) 
+            List<CompositeDefinition> pn = new ArrayList<CompositeDefinition>();
+            if (Utilities.noString(d))
               throw new Exception("Search Param "+root2.getName()+"/"+n+" has no description "+ getLocation(row));
+
+            String[] pl = sheet.getColumn(row, "Path").split("\\&");
+            String[] pe = sheet.getColumn(row, "Expression").split("\\;");
+            if (pe.length != pl.length+1)
+              throw new Exception("Composite Search Param "+root2.getName()+"/"+n+" needs expressions "+ getLocation(row));
+            int i = 0;
             for (String pi : pl) {
               String p = pi.trim();
+              i++;
+              String e = pe[i].trim();
               if (!root2.getSearchParams().containsKey(p)) {
                 boolean found = false;
                 if (p.endsWith("[x]"))
@@ -909,26 +955,35 @@ public class SpreadsheetParser {
                     if (pan.startsWith(p.substring(0,  p.length()-3)))
                       found = true;
                   }
-                if (!found)                
+                if (!found)
                   throw new Exception("Composite Search Param "+root2.getName()+"/"+n+"  refers to an unknown component "+p+" at "+ getLocation(row));
               }
-              pn.add(p);
-              sp = new SearchParameterDefn(n, d, t, pu);
-              sp.getComposites().addAll(pn);
+              pn.add(new CompositeDefinition(p, e));
             }
+            StandardsStatus ss = root2.getStatus();
+            if (!Utilities.noString(sheet.getColumn(row, "Standards-Status")))
+              ss = StandardsStatus.fromCode(sheet.getColumn(row, "Standards-Status"));
+            sp = new SearchParameterDefn(n, d, t, pu, ss);
+            sp.setExpression(pe[0].trim());
+            sp.getComposites().addAll(pn);
           } else {
+            List<String> pn = new ArrayList<String>();
+            String xp = sheet.getColumn(row, "XPath");
             String[] pl = sheet.getColumn(row, "Path").split("\\|");
+            boolean hierarchy = false;
             for (String pi : pl) {
               String p = pi.trim();
               ElementDefn e = null;
               if (!Utilities.noString(p) && !p.startsWith("!") && !p.startsWith("Extension{") && definitions != null ) {
-                e = root2.getRoot().getElementForPath(trimIndexes(p), definitions, "search param", true); 
+                e = root2.getRoot().getElementForPath(trimIndexes(p), definitions, "search param", true, true);
               }
+              if (e != null && e.hasHierarchy() && e.getHierarchy())
+                hierarchy = true;
               if (Utilities.noString(d) && e != null)
                 d = e.getShortDefn();
               if (p.startsWith("Extension(")) {
                 String url = extractExtensionUrl(p);
-                StructureDefinition ex = extensionDefinitions.get(url);
+                StructureDefinition ex = context.fetchResource(StructureDefinition.class, url);
                 if (ex == null)
                   throw new Exception("Search Param "+root2.getName()+"/"+n+" refers to unknown extension '"+url+"' "+ getLocation(row));
                 if (Utilities.noString(d))
@@ -942,13 +997,13 @@ public class SpreadsheetParser {
               if (t == SearchType.reference) {
                 if (e == null && !forProfile && !sheet.hasColumn(row, "Target Types"))
                   throw new Exception("Search Param "+root2.getName()+"/"+n+" of type reference has wrong path "+ getLocation(row));
-                if (!forProfile && e != null && (!e.hasType("Reference")) && (!e.hasType("Resource")))
+                if (!forProfile && e != null && (!e.hasType("Reference")) && (!e.hasType("canonical")) && (!e.hasType("Resource")))
                   throw new Exception("Search Param "+root2.getName()+"/"+n+" wrong type. The search type is reference, but the element type is "+e.typeCode());
               } else {
                 if (e != null && e.hasOnlyType("Reference"))
                   throw new Exception("Search Param "+root2.getName()+"/"+n+" wrong type. The search type is "+t.toString()+", but the element type is "+e.typeCode());
                 if (t == SearchType.uri) {
-                  if (e != null && !(e.typeCode().equals("uri") | e.typeCode().equals("oid")))
+                  if (e != null && !(e.typeCode().equals("uri") | e.typeCode().equals("url") | e.typeCode().equals("oid")))
                     throw new Exception("Search Param "+root2.getName()+"/"+n+" wrong type. The search type is "+t.toString()+", but the element type is "+e.typeCode());
                 } else {
                   if (e != null && e.typeCode().equals("uri"))
@@ -959,11 +1014,25 @@ public class SpreadsheetParser {
             if (!forProfile && t == SearchType.reference && pn.size() == 0 && !sheet.hasColumn(row, "Target Types"))
               throw new Exception("Search Param "+root2.getName()+"/"+n+" of type reference has no path(s) "+ getLocation(row));
 
-            sp = new SearchParameterDefn(n, d, t, pu);
+            StandardsStatus ss = root2.getStatus();
+            if (!Utilities.noString(sheet.getColumn(row, "Standards-Status")))
+              ss = StandardsStatus.fromCode(sheet.getColumn(row, "Standards-Status"));
+            sp = new SearchParameterDefn(n, d, t, pu, ss);
             sp.getPaths().addAll(pn);
+            if (!Utilities.noString(xp))
+              sp.setXPath(xp);
+            if (!Utilities.noString(sheet.getColumn(row, "Expression")))
+              sp.setExpression(sheet.getColumn(row, "Expression"));
             if (!Utilities.noString(sheet.getColumn(row, "Target Types"))) {
               sp.setManualTypes(sheet.getColumn(row, "Target Types").split("\\,"));
             }
+            sp.setHierarchy(hierarchy);
+            CommonSearchParameter csp = definitions.getCommonSearchParameters().get(root2.getName()+"::"+n);
+            if (csp != null)
+              for (String s : csp.getResources()) {
+                if (!root2.getName().equals(s))
+                  sp.getOtherResources().add(s);
+              }
           }
           root2.getSearchParams().put(n, sp);
         }
@@ -976,7 +1045,7 @@ public class SpreadsheetParser {
       if (p.indexOf(")") == p.length()-1)
         p = p.substring(0, p.indexOf("("));
       else
-        p = p.substring(0, p.indexOf("("))+p.substring(p.indexOf(")"+1));
+        p = p.substring(0, p.indexOf("("))+p.substring(p.indexOf(")")+1);
     return p;
   }
 
@@ -1023,56 +1092,28 @@ public class SpreadsheetParser {
       return SearchType.composite;
     if ("quantity".equals(s))
       return SearchType.quantity;
+    if ("special".equals(s))
+      return SearchType.special;
 		throw new Exception("Unknown Search Type '" + s + "': " + getLocation(row));
 	}
 
- 
+
 	// Adds bindings to global definition.bindings. Returns list of
 	// newly found bindings in the sheet.
 	private void readBindings(Sheet sheet) throws Exception {
-    tabfmt.sheet("Bindings");
-    tabfmt.column("Binding Name"); 
-    tabfmt.column("Binding");
-    tabfmt.column("Reference");
-    tabfmt.column("Definition");
-    tabfmt.column("Description");
-    tabfmt.column("Conformance");
-    tabfmt.column("Uri");
-    tabfmt.column("Oid");
-    tabfmt.column("Status");
-    tabfmt.column("Website");
-    tabfmt.column("Email");
-    tabfmt.column("Copyright");
-    tabfmt.column("v2");
-    tabfmt.column("v3");
 
     for (int row = 0; row < sheet.rows.size(); row++) {
-      String bindingName = sheet.getColumn(row, "Binding Name"); 
-      tabfmt.row();
-      tabfmt.cell(bindingName);
-      tabfmt.cell(sheet.getColumn(row, "Binding"));
-      tabfmt.cell(sheet.getColumn(row, "Reference"));
-      tabfmt.cell(sheet.getColumn(row, "Definition"));
-      tabfmt.cell(sheet.getColumn(row, "Description"));
-      tabfmt.cell(sheet.getColumn(row, "Conformance"));
-      tabfmt.cell(sheet.getColumn(row, "Uri"));
-      tabfmt.cell(sheet.getColumn(row, "Oid"));
-      tabfmt.cell(sheet.getColumn(row, "Status"));
-      tabfmt.cell(sheet.getColumn(row, "Website"));
-      tabfmt.cell(sheet.getColumn(row, "Email"));
-      tabfmt.cell(sheet.getColumn(row, "Copyright"));
-      tabfmt.cell(sheet.getColumn(row, "v2"));
-      tabfmt.cell(sheet.getColumn(row, "v3"));
+      String bindingName = sheet.getColumn(row, "Binding Name");
     }
-    
-		ValueSetGenerator vsGen = new ValueSetGenerator(definitions, version, genDate);
-		
+
+		ValueSetGenerator vsGen = new ValueSetGenerator(definitions, version.toCode(), genDate, context.translator());
+
 		for (int row = 0; row < sheet.rows.size(); row++) {
-		  String bindingName = sheet.getColumn(row, "Binding Name"); 
-		  
+		  String bindingName = sheet.getColumn(row, "Binding Name");
+
 		  // Ignore bindings whose name start with "!"
 		  if (Utilities.noString(bindingName) || bindingName.startsWith("!")) continue;
-	      
+
 //      if (Character.isLowerCase(bindingName.charAt(0)))
 //        throw new Exception("binding name "+bindingName+" is illegal - must start with a capital letter");
 
@@ -1080,26 +1121,42 @@ public class SpreadsheetParser {
       if (definitions != null)
         definitions.getAllBindings().add(cd);
 
-			cd.setDefinition(sheet.getColumn(row, "Definition"));
-			
-			cd.setBindingMethod(BindingsParser.readBinding(sheet.getColumn(row, "Binding")));
+			cd.setDefinition(Utilities.appendPeriod(sheet.getColumn(row, "Definition")));
+
+			cd.setBindingMethod(BindingsParser.readBinding(sheet.getColumn(row, "Binding"), cd.getName()+" in "+folder));
       String ref = sheet.getColumn(row, "Reference");
-      if (!cd.getBinding().equals(BindingMethod.Unbound) && Utilities.noString(ref)) 
+      if (!cd.getBinding().equals(BindingMethod.Unbound) && Utilities.noString(ref))
         throw new Exception("binding "+cd.getName()+" is missing a reference");
       if (cd.getBinding() == BindingMethod.CodeList) {
         if (ref.startsWith("#valueset-"))
           throw new Exception("don't start code list references with #valueset-");
-        cd.setValueSet(new ValueSet());
+        cd.setValueSet(ValueSetUtilities.makeShareable(new ValueSet()));
         valuesets.add(cd.getValueSet());
+        cd.getValueSet().setVersion(Constants.VERSION);
         cd.getValueSet().setId(igSuffix(ig)+ref.substring(1));
         cd.getValueSet().setUrl("http://hl7.org/fhir/ValueSet/"+igSuffix(ig)+ref.substring(1));
+        cd.getValueSet().setUserData("filename", "valueset-"+cd.getValueSet().getId());
+        if (!cd.getValueSet().hasExtension(ToolingExtensions.EXT_WORKGROUP)) {
+          cd.getValueSet().addExtension().setUrl(ToolingExtensions.EXT_WORKGROUP).setValue(new CodeType(committee.getCode()));
+        } else {
+          String ec = ToolingExtensions.readStringExtension(cd.getValueSet(), ToolingExtensions.EXT_WORKGROUP);
+          if (!ec.equals(committee))
+            System.out.println("ValueSet "+cd.getValueSet().getUrl()+" WG mismatch 3: is "+ec+", want to set to "+committee.getCode());
+        } 
+        if (ig != null) {
+          cd.getValueSet().setUserDataINN(ToolResourceUtilities.NAME_RES_IG, ig);
+          cd.getValueSet().setUserData("path", "valueset-"+cd.getValueSet().getId()+".html");
+        } else
+          cd.getValueSet().setUserData("path", "valueset-"+cd.getValueSet().getId()+".html");
+        if (!cd.getValueSet().getUserData("path").equals(cd.getValueSet().getUserData("filename")+".html"))
+          throw new Exception("Mis-identified value set");
         if (!ref.startsWith("#"))
           throw new Exception("Error parsing binding "+cd.getName()+": code list reference '"+ref+"' must started with '#'");
         Sheet cs = xls.getSheets().get(ref.substring(1));
         if (cs == null)
           throw new Exception("Error parsing binding "+cd.getName()+": code list reference '"+ref+"' not resolved");
-        tabfmt.sheet(ref.substring(1));
-        new CodeListToValueSetParser(cs, ref.substring(1), cd.getValueSet(), version, tabfmt).execute();
+        vsGen.updateHeader(cd, cd.getValueSet());
+        new CodeListToValueSetParser(cs, ref.substring(1), cd.getValueSet(), version.toCode(), codeSystems, maps).execute(sheet.getColumn(row, "v2"), checkV3Mapping(sheet.getColumn(row, "v3")), getIsUtg(bindingName));
       } else if (cd.getBinding() == BindingMethod.ValueSet) {
         if (ref.startsWith("http:"))
           cd.setReference(sheet.getColumn(row, "Reference")); // will sort this out later
@@ -1107,31 +1164,35 @@ public class SpreadsheetParser {
           cd.setValueSet(loadValueSet(ref));
       } else if (cd.getBinding() == BindingMethod.Special) {
         if ("#operation-outcome".equals(sheet.getColumn(row, "Reference")))
-          ValueSetGenerator.loadOperationOutcomeValueSet(cd, folder);
+          new ValueSetGenerator(definitions, version.toCode(), genDate, context.translator()).loadOperationOutcomeValueSet(cd);
         else
           throw new Exception("Special bindings are only allowed in bindings.xml");
-      } else if (cd.getBinding() == BindingMethod.Reference) { 
-        cd.setReference(sheet.getColumn(row, "Reference"));
-      }			
+      }
       cd.setReference(sheet.getColumn(row, "Reference")); // do this anyway in the short term
-      
-      if (registry == null)
-        cd.setId("0"); // igtodo: how to generate this when not doing a full build?
-      else
-        cd.setId(registry.idForName(cd.getName()));
-      
+
       if (cd.getValueSet() != null) {
         ValueSet vs = cd.getValueSet();
         ValueSetUtilities.makeShareable(vs);
         vs.setUserData("filename", "valueset-"+vs.getId());
-        vs.setUserData("committee", committee);
+        if (!vs.hasExtension(ToolingExtensions.EXT_WORKGROUP)) {
+          vs.addExtension().setUrl(ToolingExtensions.EXT_WORKGROUP).setValue(new CodeType(committee.getCode()));
+        } else {
+          String ec = ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_WORKGROUP);
+          if (!ec.equals(committee.getCode()))
+            System.out.println("ValueSet "+vs.getUrl()+" WG mismatch 4: is "+ec+", want to set to "+committee.getCode());
+        } 
+
         if (ig != null) {
           vs.setUserDataINN(ToolResourceUtilities.NAME_RES_IG, ig);
           vs.setUserData("path", ig.getCode()+"/valueset-"+vs.getId()+".html");
         } else
           vs.setUserData("path", "valueset-"+vs.getId()+".html");
-        ToolingExtensions.setOID(vs, "urn:oid:"+BindingSpecification.DEFAULT_OID_VS + cd.getId());
-        vs.setUserData("csoid", BindingSpecification.DEFAULT_OID_CS + cd.getId());
+        if (!ValueSetUtilities.hasOID(vs))
+          ValueSetUtilities.setOID(vs, "urn:oid:"+BindingSpecification.DEFAULT_OID_VS +registry.idForUri(vs.getUrl()));
+        if (vs.getUserData("cs") != null) {
+          if (!CodeSystemUtilities.hasOID((CodeSystem) vs.getUserData("cs")))
+            CodeSystemUtilities.setOID((CodeSystem) vs.getUserData("cs"), "urn:oid:"+BindingSpecification.DEFAULT_OID_CS + registry.idForUri(((CodeSystem) vs.getUserData("cs")).getUrl()));
+        }
         if (definitions != null)
           definitions.getBoundValueSets().put(vs.getUrl(), vs);
         else
@@ -1139,29 +1200,36 @@ public class SpreadsheetParser {
       } else if (cd.getReference() != null && cd.getReference().startsWith("http:")) {
         if (definitions != null)
           definitions.getUnresolvedBindings().add(cd);
-        else 
+        else
           ig.getUnresolvedBindings().add(cd);
       }
-      
+
       cd.setDescription(sheet.getColumn(row, "Description"));
       if (!Utilities.noString(sheet.getColumn(row, "Example")))
           throw new Exception("The 'Example' column is no longer supported");
       if (!Utilities.noString(sheet.getColumn(row, "Extensible")))
         throw new Exception("The 'Extensible' column is no longer supported");
       cd.setStrength(BindingsParser.readBindingStrength(sheet.getColumn(row, "Conformance")));
-        
+
 			cd.setSource(name);
       cd.setUri(sheet.getColumn(row, "Uri"));
       String oid = sheet.getColumn(row, "Oid");
       if (!Utilities.noString(oid))
         cd.setVsOid(oid); // no cs oid in this case
-      cd.setStatus(ConformanceResourceStatus.fromCode(sheet.getColumn(row, "Status")));
+      cd.setStatus(PublicationStatus.fromCode(sheet.getColumn(row, "Status")));
       cd.setWebSite(sheet.getColumn(row, "Website"));
       cd.setEmail(sheet.getColumn(row, "Email"));
       cd.setCopyright(sheet.getColumn(row, "Copyright"));
       cd.setV2Map(sheet.getColumn(row, "v2"));
       cd.setV3Map(checkV3Mapping(sheet.getColumn(row, "v3")));
 
+      String max = sheet.getColumn(row, "Max");
+      if (!Utilities.noString(max))
+        if (max.startsWith("http:")) {
+          cd.setMaxReference(max); // will sort this out later
+        } else
+          cd.setMaxValueSet(loadValueSet(max));
+      
 			bindings.put(cd.getName(), cd);
 	    if (cd.getValueSet() != null) {
 	      ValueSet vs = cd.getValueSet();
@@ -1170,10 +1238,28 @@ public class SpreadsheetParser {
 		}
 	}
 
+	private boolean getIsUtg(String bindingName) {
+	  Sheet sheet =  loadSheet("Data Elements");
+	  if (sheet != null)
+	    for (int row = 0; row < sheet.rows.size(); row++) {
+	      if (bindingName.equals(sheet.getColumn(row, "Binding"))) {
+	        return !"code".equals(sheet.getColumn(row, "Type"));
+	      }
+	    }
+	  sheet =  loadSheet("Operations");
+	  if (sheet != null)
+	    for (int row = 0; row < sheet.rows.size(); row++) {
+	      if (bindingName.equals(sheet.getColumn(row, "Binding"))) {
+	        return !"code".equals(sheet.getColumn(row, "Type"));
+	      }
+	    }
+	  return true;
+  }
+
   private ValueSet loadValueSet(String ref) throws Exception {
 	  if (!ref.startsWith("valueset-"))
 	    throw new Exception("Value set file names must start with 'valueset-'");
-	  
+
 	  IParser p;
 	  String filename;
 	  if (new File(Utilities.path(folder, ref+".xml")).exists()) {
@@ -1188,7 +1274,7 @@ public class SpreadsheetParser {
     } else if (new File(Utilities.path(dataTypesFolder, ref+".json")).exists()) {
       p = new JsonParser();
       filename = Utilities.path(dataTypesFolder, ref+".json");
-    } else 
+    } else
 	    throw new Exception("Unable to find source for "+ref+" in "+folder+" ("+Utilities.path(folder, ref+".xml/json)"));
 
 	    ValueSet result;
@@ -1205,18 +1291,29 @@ public class SpreadsheetParser {
 	    }
       result.setId(igSuffix(ig)+ref.substring(9));
       result.setUrl("http://hl7.org/fhir/ValueSet/"+igSuffix(ig)+ref.substring(9));
+      if (!result.hasTitle())
+        result.setTitle(Utilities.capitalize(Utilities.unCamelCase(result.getName())));
 	    result.setExperimental(true);
-	    if (!result.hasVersion())
-	      result.setVersion(version);
+	    if (!result.hasVersion() || result.getUrl().startsWith("http://hl7.org/fhir"))
+	      result.setVersion(version.toCode());
+      result.setUserData("filename", ref);
       result.setUserData("path", ((ig == null || ig.isCore()) ? "" : ig.getCode()+"/")+ ref+".html");
-      result.setUserData("committee", committee);
+      if (!result.hasExtension(ToolingExtensions.EXT_WORKGROUP)) {
+        result.addExtension().setUrl(ToolingExtensions.EXT_WORKGROUP).setValue(new CodeType(committee.getCode()));
+      } else {
+        String ec = ToolingExtensions.readStringExtension(result, ToolingExtensions.EXT_WORKGROUP);
+        if (!ec.equals(committee.getCode()))
+          System.out.println("ValueSet "+result.getUrl()+" WG mismatch 5: is "+ec+", want to set to "+committee.getCode());
+      } 
+
+      new CodeSystemConvertor(codeSystems).convert(p, result, filename);
       valuesets.add(result);
 	    return result;
 	}
 
 	private String checkV3Mapping(String value) {
-	  if (value.startsWith("http://hl7.org/fhir/ValueSet/v3-"))
-	    return value.substring("http://hl7.org/fhir/ValueSet/v3-".length());
+	  if (value.startsWith("http://terminology.hl7.org/ValueSet/v3-"))
+	    return value.substring("http://terminology.hl7.org/ValueSet/v3-".length());
 	  else
 	    return value;
 	  }
@@ -1226,17 +1323,18 @@ public class SpreadsheetParser {
 		for (int row = 0; row < sheet.rows.size(); row++) {
 			DefinedCode c = new DefinedCode();
 			c.setId(sheet.getColumn(row, "Id"));
+      c.setAbstract(sheet.getColumn(row, "Abstract").toUpperCase().equals("Y"));
 			c.setCode(sheet.getColumn(row, "Code"));
       c.setDisplay(sheet.getColumn(row, "Display"));
       if (c.hasCode() && !c.hasDisplay())
         c.setDisplay(Utilities.humanize(c.getCode()));
       c.setSystem(sheet.getColumn(row, "System"));
 			c.setDefinition(Utilities.appendPeriod(processDefinition(sheet.getColumn(row, "Definition"))));
-      c.setComment(sheet.getColumn(row, "Comment"));
+      c.setComment(Utilities.appendPeriod(sheet.getColumn(row, "Comment")));
       c.setParent(sheet.getColumn(row, "Parent"));
       c.setV2Map(sheet.getColumn(row, "v2"));
       c.setV3Map(sheet.getColumn(row, "v3"));
-      for (String ct : sheet.columns) 
+      for (String ct : sheet.columns)
         if (ct.startsWith("Display:") && !Utilities.noString(sheet.getColumn(row, ct)))
           c.getLangs().put(ct.substring(8), sheet.getColumn(row, ct));
       if (Utilities.noString(c.getId()) && Utilities.noString(c.getSystem()))
@@ -1247,14 +1345,15 @@ public class SpreadsheetParser {
 
 
   private String processDefinition(String definition) {
-    
-    return definition.replace("$version$", version);
+
+    return definition.replace("$version$", Utilities.appendPeriod(version.toCode()));
   }
 
 
-	public void parseConformancePackage(Profile ap, Definitions definitions, String folder, String usage, List<ValidationMessage> issues) throws Exception {
+	public void parseConformancePackage(Profile ap, Definitions definitions, String folder, String usage, List<ValidationMessage> issues, WorkGroup wg) throws Exception {
 	  try {
 	    isProfile = true;
+	    this.folder = folder;
 	    checkMappings(ap);
 	    Sheet sheet = loadSheet("Bindings");
 	    if (sheet != null)
@@ -1275,7 +1374,7 @@ public class SpreadsheetParser {
 	      }
 	    }
       if (!Utilities.noString(ap.metadata("category")))
-          usage = ap.metadata("category");        
+          usage = ap.metadata("category");
       if (ap.hasMetadata("name"))
         ap.setTitle(ap.metadata("name"));
       if (ap.hasMetadata("introduction"))
@@ -1287,12 +1386,19 @@ public class SpreadsheetParser {
       if (!ap.metadata("id").matches(FormatUtilities.ID_REGEX))
         throw new Exception("Error parsing "+ap.getId()+"/"+ap.getTitle()+" 'id' is not a valid id");
 
+      if (wg == null)
+        wg = workgroups.get(ap.metadata("workgroup"));
+      if (wg == null)
+        wg = committee;
+      if (wg == null)
+        throw new Exception("Error parsing "+ap.getId()+"/"+ap.getTitle()+" : no workgroup value in the metadata");
+      
       if (!ap.metadata("id").equals(ap.metadata("id").toLowerCase()))
         throw new Exception("Error parsing "+ap.getId()+"/"+ap.getTitle()+" 'id' must be all lowercase");
-      
+
 	    this.profileExtensionBase = ap.metadata("extension.uri");
 	    if (ig == null || ig.isCore()) {
-	      if (!profileExtensionBase.startsWith("http://hl7.org/fhir/StructureDefinition/"))
+	      if (!profileExtensionBase.startsWith("http://hl7.org/fhir/StructureDefinition/") && !profileExtensionBase.startsWith("http://fhir-registry.smarthealthit.org/StructureDefinition/"))
 	        throw new Exception("Core extensions must have a url starting with http://hl7.org/fhir/StructureDefinition/ for "+ap.getId());
 	    } else {
         if (!profileExtensionBase.startsWith("http://hl7.org/fhir/StructureDefinition/"+ig.getCode()+"-"))
@@ -1310,8 +1416,8 @@ public class SpreadsheetParser {
         while (row < sheet.rows.size()) {
           if (sheet.getColumn(row, "Code").startsWith("!"))
             row++;
-          else 
-            row = processExtension(null, sheet, row, definitions, ap.metadata("extension.uri"), ap, issues, invariants);
+          else
+            row = processExtension(null, sheet, row, definitions, ap.metadata("extension.uri"), ap, issues, invariants, wg);
         }
       }
 
@@ -1322,19 +1428,28 @@ public class SpreadsheetParser {
 	        if (!Utilities.noString(n)) {
 	          if (ig != null && !ig.isCore() && !n.toLowerCase().startsWith(ig.getCode()+"-"))
 	            throw new Exception("Error: published structure names must start with the implementation guide code ("+ig.getCode()+"-)");
-	          ap.getProfiles().add(parseProfileSheet(definitions, ap, n, namedSheets, true, usage, issues));
+	          String fmm = ap.metadata("fmm-"+n);
+	          if (Utilities.noString(fmm)) 
+	            fmm = ap.metadata("fmm");
+	          if (Utilities.noString(fmm)) 
+	            fmm = "1"; // default fmm value
+	          ap.getProfiles().add(parseProfileSheet(definitions, ap, n, namedSheets, true, usage, issues, wg, fmm));
 	        }
 	      }
 	    }
 
 	    int i = 0;
 	    while (i < namedSheets.size()) {
-	      ap.getProfiles().add(parseProfileSheet(definitions, ap, namedSheets.get(i), namedSheets, false, usage, issues));
+        String fmm = ap.metadata("fmm-"+namedSheets.get(i));
+        if (Utilities.noString(fmm)) 
+          fmm = ap.metadata("fmm");
+        if (Utilities.noString(fmm)) 
+          fmm = "1"; // default fmm value
+	      ap.getProfiles().add(parseProfileSheet(definitions, ap, namedSheets.get(i), namedSheets, false, usage, issues, wg, fmm));
 	      i++;
 	    }
 	    if (namedSheets.isEmpty() && xls.getSheets().containsKey("Search"))
 	      readSearchParams(ap, xls.getSheets().get("Search"), this.profileExtensionBase);
-	    tabfmt.close();
 
 	    if (xls.getSheets().containsKey("Operations"))
   	    readOperations(ap.getOperations(), loadSheet("Operations"));
@@ -1351,14 +1466,14 @@ public class SpreadsheetParser {
     if (sheet != null) {
       for (int row = 0; row < sheet.rows.size(); row++) {
         String uri = sheet.getNonEmptyColumn(row, "Uri");
-        MappingSpace ms = new MappingSpace(sheet.getNonEmptyColumn(row, "Column"), sheet.getNonEmptyColumn(row, "Title"), sheet.getNonEmptyColumn(row, "Id"), sheet.getIntColumn(row, "Sort Order"));
+        MappingSpace ms = new MappingSpace(sheet.getNonEmptyColumn(row, "Column"), sheet.getNonEmptyColumn(row, "Title"), sheet.getNonEmptyColumn(row, "Id"), sheet.getIntColumn(row, "Sort Order"), true, false, false, sheet.hasColumn(row, "Link") ?  sheet.getColumn(row, "Link") : uri);
         pack.getMappingSpaces().put(uri, ms);
       }
     }
   }
 
 
-  private ConstraintStructure parseProfileSheet(Definitions definitions, Profile ap, String n, List<String> namedSheets, boolean published, String usage, List<ValidationMessage> issues) throws Exception {
+  private ConstraintStructure parseProfileSheet(Definitions definitions, Profile ap, String n, List<String> namedSheets, boolean published, String usage, List<ValidationMessage> issues, WorkGroup wg, String fmm) throws Exception {
     Sheet sheet;
     ResourceDefn resource = new ResourceDefn();
     resource.setPublishedInProfile(published);
@@ -1370,30 +1485,30 @@ public class SpreadsheetParser {
 	  } else {
 	  	invariants = new HashMap<String,Invariant>();
 		}
-		
+
     sheet = loadSheet(n);
     if (sheet == null)
       throw new Exception("The StructureDefinition referred to a tab by the name of '"+n+"', but no tab by the name could be found");
-    tabfmt.sheet(n);
+
     for (int row = 0; row < sheet.rows.size(); row++) {
       ElementDefn e = processLine(resource, sheet, row, invariants, true, ap, row == 0);
-      if (e != null) 
+      if (e != null)
         for (TypeRef t : e.getTypes()) {
-          if (t.getProfile() != null && !t.getName().equals("Extension") && t.getProfile().startsWith("#")) { 
+          if (t.getProfile() != null && !t.getName().equals("Extension") && t.getProfile().startsWith("#")) {
             if (!namedSheets.contains(t.getProfile().substring(1)))
-              namedSheets.add(t.getProfile().substring(1));      
+              namedSheets.add(t.getProfile().substring(1));
           }
         }
     }
-    
+
     sheet = loadSheet(n + "-Extensions");
     if (sheet != null) {
       int row = 0;
       while (row < sheet.rows.size()) {
         if (sheet.getColumn(row, "Code").startsWith("!"))
           row++;
-        else
-          row = processExtension(resource.getRoot().getElementByName("extensions"), sheet, row, definitions, ap.metadata("extension.uri"), ap, issues, invariants);
+        else 
+          row = processExtension(resource.getRoot().getElementByName(definitions, "extensions", true, false), sheet, row, definitions, ap.metadata("extension.uri"), ap, issues, invariants, wg);
       }
     }
     sheet = loadSheet(n+"-Search");
@@ -1403,7 +1518,7 @@ public class SpreadsheetParser {
 
 		if (invariants != null) {
 			for (Invariant inv : invariants.values()) {
-			  if (Utilities.noString(inv.getContext())) 
+			  if (Utilities.noString(inv.getContext()))
 			    throw new Exception("Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" has no context");
 			  else {
 			    ElementDefn ed = findContext(resource.getRoot(), inv.getContext(), "Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" Context");
@@ -1416,6 +1531,8 @@ public class SpreadsheetParser {
           }
 			    else if (inv.getXpath().contains("\""))
 	          throw new Exception("Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" ("+inv.getEnglish()+") contains a \" character");
+//          if (Utilities.noString(inv.getExpression()))
+//            throw new Exception("Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" ("+inv.getEnglish()+") has no Expression statement (in FHIRPath format)");
 			  }
 			}
 		}
@@ -1423,13 +1540,17 @@ public class SpreadsheetParser {
     resource.getRoot().setProfileName(n);
     if (n.toLowerCase().equals(ap.getId()))
       throw new Exception("Duplicate Profile Name: Package id "+ap.getId()+" and profile id "+n.toLowerCase()+" are the same");
-      
+
     if (profileIds.containsKey(n.toLowerCase()))
       throw new Exception("Duplicate Profile Name: "+n.toLowerCase()+" in "+ap.getId()+", already registered in "+profileIds.get(n.toLowerCase()).getOwner());
-		ConstraintStructure p = new ConstraintStructure(n.toLowerCase(), resource.getRoot().getProfileName(), resource, ig != null ? ig : definitions.getUsageIG(usage, "Parsing "+name));
+		ConstraintStructure p = new ConstraintStructure(n.toLowerCase(), resource.getRoot().getProfileName(), resource, ig != null ? ig : definitions.getUsageIG(usage, "Parsing "+name), wg, fmm, Utilities.existsInList(ap.metadata("Experimental"), "y", "Y", "true", "TRUE", "1"));
 		p.setOwner(ap.getId());
     profileIds.put(n.toLowerCase(), p);
     return p;
+  }
+
+  private WorkGroup wg(String code) {
+    return definitions.getWorkgroups().get(code);
   }
 
   private String igPrefix(ImplementationGuideDefn ig2) {
@@ -1442,22 +1563,8 @@ public class SpreadsheetParser {
 
   private void readExamples(ResourceDefn defn, Sheet sheet) throws Exception {
 		if (sheet != null) {
-      tabfmt.sheet("Examples");
-      tabfmt.column("Name");
-      tabfmt.column("Identity");
-      tabfmt.column("Description");
-      tabfmt.column("Filename");
-      tabfmt.column("Type");
-      tabfmt.column("Profile");
-		
+
 			for (int row = 0; row < sheet.rows.size(); row++) {
-        tabfmt.row();
-        tabfmt.cell(sheet.getColumn(row, "Name"));
-        tabfmt.cell(sheet.getColumn(row, "Identity"));
-        tabfmt.cell(sheet.getColumn(row, "Description"));
-        tabfmt.cell(sheet.getColumn(row, "Filename"));
-        tabfmt.cell(sheet.getColumn(row, "Type"));
-        tabfmt.cell(sheet.getColumn(row, "Profile"));
 
         String name = sheet.getColumn(row, "Name");
 				if (name != null && !name.equals("") && !name.startsWith("!")) {
@@ -1468,7 +1575,7 @@ public class SpreadsheetParser {
 					if (desc == null || desc.equals(""))
 						throw new Exception("Example " + name + " has no description parsing " + this.name);
 					String filename = sheet.getColumn(row, "Filename");
-					if (filename.startsWith(defn.getName().toLowerCase()+"-examples.")) 
+					if (filename.startsWith(defn.getName().toLowerCase()+"-examples."))
 					  throw new Exception("Cannot name an example file "+filename);
 					File file = new CSFile(folder + filename);
 					String type = sheet.getColumn(row, "Type");
@@ -1476,7 +1583,7 @@ public class SpreadsheetParser {
 						throw new Exception("Example " + name + " file '" + file.getAbsolutePath() + "' not found parsing " + this.name);
           List<Example> list = defn.getExamples();
 					String pn = sheet.getColumn(row, "Profile");
-          if (!Utilities.noString(pn)) {
+          if (!Utilities.noString(pn) && !pn.startsWith("!")) {
             Profile ap = null;
             for (Profile r : defn.getConformancePackages()) {
               if (r.getTitle().equals(pn))
@@ -1487,7 +1594,7 @@ public class SpreadsheetParser {
             else
               list = ap.getExamples();
           }
-          
+
 					ExampleType etype = parseExampleType(type, row);
   			  list.add(new Example(name, id, desc, file, parseBoolean(sheet.getColumn(row, "Registered"), row, true), etype, isAbstract));
 				}
@@ -1500,7 +1607,7 @@ public class SpreadsheetParser {
 			if (file.exists())
 			  defn.getExamples().add(
 			      new Example("General", "example", "Example of " + title, file, true, ExampleType.XmlFile, isAbstract));
-		}		
+		}
 	}
 
   private boolean isSpecialType(String type) {
@@ -1508,14 +1615,16 @@ public class SpreadsheetParser {
   }
 
 
-  private void readEvents(Sheet sheet) throws Exception {
+  private void readEvents(Sheet sheet, ResourceDefn root) throws Exception {
 		if (sheet != null) {
 			for (int row = 0; row < sheet.rows.size(); row++) {
 				String code = sheet.getColumn(row, "Event Code");
 				if (code != null && !code.equals("") && !code.startsWith("!")) {
+				  System.out.print("!!Lloyd Look at me! - event "+code+" on resource "+root.getName());
 					EventDefn e = new EventDefn();
 					events.add(e);
 					e.setCode(code);
+					e.setTitle(sheet.getColumn(row, "Title"));
 					e.setDefinition(Utilities.appendPeriod(sheet.getColumn(row, "Description")));
 					e.setCategory(readCategory(sheet.getColumn(row, "Category")));
 					EventUsage u = new EventUsage();
@@ -1572,93 +1681,20 @@ public class SpreadsheetParser {
   private ElementDefn processLine(ResourceDefn root, Sheet sheet, int row, Map<String, Invariant> invariants, boolean profile, Profile pack, boolean firstTime) throws Exception {
 		ElementDefn e;
 		String path = sheet.getColumn(row, "Element");
-		if (firstTime) {
-      tabfmt.column("Element");
-      tabfmt.column("Profile Name");
-      tabfmt.column("Discriminator");
-      tabfmt.column("gForge");
-      tabfmt.column("Card.");
-      tabfmt.column("Slice Description");
-      tabfmt.column("Aliases");
-      tabfmt.column("Is Modifier");
-      tabfmt.column("Must Support");
-      tabfmt.column("Summary");
-      tabfmt.column("Regex");
-      tabfmt.column("UML");
-      tabfmt.column("Inv.");
-      tabfmt.column("Type");
-      tabfmt.column("Binding");
-      tabfmt.column("Short Label");
-      tabfmt.column("Definition");
-      tabfmt.column("Max Length");
-      tabfmt.column("Requirements");
-      tabfmt.column("Comments");
-      for (String n : mappings.keySet()) {
-        tabfmt.column(mappings.get(n).getColumnName());
-      }
-      tabfmt.column("To Do");
-      tabfmt.column("Example");
-      tabfmt.column("Committee Notes");
-      tabfmt.column("Display Hint");
-      tabfmt.column("Value");
-      tabfmt.column("Pattern");
-      tabfmt.column("Default Value");
-      tabfmt.column("Missing Meaning");
-      tabfmt.column("w5");
-		}
-		
-    tabfmt.row();
-		tabfmt.cell(path);
-		tabfmt.cell(sheet.getColumn(row, "Profile Name"));
-		tabfmt.cell(sheet.getColumn(row, "Discriminator"));
-		tabfmt.cell(sheet.getColumn(row, "gForge"));
-		tabfmt.cell(sheet.getColumn(row, "Card."));
-		tabfmt.cell(sheet.getColumn(row, "Slice Description")); 
-		tabfmt.cell(sheet.getColumn(row, "Aliases"));
-		tabfmt.cell(sheet.getColumn(row, "Is Modifier"));
-		tabfmt.cell(sheet.getColumn(row, "Must Support"));
-		tabfmt.cell(sheet.getColumn(row, "Summary"));
-		tabfmt.cell(sheet.getColumn(row, "Regex"));
-		tabfmt.cell(sheet.getColumn(row, "UML"));
-		tabfmt.cell(sheet.getColumn(row, "Inv."));
-		tabfmt.cell(sheet.getColumn(row, "Type"));
-		tabfmt.cell(sheet.getColumn(row, "Binding"));
-    if (!Utilities.noString(sheet.getColumn(row, "Short Label")))
-      tabfmt.cell(sheet.getColumn(row, "Short Label"));
-    else // todo: make this a warning when a fair chunk of the spreadsheets have been converted 
-      tabfmt.cell(sheet.getColumn(row, "Short Name"));
-    tabfmt.cell(sheet.getColumn(row, "Definition"));
-    tabfmt.cell(sheet.getColumn(row, "Max Length"));
-    tabfmt.cell(sheet.getColumn(row, "Requirements"));
-    tabfmt.cell(sheet.getColumn(row, "Comments"));
-    for (String n : mappings.keySet()) {
-      tabfmt.cell(sheet.getColumn(row, mappings.get(n).getColumnName()));
-    }
-    tabfmt.cell(sheet.getColumn(row, "To Do"));
-    tabfmt.cell(sheet.getColumn(row, "Example"));
-    tabfmt.cell(sheet.getColumn(row, "Committee Notes"));
-    tabfmt.cell(sheet.getColumn(row, "Display Hint"));
-    tabfmt.cell(sheet.getColumn(row, "Value"));
-    tabfmt.cell(sheet.getColumn(row, "Pattern"));
-    tabfmt.cell(sheet.getColumn(row, "Default Value"));
-    tabfmt.cell(sheet.getColumn(row, "Missing Meaning"));
-    tabfmt.cell(sheet.getColumn(row, "w5"));
-	
+
 		if (path.startsWith("!"))
 		  return null;
-		if (Utilities.noString(path)) 
+		if (Utilities.noString(path))
       throw new Exception("Error reading definitions - no path found @ " + getLocation(row));
-		  
+
 		if (path.contains("#"))
 			throw new Exception("Old path style @ " + getLocation(row));
 
     String profileName = isProfile ? sheet.getColumn(row, "Profile Name") : "";
     String discriminator = isProfile ? sheet.getColumn(row, "Discriminator") : "";
-		if (!Utilities.noString(profileName) && Utilities.noString(discriminator) && (path.endsWith(".extension") || path.endsWith(".modifierExtension")))
-		  discriminator = "url";
-		  
+
 		boolean isRoot = !path.contains(".");
-		
+
 		if (isRoot) {
 			if (root.getRoot() != null)
 				throw new Exception("Definitions in " + getLocation(row)+ " contain two roots: " + path + " in "+ root.getName());
@@ -1667,25 +1703,29 @@ public class SpreadsheetParser {
 			e = new TypeDefn();
 			e.setName(path);
 			root.setRoot((TypeDefn) e);
+			if (template != null)
+        e.copyFrom(template.getRoot(), root.getName(), templateTitle);
 		} else {
 			e = makeFromPath(root.getRoot(), path, row, profileName, true);
+			if (template != null) {
+			  ElementDefn ted = getTemplateDefinition(path);
+			  if (ted != null) {
+			    e.copyFrom(ted, root.getName(), templateTitle);
+			  }
+			}
 		}
 
-		String tasks = sheet.getColumn(row, "gForge");
-		if (!Utilities.noString(tasks)) {
-		  for (String t : tasks.split(","))
-		    e.getTasks().add(t);
-		}
-		
+    e.setStandardsStatus(StandardsStatus.fromCode(sheet.getColumn(row, "Standards-Status")));
+
 		if (e.getName().startsWith("@")) {
 		  e.setName(e.getName().substring(1));
 		  e.setXmlAttribute(true);
 		}
 		String c = sheet.getColumn(row, "Card.");
 		if (c == null || c.equals("") || c.startsWith("!")) {
-			if (!isRoot && !profile)
+			if (!isRoot && !profile && (template == null))
 				throw new Exception("Missing cardinality at "+ getLocation(row) + " on " + path);
-			if (isRoot) {
+			if (isRoot && (template == null)) {
 			  e.setMinCardinality(0);
 			  e.setMaxCardinality(Integer.MAX_VALUE);
 			}
@@ -1699,7 +1739,7 @@ public class SpreadsheetParser {
 		if (profileName.startsWith("#"))
 		  throw new Exception("blah: "+profileName);
 		e.setProfileName(profileName);
-		e.setSliceDescription(isProfile ? sheet.getColumn(row, "Slice Description") : ""); 
+		e.setSliceDescription(isProfile ? sheet.getColumn(row, "Slice Description") : "");
 		for (String d : discriminator.split("\\,"))
 		  if (!Utilities.noString(d))
 		    e.getDiscriminator().add(d);
@@ -1707,14 +1747,27 @@ public class SpreadsheetParser {
     if (sheet.hasColumn(row, "Must Understand"))
       throw new Exception("Column 'Must Understand' has been renamed to 'Is Modifier'");
 
-		e.setIsModifier(parseBoolean(sheet.getColumn(row, "Is Modifier"), row, null));
+    if (sheet.hasColumn(row, "Is Modifier")) {
+      e.setIsModifier(parseBoolean(sheet.getColumn(row, "Is Modifier"), row, null));
+      String reason = sheet.getColumn(row, "Modifier Reason");
+      if (Utilities.noString(reason) && e.getName().toLowerCase().contains("status") && sheet.getColumn(row, "Short Name").contains("error")) 
+        reason = "This element is labelled as a modifier because it is a status element that contains status entered-in-error which means that the resource should not be treated as valid";
+      if (Utilities.noString(reason) && e.getName().equals("active")) 
+        reason = "This element is labelled as a modifier because it is a status element that can indicate that a record should not be treated as valid";
+      if (Utilities.noString(reason)) {
+        System.out.println("Missing IsModifierReason on "+path);
+        reason = "Not known why this is labelled a modifier";
+      }
+      e.setModifierReason(reason);
+    }
 		if (isProfile) {
 		  // later, this will get hooked in from the underlying definitions, but we need to know this now to validate the extension modifier matching
 	    if (e.getName().equals("modifierExtension"))
 	      e.setIsModifier(true);
 		  e.setMustSupport(parseBoolean(sheet.getColumn(row, "Must Support"), row, null));
 		}
-    e.setSummaryItem(parseBoolean(sheet.getColumn(row, "Summary"), row, null));
+		if (sheet.hasColumn(row, "Summary"))
+		  e.setSummaryItem(parseBoolean(sheet.getColumn(row, "Summary"), row, null));
     e.setRegex(sheet.getColumn(row, "Regex"));
     String uml = sheet.getColumn(row, "UML");
     if (uml != null) {
@@ -1738,125 +1791,183 @@ public class SpreadsheetParser {
 		s = sheet.getColumn(row, "Inv.");
 		if (s != null && !s.equals("")) {
 		  for (String sn : s.split(",")) {
-		    Invariant inv = invariants.get(sn);
-		    if (inv == null)
-		      throw new Exception("unable to find Invariant '" + sn + "' "   + getLocation(row));
-		    e.getStatedInvariants().add(inv);
+		    if (!sn.startsWith("!")) {
+		      Invariant inv = invariants.get(sn);
+		      if (inv == null)
+		        throw new Exception("unable to find Invariant '" + sn + "' "   + getLocation(row));
+		      e.getStatedInvariants().add(inv);
+		    }
 		  }
 		}
 
 		TypeParser tp = new TypeParser();
-		e.getTypes().addAll(tp.parse(sheet.getColumn(row, "Type"), isProfile, profileExtensionBase, context, !path.contains(".")));
+		e.getTypes().addAll(tp.parse(sheet.getColumn(row, "Type"), isProfile, profileExtensionBase, context, !path.contains("."), this.name));
+		if (isRoot && e.getTypes().size() == 1 && definitions  != null) {
+		  if (definitions.getResourceTemplates().containsKey(e.getTypes().get(0).getName())) {
+		    // we've got a template in play.
+		    template = definitions.getResourceTemplates().get(e.getTypes().get(0).getName());
+		    templateTitle = Utilities.unCamelCase(e.getName());
+		    e.getTypes().get(0).setName(template.getRoot().getTypes().get(0).getName());
+		  }
+		}
 
-		
+
 		if (isProfile && ((path.endsWith(".extension") || path.endsWith(".modifierExtension")) && (e.getTypes().size() == 1) && e.getTypes().get(0).hasProfile()) && Utilities.noString(profileName))
 		    throw new Exception("need to have a profile name if a profiled extension is referenced for "+ e.getTypes().get(0).getProfile());
-		
+
 		if (sheet.hasColumn(row, "Concept Domain"))
 			throw new Exception("Column 'Concept Domain' has been retired in "
 					+ path);
 
 		String bindingName = sheet.getColumn(row, "Binding");
-		if (!Utilities.noString(bindingName)) { 
+		if (!Utilities.noString(bindingName)) {
 		  BindingSpecification binding = bindings.get(bindingName);
 		  if (binding == null && definitions != null)
 		    binding = definitions.getCommonBindings().get(bindingName);
 		  if (binding == null) {
 		    if (bindingName.startsWith("!"))
-		      e.setNoBindingAllowed(true); 
+		      e.setNoBindingAllowed(true);
 		    else
 	        throw new Exception("Binding name "+bindingName+" could not be resolved in local spreadsheet");
 		  }
 		  e.setBinding(binding);
 		  if (binding != null && !binding.getUseContexts().contains(name))
 		    binding.getUseContexts().add(name);
+		} else if (e.getBinding() != null) {
+      if (!e.getBinding().getUseContexts().contains(name))
+        e.getBinding().getUseContexts().add(name);
 		}
     if (!Utilities.noString(sheet.getColumn(row, "Short Label")))
-      e.setShortDefn(sheet.getColumn(row, "Short Label"));
-    else // todo: make this a warning when a fair chunk of the spreadsheets have been converted 
-      e.setShortDefn(sheet.getColumn(row, "Short Name"));
-      
-    
-		e.setDefinition(Utilities.appendPeriod(processDefinition(sheet.getColumn(row, "Definition"))));
-		
+      throw new Exception("Short Label is no longer used");
+    if (sheet.hasColumn(row, "Short Name"))// todo: make this a warning when a fair chunk of the spreadsheets have been converted
+      if (sheet.getColumn(row, "Short Name").startsWith("&"))
+        e.setShortDefn(e.getShortDefn() + sheet.getColumn(row, "Short Name").substring(1));
+      else
+        e.setShortDefn(sheet.getColumn(row, "Short Name"));
+    if (!isProfile && e.getShortDefn() == null)
+      throw new Exception("A short definition is required "+ getLocation(row));
+
+    if (sheet.hasColumn(row, "Definition"))
+      if (sheet.getColumn(row, "Definition").startsWith("&"))
+        e.setDefinition(Utilities.appendPeriod(e.getDefinition() + processDefinition(sheet.getColumn(row, "Definition")).substring(1)));
+      else
+        e.setDefinition(Utilities.appendPeriod(processDefinition(sheet.getColumn(row, "Definition"))));
+
 		if (isRoot) {
 			root.setDefinition(e.getDefinition());
-		} 
-		
+		}
+
 		if (isProfile || isLogicalModel)
 		  e.setMaxLength(sheet.getColumn(row, "Max Length"));
-		e.setRequirements(Utilities.appendPeriod(sheet.getColumn(row, "Requirements")));
-		e.setComments(Utilities.appendPeriod(sheet.getColumn(row, "Comments")));
+		if (sheet.hasColumn(row, "Requirements"))
+		  if (sheet.getColumn(row, "Requirements").startsWith("&"))
+		    e.setRequirements(Utilities.appendPeriod(e.getRequirements() + sheet.getColumn(row, "Requirements").substring(1)));
+		  else
+		    e.setRequirements(Utilities.appendPeriod(sheet.getColumn(row, "Requirements")));
+		if (sheet.hasColumn(row, "Comments"))
+		  if (sheet.getColumn(row, "Comments").startsWith("&"))
+		    e.setComments(Utilities.appendPeriod(e.getComments() + Utilities.appendPeriod(sheet.getColumn(row, "Comments").substring(1))));
+		  else
+		    e.setComments(Utilities.appendPeriod(Utilities.appendPeriod(sheet.getColumn(row, "Comments"))));
 		for (String n : mappings.keySet()) {
-		  e.addMapping(n, sheet.getColumn(row, mappings.get(n).getColumnName()));
+		  String ms = sheet.getColumn(row, mappings.get(n).getColumnName());
+		  if (mappings.get(n).getColumnName().equals("Snomed Code") && !Utilities.noString(ms))
+		    System.out.println("!!");
+		  e.addMapping(n, ms);
 		}
     if (pack != null) {
       for (String n : pack.getMappingSpaces().keySet()) {
         e.addMapping(n, sheet.getColumn(row, pack.getMappingSpaces().get(n).getColumnName()));
-      }      
+      }
     }
-		e.setTodo(Utilities.appendPeriod(sheet.getColumn(row, "To Do")));
-		e.setExample(processValue(sheet, row, "Example", e));
-		processOtherExamples(e, sheet, row);		
-		e.setCommitteeNotes(Utilities.appendPeriod(sheet.getColumn(row, "Committee Notes")));
-		e.setDisplayHint(sheet.getColumn(row, "Display Hint"));
+    if (sheet.hasColumn("Hierarchy"))
+      e.setHierarchy(parseBoolean(sheet.getColumn(row, "Hierarchy"), row, null));
+    if (sheet.hasColumn(row, "To Do"))
+      e.setTodo(Utilities.appendPeriod(sheet.getColumn(row, "To Do")));
+    if (sheet.hasColumn(row, "Example"))
+      e.setExample(processValue(sheet, row, "Example", sheet.getColumn(row, "Example"), e));
+		processOtherExamples(e, sheet, row);
+		if (sheet.hasColumn(row, "Committee Notes"))
+		  e.setCommitteeNotes(Utilities.appendPeriod(sheet.getColumn(row, "Committee Notes")));
+		if (sheet.hasColumn(row, "Display Hint"))
+		  e.setDisplayHint(sheet.getColumn(row, "Display Hint"));
 		if (isProfile) {
-      e.setFixed(processValue(sheet, row, "Value", e));
-      e.setPattern(processValue(sheet, row, "Pattern", e));
+      e.setFixed(processValue(sheet, row, "Value", sheet.getColumn(row, "Value"), e));
+      e.setPattern(processValue(sheet, row, "Pattern", sheet.getColumn(row, "Pattern"), e));
 		} else {
-      e.setDefaultValue(processValue(sheet, row, "Default Value", e));
-      e.setMeaningWhenMissing(sheet.getColumn(row, "Missing Meaning"));
+		  if (sheet.hasColumn(row, "Default Value")) 
+		    errors.add(path+": Default value '"+sheet.getColumn(row, "Default Value")+"' found @ "+getLocation(row));
+		  if (sheet.hasColumn(row, "Missing Meaning"))
+		    e.setMeaningWhenMissing(sheet.getColumn(row, "Missing Meaning"));
 		}
-		e.setW5(checkW5(sheet.getColumn(row, "w5"), path));
+    if (sheet.hasColumn(row, "w5"))
+      e.setW5(checkW5(sheet.getColumn(row, "w5"), path));
+    if (sheet.hasColumn(row, "Translatable"))
+      e.setTranslatable(parseBoolean(sheet.getColumn(row, "Translatable"), row, false));
+    if (sheet.hasColumn(row, "Order Meaning"))
+      e.setOrderMeaning(sheet.getColumn(row, "Order Meaning"));
 		return e;
 	}
 
-	private void processOtherExamples(ElementDefn e, Sheet sheet, int row) throws Exception {
-	  for (int i = 1; i <= 10; i++) {
+	private ElementDefn getTemplateDefinition(String path) {
+	  String[] parts = path.split("\\.");
+	  if (parts.length != 2)
+	    return null;
+	  for (ElementDefn ted : template.getRoot().getElements()) {
+	    if (ted.getName().equals(parts[1]))
+	      return ted;
+	  }
+    return null;
+  }
+
+  private void processOtherExamples(ElementDefn e, Sheet sheet, int row) throws Exception {
+	  for (int i = 1; i <= 20; i++) {
 	    String s = sheet.getColumn(row, "Example "+Integer.toString(i));
+	    if (Utilities.noString(s))
+	      s = sheet.getByColumnPrefix(row, "Example "+Integer.toString(i)+" (");
 	    if (!Utilities.noString(s))
-       e.getOtherExamples().put(i, processValue(sheet, row, "Example "+Integer.toString(i), e));
-	  }    
+        e.getOtherExamples().put(i, processValue(sheet, row, "Example "+Integer.toString(i), s, e));
+	  }
   }
 
   private String checkW5(String value, String path) throws Exception {
     if (Utilities.noString(value))
       return null;
-    if (path.contains(".")) {
-      if (!definitions.getW5s().containsKey(value))
+    if (!definitions.getW5s().containsKey(value)) {
+      if (!value.contains(".")) {
         throw new Exception("Unknown w5 value "+value+" at "+path);
-    } else {
-      String[] vs = value.split("\\."); 
-      if (vs.length != 2)
-        throw new Exception("improper w5 value "+value+" at "+path);
-      if (!definitions.getW5s().containsKey(vs[0]))
-        throw new Exception("Unknown w5 value "+value+" at "+path);
-      W5Entry w5 = definitions.getW5s().get(vs[0]);
-      if (!w5.getSubClasses().contains(vs[1]))
-        throw new Exception("Unknown w5 value "+value+" at "+path);
+      } else {
+        String[] vs = value.split("\\.");
+        if (vs.length != 2)
+          throw new Exception("improper w5 value "+value+" at "+path);
+        if (!definitions.getW5s().containsKey(vs[0]))
+          throw new Exception("Unknown w5 value "+value+" at "+path);
+        W5Entry w5 = definitions.getW5s().get(vs[0]);
+        if (!w5.getSubClasses().contains(vs[1]))
+          throw new Exception("Unknown w5 value "+value+" at "+path);
+      }
     }
     return value;
   }
 
 
-  private Type processValue(Sheet sheet, int row, String column, ElementDefn e) throws Exception {
-    String source = sheet.getColumn(row, column);
+  private Type processValue(Sheet sheet, int row, String column, String source, ElementDefn e) throws Exception {
     if (Utilities.noString(source))
-      return null;  
-	  if (e.getTypes().size() != 1) 
-      throw new Exception("Unable to process "+column+" unless a single type is specified (types = "+e.typeCode()+") "+getLocation(row));
+      return null;
+	  if (e.getTypes().size() != 1)
+      throw new Exception("Unable to process "+column+" unless a single type is specified (types = "+e.typeCode()+") "+getLocation(row)+", column = "+column);
     String type = e.typeCode();
     if (definitions != null) {
       if (definitions.getConstraints().containsKey(type))
         type = definitions.getConstraints().get(type).getBaseType();
     } else {
-      StructureDefinition sd = context.getProfiles().get("http://hl7.org/fhir/StructureDefinition/"+type);
-      if (sd != null && sd.hasConstrainedType())
-        type = sd.getConstrainedType();
+      StructureDefinition sd = context.fetchTypeDefinition(type);
+      if (sd != null) // not loaded yet?
+        type = sd.getType();
       if (type.equals("SimpleQuantity"))
         type = "Quantity";
     }
-    
+
     if (source.startsWith("{")) {
       JsonParser json = new JsonParser();
       return json.parseType(source, type);
@@ -1866,38 +1977,41 @@ public class SpreadsheetParser {
     } else {
       if (source.startsWith("\"") && source.endsWith("\""))
         source = source.substring(1, source.length()-1);
-      
-      
+
       if (type.equals("string"))
         return new StringType(source);
       if (type.equals("boolean"))
-        return new BooleanType(Boolean.valueOf(source)); 
+        return new BooleanType(Boolean.valueOf(source));
       if (type.equals("integer"))
-        return new IntegerType(Integer.valueOf(source)); 
+        return new IntegerType(Integer.valueOf(source));
       if (type.equals("unsignedInt"))
-        return new UnsignedIntType(Integer.valueOf(source)); 
+        return new UnsignedIntType(Integer.valueOf(source));
       if (type.equals("positiveInt"))
-        return new PositiveIntType(Integer.valueOf(source)); 
+        return new PositiveIntType(Integer.valueOf(source));
       if (type.equals("decimal"))
-        return new DecimalType(new BigDecimal(source)); 
+        return new DecimalType(new BigDecimal(source));
       if (type.equals("base64Binary"))
-        return new Base64BinaryType(Base64.decode(source.toCharArray()));  
+        return new Base64BinaryType(Base64.decode(source.toCharArray()));
       if (type.equals("instant"))
-        return new InstantType(source); 
+        return new InstantType(source);
       if (type.equals("uri"))
-        return new UriType(source); 
+        return new UriType(source);
+      if (type.equals("url"))
+        return new UrlType(source);
+      if (type.equals("canonical"))
+        return new CanonicalType(source);
       if (type.equals("date"))
-        return new DateType(source); 
+        return new DateType(source);
       if (type.equals("dateTime"))
-        return new DateTimeType(source); 
+        return new DateTimeType(source);
       if (type.equals("time"))
-        return new TimeType(source); 
+        return new TimeType(source);
       if (type.equals("code"))
-        return new CodeType(source); 
+        return new CodeType(source);
       if (type.equals("oid"))
-        return new OidType(source); 
+        return new OidType(source);
       if (type.equals("uuid"))
-        return new UuidType(source); 
+        return new UuidType(source);
       if (type.equals("id"))
         return new IdType(source);
       if (type.startsWith("Reference(")) {
@@ -1913,8 +2027,8 @@ public class SpreadsheetParser {
           if (parts.length > 1)
             p.setEndElement(new DateTimeType(parts[1].trim()));
           return p;
-              
-        } else 
+
+        } else
           throw new Exception("format not understood parsing "+source+" into a period");
       }
       if (type.equals("CodeableConcept")) {
@@ -1928,7 +2042,7 @@ public class SpreadsheetParser {
             system = "http://loinc.org";
           else if (parts[0].equalsIgnoreCase("AMTv2"))
             system = "http://nehta.gov.au/amtv2";
-          else 
+          else
             system = "http://hl7.org/fhir/"+parts[0];
           String code = parts[1];
           String display = parts.length > 2 ? parts[2] : null;
@@ -1945,9 +2059,9 @@ public class SpreadsheetParser {
       }
       if (type.equals("Quantity")) {
         int s = 0;
-        if (source.startsWith("<=") || source.startsWith("=>")) 
+        if (source.startsWith("<=") || source.startsWith("=>"))
           s = 2;
-        else if (source.startsWith("<") || source.startsWith(">")) 
+        else if (source.startsWith("<") || source.startsWith(">"))
           s = 1;
         int i = s;
         while (i < source.length() && Character.isDigit(source.charAt(i)))
@@ -1955,13 +2069,13 @@ public class SpreadsheetParser {
         Quantity q = new Quantity();
         if (s > 0)
           q.setComparator(QuantityComparator.fromCode(source.substring(0, s)));
-        if (i > s) 
+        if (i > s)
           q.setValue(new BigDecimal(source.substring(s, i)));
-        if (i < source.length()) 
+        if (i < source.length())
           q.setUnit(source.substring(i).trim());
         return q;
       }
-        
+
       throw new Exception("Unable to process primitive value '"+source+"' provided for "+column+" - unhandled type "+type+" @ " +getLocation(row));
     }
   }
@@ -1979,45 +2093,66 @@ public class SpreadsheetParser {
 		  }
 	}
 
-  private int processExtension(ElementDefn extensions, Sheet sheet, int row,	Definitions definitions, String uri, Profile ap, List<ValidationMessage> issues, Map<String, Invariant> invariants) throws Exception {
+  private int processExtension(ElementDefn extensions, Sheet sheet, int row,	Definitions definitions, String uri, Profile ap, List<ValidationMessage> issues, Map<String, Invariant> invariants, WorkGroup wg) throws Exception {
 	  // first, we build the extension definition
     StructureDefinition ex = new StructureDefinition();
     ex.setUserData(ToolResourceUtilities.NAME_RES_IG, ig == null ? "core" : ig.getCode());
-    ex.setKind(StructureDefinitionKind.DATATYPE);
-    ex.setConstrainedType("Extension");
-    ex.setBase("http://hl7.org/fhir/StructureDefinition/Extension");
+    ex.setUserData("profile", ap);
+    ex.setKind(StructureDefinitionKind.COMPLEXTYPE);
+    ex.setType("Extension");
+    ex.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Extension");
+    ex.setDerivation(TypeDerivationRule.CONSTRAINT);
     ex.setAbstract(false);
     ex.setFhirVersion(version);
+    ex.setVersion(Constants.VERSION);
+    if (wg != null)
+      ToolingExtensions.setCodeExtension(ex, ToolingExtensions.EXT_WORKGROUP, wg.getCode());
+    String fmm = sheet.getColumn(row, "FMM");
+    if (Utilities.noString(fmm))
+      fmm = "1"; // default fmm value for extensions
+    ToolingExtensions.addIntegerExtension(ex, ToolingExtensions.EXT_FMM_LEVEL, Integer.parseInt(fmm));
+    
+    if (ap.hasMetadata("fmm-level"))
+      ToolingExtensions.addIntegerExtension(ex, ToolingExtensions.EXT_FMM_LEVEL, Integer.parseInt(ap.getFmmLevel()));
+    if (ap.hasMetadata("workgroup"))
+      ToolingExtensions.setCodeExtension(ex, ToolingExtensions.EXT_WORKGROUP, ap.getWg());
 
     ToolResourceUtilities.updateUsage(ex, ap.getCategory());
 	  String name = sheet.getColumn(row, "Code");
 	  String context = null;
 	  if (Utilities.noString(name))
 	    throw new Exception("No code found on Extension at "+getLocation(row));
-	  
+
 	  if (name.contains("."))
 	    throw new Exception("Extension Definition Error: Extension names cannot contain '.': "+name+"  at "+getLocation(row));
-	
+
 	  ex.setUrl(uri+name);
     ex.setId(tail(ex.getUrl()));
 	  ap.getExtensions().add(ex);
 	  if (context == null) {
-      ex.setContextType(readContextType(sheet.getColumn(row, "Context Type"), row));
-      String cc = sheet.getColumn(row, "Context");
-      if (!Utilities.noString(cc))
-        for (String c : cc.split("\\;")) {
-          if (definitions != null) // igtodo: what to do about this?
-            definitions.checkContextValid(ex.getContextType(), c, this.name);
-          ex.addContext(c);
-        }
+	    ExtensionContextType ct = readContextType(sheet.getColumn(row, "Context Type"), row);
+	    if (sheet.hasColumn("Context Invariant"))
+	      for (String s : sheet.getColumn(row, "Context Invariant").split("~"))
+	        ex.addContextInvariant(s);
+	    String cc = checkContextMacro(sheet.getColumn(row, "Context"));
+	    if (!Utilities.noString(cc))
+	      for (String c : cc.split("\\;")) {
+	        StructureDefinitionContextComponent ec = ex.addContext();
+	        ec.setExpression(c.trim());
+	        ec.setType(ct);
+	        if (definitions != null) { 
+	          definitions.checkContextValid(ec, this.name, this.context);
+	        }
+	      }
 	  }
-	  ex.setDisplay(sheet.getColumn(row, "Display"));
-	  
+	  ex.setTitle(sheet.getColumn(row, "Display"));
+
 	  ElementDefn exe = new ElementDefn();
 	  exe.setName(sheet.getColumn(row, "Code"));
-	  
+
 	  ElementDefn exu = new ElementDefn();
 	  exu.setName("url");
+	  exu.setXmlAttribute(true);
 	  exe.getElements().add(exu);
 	  exu.setFixed(new UriType(ex.getUrl()));
 	  exu.getTypes().add(new TypeRef().setName("uri"));
@@ -2028,33 +2163,35 @@ public class SpreadsheetParser {
 	        exe.getInvariants().put(inv.getId(), inv);
 	    }
 	  }
-     
+
     parseExtensionElement(sheet, row, definitions, exe, false);
     String sl = exe.getShortDefn();
     ex.setName(sheet.getColumn(row, "Name"));
     if (!ex.hasName())
-      ex.setName(ex.getDisplay());
-    if (!Utilities.noString(sl) && (!sl.contains("|") || !ex.hasName())) 
+      ex.setName(exe.getName());
+    if (!ex.hasName())
+      ex.setName(ex.getTitle());
+    if (!ex.hasName() && !Utilities.noString(sl))
       ex.setName(sl);
     if (!ex.hasName())
       throw new Exception("Extension "+ex.getUrl()+" missing name at "+getLocation(row));
-    ex.setDescription(exe.getDefinition());
+    ex.setDescription(preProcessMarkdown(exe.getDefinition(), "Extension Definition"));
 
     ex.setPublisher(ap.metadata("author.name"));
     if (ap.hasMetadata("author.reference"))
-      ex.addContact().getTelecom().add(Factory.newContactPoint(ContactPointSystem.OTHER, ap.metadata("author.reference")));
+      ex.addContact().getTelecom().add(Factory.newContactPoint(ContactPointSystem.URL, ap.metadata("author.reference")));
     //  <code> opt Zero+ Coding assist with indexing and finding</code>
     if (ap.hasMetadata("date"))
       ex.setDateElement(Factory.newDateTime(ap.metadata("date").substring(0, 10)));
     else
       ex.setDate(genDate.getTime());
 
-    if (ap.hasMetadata("status")) 
-      ex.setStatus(ConformanceResourceStatus.fromCode(ap.metadata("status")));
-   
+    if (ap.hasMetadata("status"))
+      ex.setStatus(PublicationStatus.fromCode(ap.metadata("status")));
+
     row++;
     if (ig == null || ig.isCore()) {
-      if (!ex.getUrl().startsWith("http://hl7.org/fhir/StructureDefinition/"))
+      if (!ex.getUrl().startsWith("http://hl7.org/fhir/StructureDefinition/") && !ex.getUrl().startsWith("http://fhir-registry.smarthealthit.org/StructureDefinition/"))
         throw new Exception("extension "+ex.getUrl()+" is not valid in the publication tooling");
     } else {
       if (!ex.getUrl().startsWith("http://hl7.org/fhir/StructureDefinition/"+ig.getCode()+"-"))
@@ -2066,6 +2203,7 @@ public class SpreadsheetParser {
       ElementDefn child = new ElementDefn();
       p.getElements().add(child);
       child.setName(n.substring(n.lastIndexOf(".")+1));
+      child.setProfileName(child.getName());
       parseExtensionElement(sheet, row, definitions, child, true);
       if (invariants != null) {
         for (Invariant inv : invariants.values()) {
@@ -2075,16 +2213,43 @@ public class SpreadsheetParser {
       }
       row++;
     }
-	  
-    new ProfileGenerator(definitions, null, pkp, null, null, null).convertElements(exe, ex, null);
-    StructureDefinition base = definitions != null ? definitions.getSnapShotForType("Extension") : this.context.getProfiles().get("http://hl7.org/fhir/StructureDefinition/Extension");
+    ProfileGenerator gen = new ProfileGenerator(definitions, null, pkp, null, null, null, fpUsages, null);
+    ProfileUtilities utils = new ProfileUtilities(this.context, issues, pkp);
+    gen.convertElements(exe, ex, null);
+    ex.getDifferential().getElementFirstRep().getType().clear();
+    utils.setIds(ex, false);
+
+    StructureDefinition base = definitions != null ? definitions.getSnapShotForType("Extension") : this.context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/Extension");
     List<String> errors = new ArrayList<String>();
-    new ProfileUtilities(this.context).sortDifferential(base, ex, "extension "+ex.getUrl(), pkp, errors);
+    utils.sortDifferential(base, ex, "extension "+ex.getUrl(), errors);
     assert(errors.size() == 0);
-    new ProfileUtilities(this.context).generateSnapshot(base, ex, ex.getUrl(), ex.getName(), pkp, issues);
-	  this.context.seeExtensionDefinition("http://hl7.org/fhir", ex);
+    utils.generateSnapshot(base, ex, ex.getUrl(), ex.getName());
+    utils.setIds(ex, true);
+    new ExtensionDefinitionValidator(context).validate(ex);
+	  this.context.cacheResource(ex);
 	  return row;
 	}
+
+ private String checkContextMacro(String s) throws FHIRException {
+    if ("%canonicals".equals(s)) {
+      StringBuilder b = new StringBuilder();
+      boolean first = true;
+      
+      for (String rn : definitions.sortedResourceNames()) {
+        ResourceDefn rd = definitions.getResourceByName(rn);
+        if (rd.getTemplate() != null) {
+          if (first) first = false; else b.append(";");
+          b.append(rn);
+        }
+      }
+      return b.toString();
+    }
+    return s;
+  }
+
+ private String preProcessMarkdown(String text, String location) throws Exception {
+    return MarkDownPreProcessor.process(definitions, context, null, text, location, null);
+  }
 
   private String tail(String url) {
     return url.substring(url.lastIndexOf("/")+1);
@@ -2107,24 +2272,55 @@ public class SpreadsheetParser {
     for (String n : mappings.keySet()) {
       exe.addMapping(n, sheet.getColumn(row, mappings.get(n).getColumnName()));
     }
-    String tasks = sheet.getColumn(row, "gForge");
-    if (!Utilities.noString(tasks)) {
-      for (String t : tasks.split(","))
-        exe.getTasks().add(t);
-    }   
     exe.setTodo(Utilities.appendPeriod(sheet.getColumn(row, "To Do")));
     exe.setCommitteeNotes(Utilities.appendPeriod(sheet.getColumn(row, "Committee Notes")));
-    exe.setShortDefn(sheet.getColumn(row, "Short Label"));
+    exe.setShortDefn(sheet.getColumn(row, "Short Name"));
 
     exe.setIsModifier(parseBoolean(sheet.getColumn(row, "Is Modifier"), row, null));
+    if (exe.isModifier()) {
+      String reason = sheet.getColumn(row, "Modifier Reason");
+      if (Utilities.noString(reason)) {
+        System.out.println("Missing IsModifierReason on extension @ "+getLocation(row));
+        reason = "Not known why this is labelled a modifier";
+      }
+      exe.setModifierReason(reason);
+    }
     if (nested && exe.isModifier())
       throw new Exception("Cannot create a nested extension that is a modifier @"+getLocation(row));
     exe.getTypes().add(new TypeRef().setName("Extension"));
-    
+
     // things that go on Extension.value
     if (!Utilities.noString(sheet.getColumn(row, "Type"))) {
       ElementDefn exv = new ElementDefn();
-      exv.setName("value[x]");
+      exv.getTypes().addAll(new TypeParser().parse(sheet.getColumn(row, "Type"), true, profileExtensionBase, context, false, sheet.title));
+      if (exv.getTypes().size()>1) {
+        exv.setName("valueReference");
+        for (TypeRef t : exv.getTypes()) {
+          if (!t.getName().equals("Reference") && !t.getName().equals("canonical") ) {
+            exv.setName("value[x]");
+            break;
+          }
+        }
+      } else {
+        TypeRef type = exv.getTypes().get(0);
+        if (type.getName().equals("*") || type.getParams().size()>1)
+          exv.setName("value[x]");
+        else {
+          String name = type.getName();
+          exv.setName("value" + name.substring(0,1).toUpperCase() + name.substring(1));
+        }
+      }
+/*      if (!exv.getName().equals("value[x]")) {
+        ElementDefn exd = new ElementDefn();
+        exd.setName("value[x]");
+        exd.setMaxCardinality(1);
+        exd.getTypes().add(new TypeRef(exv.getTypes().get(0).getName()));
+        List<String> discriminator = new ArrayList<String>();
+        discriminator.add("@type");
+        exd.setDiscriminator(discriminator);
+        exe.getElements().add(exd);
+        exv.setProfileName("value");
+      }*/
       exe.getElements().add(exv);
       String bindingName = sheet.getColumn(row, "Binding");
       if (!Utilities.noString(bindingName)) {
@@ -2133,7 +2329,7 @@ public class SpreadsheetParser {
           binding = definitions.getCommonBindings().get(bindingName);
         if (binding == null) {
           if (bindingName.startsWith("!"))
-            exv.setNoBindingAllowed(true); 
+            exv.setNoBindingAllowed(true);
           else
             throw new Exception("Binding name "+bindingName+" could not be resolved in local spreadsheet");
         }
@@ -2143,31 +2339,27 @@ public class SpreadsheetParser {
       }
       // exv.setBinding();
       exv.setMaxLength(sheet.getColumn(row, "Max Length"));
-      exv.getTypes().addAll(new TypeParser().parse(sheet.getColumn(row, "Type"), true, profileExtensionBase, context, false));
-      exv.setExample(processValue(sheet, row, "Example", exv));
+      exv.setExample(processValue(sheet, row, "Example", sheet.getColumn(row, "Example"), exv));
     }
   }
 
-	private ExtensionContext readContextType(String value, int row) throws Exception {
+	private ExtensionContextType readContextType(String value, int row) throws Exception {
     if (value.equals("Resource"))
-      return ExtensionContext.RESOURCE;
+      return ExtensionContextType.ELEMENT;
     if (value.equals("DataType") || value.equals("Data Type"))
-      return ExtensionContext.DATATYPE;
+      return ExtensionContextType.ELEMENT;
     if (value.equals("Elements"))
-      return ExtensionContext.RESOURCE;
+      return ExtensionContextType.ELEMENT;
     if (value.equals("Element"))
-      return ExtensionContext.RESOURCE;
-    if (value.equals("Mapping"))
-      return ExtensionContext.MAPPING;
+      return ExtensionContextType.ELEMENT;
     if (value.equals("Extension"))
-      return ExtensionContext.EXTENSION;
-	  
+      return ExtensionContextType.EXTENSION;
     throw new Exception("Unable to read context type '"+value+"' at "+getLocation(row));
   }
 
 	 private ElementDefn findContext(ElementDefn root, String pathname, String source) throws Exception {
 	    String[] path = pathname.split("\\.");
-	    
+
 	    if (!path[0].equals(root.getName()))
 	      throw new Exception("Element Path '" + pathname + "' is not legal found at " + source);
 	    ElementDefn res = root;
@@ -2175,10 +2367,10 @@ public class SpreadsheetParser {
 	      String en = path[i];
 	      if (en.length() == 0)
 	        throw new Exception("Improper path " + pathname + " found at " + source);
-	      if (en.charAt(en.length() - 1) == '*') 
+	      if (en.charAt(en.length() - 1) == '*')
 	        throw new Exception("no-list wrapper found at " + source);
 
-	      ElementDefn t = res.getElementByName(en, true, definitions, "find context");
+	      ElementDefn t = res.getElementByName(en, true, definitions, "find context", false);
 
 	      if (t == null) {
           throw new Exception("Reference to undefined Element "+ pathname+ " found at " + source);
@@ -2188,8 +2380,7 @@ public class SpreadsheetParser {
 	    return res;
 	  }
 
-  private ElementDefn makeFromPath(ElementDefn root, String pathname,
-			int row, String profileName, boolean allowMake) throws Exception {
+  private ElementDefn makeFromPath(ElementDefn root, String pathname, int row, String profileName, boolean allowMake) throws Exception {
 		String[] path = pathname.split("\\.");
 		boolean n = false;
 		if (!path[0].equals(root.getName()))
@@ -2204,10 +2395,10 @@ public class SpreadsheetParser {
 			if (en.charAt(en.length() - 1) == '*') {
 				throw new Exception("no list wrapper found " + getLocation(row));
 			}
-			ElementDefn t = res.getElementByName(en);
+			ElementDefn t = res.getElementByName(definitions, en, false, false, null);
 
 			boolean isUnpickingElement = t != null && (i == path.length - 1)
-					&& !t.getProfileName().equals("")
+					&& (!t.getProfileName().equals("") || t.hasDescriminator())
 					&& !t.getProfileName().equals(profileName);
 
 			if (t == null || isUnpickingElement) {
@@ -2219,7 +2410,7 @@ public class SpreadsheetParser {
 					throw new Exception("Encounter Element "+ pathname+ " before all the elements in the path are defined in "+ getLocation(row));
 			  if (!allowMake)
           throw new Exception("Reference to undefined Element "+ pathname+ " in "+ getLocation(row));
-			    
+
 				t = new ElementDefn();
 				t.setName(en);
 				res.getElements().add(t);
@@ -2227,8 +2418,7 @@ public class SpreadsheetParser {
 			res = t;
 		}
 		if (!n)
-			throw new Exception("Duplicate Row name " + pathname + " @ "
-					+ getLocation(row));
+			throw new Exception("Duplicate Row name " + pathname + " "+(Utilities.noString(profileName) ? "" : "("+profileName+")")+" @ "+ getLocation(row));
 		return res;
 	}
 
@@ -2300,20 +2490,20 @@ public class SpreadsheetParser {
   public LogicalModel parseLogicalModel() throws Exception {
     ResourceDefn resource = new ResourceDefn();
     isLogicalModel = true;
-    
+
     Sheet sheet = loadSheet("Bindings");
     if (sheet != null)
       readBindings(sheet);
-      
+
     sheet = loadSheet("Invariants");
     Map<String,Invariant> invariants = null;
     if (sheet != null)
       invariants = readInvariants(sheet, title, "Invariants");
-    
+
     sheet = loadSheet("Data Elements");
     if (sheet == null)
       throw new Exception("No Sheet found for Data Elements");
-    tabfmt.sheet("Data Elements");
+
     for (int row = 0; row < sheet.rows.size(); row++) {
       processLine(resource, sheet, row, invariants, false, null, row == 0);
     }
@@ -2321,7 +2511,7 @@ public class SpreadsheetParser {
 
     if (invariants != null) {
       for (Invariant inv : invariants.values()) {
-        if (Utilities.noString(inv.getContext())) 
+        if (Utilities.noString(inv.getContext()))
           throw new Exception("Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" has no context");
         else {
           ElementDefn ed = findContext(resource.getRoot(), inv.getContext(), "Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" Context");
@@ -2333,27 +2523,33 @@ public class SpreadsheetParser {
           }
           else if (inv.getXpath().contains("\""))
             throw new Exception("Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" ("+inv.getEnglish()+") contains a \" character");
+//          if (Utilities.noString(inv.getExpression()))
+//            throw new Exception("Type "+resource.getRoot().getName()+" Invariant "+inv.getId()+" ("+inv.getEnglish()+") has no Expression statement (in FHIRPath format)");
         }
       }
     }
-    
+
     //TODO: Will fail if type has no root. - GG: so? when could that be
     // EK: Future types. But those won't get there.
     if( bindings != null)
       resource.getRoot().getNestedBindings().putAll(bindings);
-    
+
     scanNestedTypes(resource, resource.getRoot(), resource.getName());
-    
+    resolveElementReferences(resource, resource.getRoot());
+
     LogicalModel lm = new LogicalModel();
-    lm.setRoot(resource.getRoot());
     lm.setResource(resource);
-    tabfmt.close();
+    lm.setWg(definitions.getWorkgroups().get("fhir"));
 
     return lm;
   }
 
   public List<ValueSet> getValuesets() {
     return valuesets;
+  }
+
+  public List<String> getErrors() {
+    return errors;
   }
 
 

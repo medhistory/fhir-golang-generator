@@ -29,20 +29,36 @@ POSSIBILITY OF SUCH DAMAGE.
 package org.hl7.fhir.utilities.xml;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
+import org.xml.sax.SAXException;
 
 public class XMLUtil {
 
@@ -267,7 +283,7 @@ public class XMLUtil {
 				else if (ch > '~' && charset != null && charSetImpliesAscii(charset)) 
 					// TODO - why is hashcode the only way to get the unicode number for the character
 					// in jre 5.0?
-					sb.append("&#x"+Integer.toHexString(new Character(ch).hashCode()).toUpperCase()+";");
+					sb.append("&#x"+Integer.toHexString(ch).toUpperCase()+";");
 				else if (isNoLines) {
 					if (ch == '\r')
 						sb.append("&#xA;");
@@ -297,6 +313,13 @@ public class XMLUtil {
     return c;
   }
 
+  public static Element getNamedChildByAttribute(Element e, String name, String nname, String nvalue) {
+    Element c = getFirstChild(e);
+    while (c != null && !((name.equals(c.getLocalName()) || name.equals(c.getNodeName())) && nvalue.equals(c.getAttribute(nname))))
+      c = getNextSibling(c);
+    return c;
+  }
+
   public static Element getNextSibling(Element e) {
     Node n = e.getNextSibling();
     while (n != null && n.getNodeType() != Node.ELEMENT_NODE)
@@ -311,6 +334,17 @@ public class XMLUtil {
         set.add(c);
       c = getNextSibling(c);
     }
+  }
+
+  public static List<Element> getNamedChildren(Element e, String name) {
+    List<Element> res = new ArrayList<Element>();
+    Element c = getFirstChild(e);
+    while (c != null) {
+      if (name.equals(c.getLocalName()) || name.equals(c.getNodeName()) )
+        res.add(c);
+      c = getNextSibling(c);
+    }
+    return res;
   }
 
   public static String htmlToXmlEscapedPlainText(Element r) {
@@ -342,7 +376,7 @@ public class XMLUtil {
     return s.toString();
   }
 
-  public static String htmlToXmlEscapedPlainText(String definition) throws Exception {
+  public static String htmlToXmlEscapedPlainText(String definition) throws ParserConfigurationException, SAXException, IOException  {
     return htmlToXmlEscapedPlainText(parseToDom("<div>"+definition+"</div>").getDocumentElement());
   }
 
@@ -361,10 +395,10 @@ public class XMLUtil {
     return e == null ? null : e.getAttribute("value");
   }
 
-  public static void setNamedChildValue(Element element, String name, String value) throws Exception {
+  public static void setNamedChildValue(Element element, String name, String value) throws FHIRException  {
     Element e = getNamedChild(element, name);
     if (e == null)
-      throw new Exception("unable to find element "+name);
+      throw new FHIRException("unable to find element "+name);
     e.setAttribute("value", value);
   }
 
@@ -377,9 +411,18 @@ public class XMLUtil {
         children.add(c);
       c = getNextSibling(c);
     }
-	  
   }
 
+	public static void getNamedChildrenWithTails(Element focus, String name, List<Element> children, Set<String> typeTails) {
+    Element c = getFirstChild(focus);
+    while (c != null) {
+      String n = c.getLocalName() != null ? c.getLocalName() : c.getNodeName(); 
+      if (n.equals(name) || (!n.equals("responseCode") && (n.startsWith(name) && typeTails.contains(n.substring(name.length())))))
+        children.add(c);
+      c = getNextSibling(c);
+    }
+  }
+	
   public static boolean hasNamedChild(Element e, String name) {
     Element c = getFirstChild(e);
     while (c != null && !name.equals(c.getLocalName()) && !name.equals(c.getNodeName()))
@@ -387,11 +430,18 @@ public class XMLUtil {
     return c != null;
   }
 
-  public static Document parseToDom(String content) throws Exception {
+  public static Document parseToDom(String content) throws ParserConfigurationException, SAXException, IOException  {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(false);
     DocumentBuilder builder = factory.newDocumentBuilder();
     return builder.parse(new ByteArrayInputStream(content.getBytes()));
+  }
+
+  public static Document parseFileToDom(String filename) throws ParserConfigurationException, SAXException, IOException  {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(false);
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    return builder.parse(new FileInputStream(filename));
   }
 
   public static Element getLastChild(Element e) {
@@ -408,6 +458,104 @@ public class XMLUtil {
     while (n != null && n.getNodeType() != Node.ELEMENT_NODE)
       n = n.getPreviousSibling();
     return (Element) n;
+  }
+
+  public static String getNamedChildAttribute(Element element, String name, String aname) {
+    Element e = getNamedChild(element, name);
+    return e == null ? null : e.getAttribute(aname);
+  }
+
+  public static void writeDomToFile(Document doc, String filename) throws TransformerException {
+    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    Transformer transformer = transformerFactory.newTransformer();
+    DOMSource source = new DOMSource(doc);
+    StreamResult streamResult =  new StreamResult(new File(filename));
+    transformer.transform(source, streamResult);    
+  }
+
+  public static String getXsiType(org.w3c.dom.Element element) {
+    Attr a = element.getAttributeNodeNS("http://www.w3.org/2001/XMLSchema-instance", "type");
+    return (a == null ? null : a.getTextContent());
+    
+  }
+
+	public static String getDirectText(org.w3c.dom.Element node) {
+    Node n = node.getFirstChild();
+    StringBuilder b = new StringBuilder();
+    while (n != null) {
+    	if (n.getNodeType() == Node.TEXT_NODE) 
+    		b.append(n.getTextContent());
+    	n = n.getNextSibling();
+    }
+	  return b.toString().trim();
+	}
+
+  public static void deleteByName(Element e, String name) {
+    List<Element> matches = getNamedChildren(e, name);
+    for (Element m : matches)
+      e.removeChild(m);    
+  }
+
+  public static void deleteAttr(Element e, String namespaceURI, String localName) {
+    if (e.hasAttributeNS(namespaceURI, localName))
+      e.removeAttributeNS(namespaceURI, localName);
+    
+  }
+
+  public static Node[] children(Element ed) {
+    Node[] res = new Node[ed.getChildNodes().getLength()];
+    for (int i = 0; i < ed.getChildNodes().getLength(); i++)
+      res[i] = ed.getChildNodes().item(i);
+    return res;
+  }
+
+  public static Element insertChild(Document doc, Element element, String name, String namespace, int indent) {
+    Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+    Element child = doc.createElementNS(namespace, name);
+    element.insertBefore(child, element.getFirstChild());
+    element.insertBefore(node, element.getFirstChild());
+    return child;
+  }
+
+  public static Element insertChild(Document doc, Element element, String name, String namespace, Node before, int indent) {
+    if (before == null) {
+      Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+      element.insertBefore(node, before);
+    }
+    Element child = doc.createElementNS(namespace, name);
+    element.insertBefore(child, before);
+    if (before != null) {
+      Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+      element.insertBefore(node, before);
+    }
+    return child;
+  }
+
+  public static void addTextTag(Document doc, Element element, String name, String namespace, String text, int indent) {
+    Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+    element.appendChild(node);
+    Element child = doc.createElementNS(namespace, name);
+    element.appendChild(child);
+    child.setAttribute("value", text);    
+  }
+
+  public static void saveToFile(Element root, OutputStream stream) throws TransformerException {
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    Result output = new StreamResult(stream);
+    Source input = new DOMSource(root);
+
+    transformer.transform(input, output);
+  }
+
+  public static void spacer(Document doc, Element element, int indent) {
+    Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+    element.appendChild(node);
+   
+  }
+
+  public static String getNamedChildText(Element element, String name) {
+    Element e = getNamedChild(element, name);
+    return e == null ? null : e.getTextContent();
   }
 
  	

@@ -4,22 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.hl7.fhir.instance.formats.XmlParser;
-import org.hl7.fhir.instance.model.Bundle;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.DataElement;
-import org.hl7.fhir.instance.model.DecimalType;
-import org.hl7.fhir.instance.model.DiagnosticReport;
-import org.hl7.fhir.instance.model.Extension;
-import org.hl7.fhir.instance.model.Observation;
-import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.Type;
+import org.hl7.fhir.r4.formats.IParser.OutputStyle;
+import org.hl7.fhir.r4.formats.XmlParser;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.formats.IParser.OutputStyle;
 
 /**
  * To run the resource order updater, do things in this order:
@@ -58,7 +51,7 @@ public class ResourceOrderUpdater {
     }
   }
 
-  private static void processFolder(String path, String resource) {
+  private static void processFolder(String path, String resource) throws IOException {
     System.out.println("process "+path);
     File folder = new File(path);
     for (String filename : folder.list()) {

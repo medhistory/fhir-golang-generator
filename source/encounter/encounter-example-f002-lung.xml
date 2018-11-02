@@ -8,7 +8,11 @@
         <value value="v3251"/>
     </identifier>
     <status value="finished"/>
-    <class value="outpatient"/>
+    <class>
+        <system value="http://terminology.hl7.org/CodeSystem/v3-ActCode"/>
+        <code value="AMB"/> <!-- outpatient -->
+        <display value="ambulatory"/>
+    </class>
     <type>
         <coding>
             <system value="http://snomed.info/sct"/>
@@ -23,10 +27,10 @@
             <display value="Urgent"/>
         </coding>
     </priority>
-    <patient>
+	<subject>
         <reference value="Patient/f001"/>
         <display value="P. van de Heuvel"/>
-    </patient>
+    </subject>
     <participant>
         <individual>
             <reference value="Practitioner/f003"/>
@@ -39,13 +43,13 @@
         <system value="http://unitsofmeasure.org"/>
         <code value="min"/>
     </length>
-    <reason>
+    <reasonCode>
         <coding>
             <system value="http://snomed.info/sct"/>
             <code value="34068001"/>
             <display value="Partial lobectomy of lung"/>
         </coding>
-    </reason>
+    </reasonCode>
     <hospitalization>
         <preAdmissionIdentifier>
             <use value="official"/>

@@ -6,7 +6,11 @@
     <value value="Encounter_Roel_20130404"/>
  </identifier>
  <status value="finished"/><!--Encounter has finished-->
- <class value="outpatient"/><!--Outpatient encounter for consultation-->
+    <class>
+        <system value="http://terminology.hl7.org/CodeSystem/v3-ActCode"/>
+        <code value="AMB"/> <!-- outpatient -->
+        <display value="ambulatory"/>
+    </class>
  <type><!--TODO Why is this merely a CodeableConcept and not Resource (any)?-->
     <coding>
        <system value="http://snomed.info/sct"/>
@@ -21,18 +25,18 @@
        <display value="Normal"/>
     </coding>
  </priority>
- <patient>
+ <subject>
      <reference value="Patient/f201"/>
      <display value="Roel"/>
- </patient>
+ </subject>
  <participant>
      <individual    >
          <reference value="Practitioner/f201"/>
     </individual>
  </participant>
- <reason>
+ <reasonCode>
    <text value="The patient had fever peaks over the last couple of days. He is worried about these peaks."/>
- </reason>
+ </reasonCode>
  <!--No indication, because no referral took place-->
  <!--No hospitalization was deemed necessary-->
  <serviceProvider>

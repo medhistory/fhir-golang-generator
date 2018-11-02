@@ -46,33 +46,9 @@
     <gender value="male" />
     <birthDate value="1980-02-04"/>
 
-	<practitionerRole>
-	<managingOrganization>
-        <reference value="Organization/f001"/>
-        <display value="BMC"/>
-    </managingOrganization>
-    <role>
-        <coding>
-            <system value="urn:oid:2.16.840.1.113883.2.4.15.111"/>
-            <!-- "AssignedRoleType" coding system -->
-            <code value="01.000"/>
-            <display value="Arts"/>
-        </coding>
-        <text value="Care role"/>
-    </role>
-    <specialty>
-        <coding>
-            <system value="urn:oid:2.16.840.1.113883.2.4.15.111"/>
-            <!-- "AssignedRoleType" coding system -->
-            <code value="01.018"/>
-            <display value="Ear-, Nose and Throat"/>
-        </coding>
-        <text value="specialization"/>
-    </specialty>
-	</practitionerRole>
 	<communication>
         <coding>
-            <system value="urn:oid:2.16.840.1.113883.6.121"/>
+            <system value="urn:ietf:bcp:47"/>
             <!-- List of ISO 639-1 language codes (ISO 3066) -->
             <code value="nl"/>
             <display value="Netherlands"/>

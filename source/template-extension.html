@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-
+<!-- template-extension.html -->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <%file newheader%>
@@ -7,20 +7,26 @@
 <body>
 <%file newnavbar%>
 
-<div class="col-9">
+<div class="col-12">
 
 <%extDefnHeader%>
 
 <h1>Extension: <%ext-name%></h1>
+
+<table class="<%fmm-style%>">
+ <tr><td><%wg%></td><td><%fmm%></td><td><%sstatus%><!--!ns!--></td><td><%profile-context%></td></tr>
+</table>
 
 <p>URL for this extension: </p>
 <pre><b><%extensionurl%></b></pre>
 
 <p>Status: <%status%>. <%pubdetails%></p>
 
-<p> 
-<%definition%> 
+<p>
+<%definition%>
 </p>
+<%ext-comments%>
+
 
 <%context-info%>
 
@@ -30,9 +36,9 @@
 <h2>
 Extension Content
 </h2>
-<a name="def"> </a>
-<a name="<%name%>"> </a>
-<a name="<%title%>"> </a>
+<a name="def"></a>
+<a name="<%name%>"></a>
+<a name="<%title%>"></a>
 
 <div id="tabs">
   <ul>
@@ -55,7 +61,7 @@ Extension Content
   <div id="tabs-struc2">
 
 <div id="tbl1">
-<p><b>Fulle Structure</b></p>
+<p><b>Full Structure</b></p>
  <div id="tbl-inner">
   <%extension-table true%>
  </div>
@@ -85,7 +91,7 @@ Extension Content
   <div id="tabs-all">
 
   <div id="tbl1a">
-<a name="tbl"> </a>
+<a name="tbl"></a>
 <p><b>Summary</b></p>
  <div id="tbl-inner">
   <%extension-table false%>
@@ -93,7 +99,7 @@ Extension Content
 </div>
 
 <div id="tbl2a">
-<a name="tbl"> </a>
+<a name="tbl"></a>
 <p><b>Full Structure</b></p>
  <div id="tbl-inner">
   <%extension-table true%>
@@ -102,7 +108,7 @@ Extension Content
 
 
 <div id="xml">
-<a name="xml"> </a>
+<a name="xml"></a>
 <p><b>XML Template</b></p>
  <div id="xml-inner">
   <%xml%>
@@ -110,19 +116,19 @@ Extension Content
 </div>
 
 <div id="json">
-<a name="json"> </a>
+<a name="json"></a>
 <p><b>JSON Template</b></p>
  <div id="json-inner">
   <%json%>
  </div>
 </div>
-  
+
  </div>
 </div>
-  
-<p>&nbsp;</p>  
 
-<a name="tx"> </a>
+<p>&nbsp;</p>
+
+<a name="tx"></a>
 <%tx%>
 
 <%inv%>
@@ -140,7 +146,7 @@ Extension Content
 try {
   var currentTabIndex = sessionStorage.getItem('fhir-resource-tab-index');
 }
-catch(exception){ 
+catch(exception){
 }
 
 if (!currentTabIndex)
@@ -155,11 +161,11 @@ $( '#tabs' ).tabs({
              try {
                sessionStorage.setItem('fhir-resource-tab-index', currentTabIndex);
              }
-             catch(exception){ 
+             catch(exception){
              }
          }
      });
 </script>
-    
+
 </body>
 </html>

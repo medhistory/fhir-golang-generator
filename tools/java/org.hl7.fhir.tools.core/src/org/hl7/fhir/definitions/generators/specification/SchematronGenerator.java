@@ -11,61 +11,69 @@ import org.hl7.fhir.definitions.model.Definitions;
 import org.hl7.fhir.definitions.model.ElementDefn;
 import org.hl7.fhir.definitions.model.Invariant;
 import org.hl7.fhir.definitions.model.ResourceDefn;
-import org.hl7.fhir.definitions.model.TypeRef;
-import org.hl7.fhir.instance.model.ElementDefinition.ElementDefinitionConstraintComponent;
-import org.hl7.fhir.instance.model.StructureDefinition;
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
+import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionConstraintComponent;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.tools.publisher.PageProcessor;
-import org.hl7.fhir.utilities.TextStreamWriter;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xml.SchematronWriter;
 import org.hl7.fhir.utilities.xml.SchematronWriter.Rule;
+import org.hl7.fhir.utilities.xml.SchematronWriter.SchematronType;
 import org.hl7.fhir.utilities.xml.SchematronWriter.Section;
 
 public class SchematronGenerator {
 			
 	private PageProcessor page;
-  private SchematronWriter sch;
   
-  public SchematronGenerator(OutputStream out, PageProcessor page) throws UnsupportedEncodingException {
+  public SchematronGenerator(PageProcessor page) throws UnsupportedEncodingException {
     super();
     this.page = page;
-    sch = new SchematronWriter(out);
   }
-
-
-  
-	public void generate(Definitions definitions) throws Exception {
-    insertGlobalRules();
-    for (ResourceDefn root : definitions.getResources().values()) {
-      Section s = sch.addSection(root.getName());
+ 
+	public void generate(OutputStream out, Definitions definitions) throws Exception {
+    SchematronWriter sch = new SchematronWriter(out, SchematronType.ALL_RESOURCES, "All Resources");
+    insertGlobalRules(sch);
+    for (String rn : definitions.sortedResourceNames()) {
+      ResourceDefn root = definitions.getResources().get(rn);
+      Section s = sch.section(root.getName());
       ArrayList<String> parents = new ArrayList<String>();
       generateInvariants(s, null, root.getRoot(), definitions, parents, root.getName());
     }
     Set<StructureDefinition> processed = new HashSet<StructureDefinition>(); 
-    for (StructureDefinition exd : page.getWorkerContext().getExtensionDefinitions().values()) {
+    for (StructureDefinition exd : page.getWorkerContext().getExtensionDefinitions()) {
       if (exd.getSnapshot().getElement().get(0).hasConstraint() && !processed.contains(exd)) {
         processed.add(exd);
-        Section s = sch.addSection("Extension: "+exd.getName());
-        Rule r = s.rule("//f:extension[@url='"+exd.getUrl()+"']");
+        Section s = sch.section("Extension: "+exd.getName());
+        Rule r = s.rule("f:"+(exd.getSnapshot().getElementFirstRep().getIsModifier() ? "modifierExtension" : "extension")+"[@url='"+exd.getUrl()+"']");
         for (ElementDefinitionConstraintComponent inv : exd.getSnapshot().getElement().get(0).getConstraint()) {
-          r.assrt(inv.getXpath().replace("\"", "'"), inv.getKey()+": "+inv.getHuman());
+          if (!isGlobal(inv.getKey()))
+            r.assrt(inv.getXpath().replace("\"", "'"), inv.getKey()+": "+inv.getHuman());
         }
       }
     }
-    sch.dump(null);	  
+    sch.dump();	 
+    sch.close();
 	}
 
-  private void insertGlobalRules() throws IOException {
-    Section s = sch.addSection("Global");
-    s.rule("//f:*").assrt("@value|f:*|h:div", "global-1: All FHIR elements must have a @value or children");
+  private boolean isGlobal(String key) {
+    return Utilities.existsInList(key, "ele-1", "ext-1");
+  }
+
+  private void insertGlobalRules(SchematronWriter sch) throws IOException {
+    Section s = sch.section("Global");
+    s.rule("f:*").assrt("@value|f:*|h:div", "global-1: All FHIR elements must have a @value or children");
+    s.rule("f:extension").assrt("exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])", "ext-1: Must have either extensions or value[x], not both");
+    s.rule("f:modifierExtension").assrt("exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])", "ext-1: Must have either extensions or value[x], not both");
 	}
 
-  public void generate(ResourceDefn root, Definitions definitions) throws Exception {
-    insertGlobalRules();
-    Section s = sch.addSection(root.getName());
+  public void generate(OutputStream out, ResourceDefn root, Definitions definitions) throws Exception {
+    SchematronWriter sch = new SchematronWriter(out, SchematronType.RESOURCE, root.getName());
+    insertGlobalRules(sch);
+    Section s = sch.section(root.getName());
     ArrayList<String> parents = new ArrayList<String>();
     generateInvariants(s, null, root.getRoot(), definitions, parents, root.getName());
-    sch.dump(root.getName());
+    sch.dump();
+    sch.close();
   }
 
 	private ElementDefn getType(TypeRef tr, Definitions definitions) throws Exception {
@@ -103,7 +111,7 @@ public class SchematronGenerator {
 	  if (name.contains("("))
 	    name = name.substring(0, name.indexOf("("));
     if (ed.getElements().size() > 0) {
-	    path = path == null ? "f:"+name : path + "/f:"+name;
+	    path = path == null ? "f:"+name : path + (recursesToSelf(ed) ? "/" : "") + "/f:"+name;
 	    genInvs(section, path, ed);
 	    genChildren(section, path, null, ed, definitions, parents);
 	  } else {
@@ -132,6 +140,20 @@ public class SchematronGenerator {
 	  }
 	}
 
+  private boolean recursesToSelf(ElementDefn ed) {
+    return recursesToSelf("@"+ed.getPath(), ed.getElements());
+  }
+
+  private boolean recursesToSelf(String path, List<ElementDefn> elements) {
+    for (ElementDefn ed : elements) {
+      if (path.equals(ed.typeCode()))
+        return true;
+     if (recursesToSelf(path, ed.getElements()))
+       return true;
+    }
+    return false;
+  }
+
   private List<TypeRef> allTypes() {
     return new ArrayList<TypeRef>();
   }
@@ -144,12 +166,14 @@ public class SchematronGenerator {
         c++;
     }
     if (c > 0) {
-      Rule r = section.rule("//"+path);
+      Rule r = section.rule(path);
 	    for (Invariant inv : ed.getInvariants().values()) {
 	      if (inv.getFixedName() == null || path.endsWith(inv.getFixedName())) {
-	        if (inv.getXpath().contains("&lt;") || inv.getXpath().contains("&gt;"))
-	          throw new Exception("error in xpath - do not escape xml characters in the xpath in the excel spreadsheet");
-	        r.assrt(inv.getXpath().replace("\"", "'"), inv.getId()+": "+inv.getEnglish());
+	        if (!isGlobal(inv.getId())) {
+	          if (inv.getXpath().contains("&lt;") || inv.getXpath().contains("&gt;"))
+	            throw new Exception("error in xpath - do not escape xml characters in the xpath in the excel spreadsheet");
+	          r.assrt(inv.getXpath().replace("\"", "'"), inv.getId()+": "+inv.getEnglish());
+	        }
 	      }
 	    }
 	  }
@@ -157,12 +181,6 @@ public class SchematronGenerator {
 
   private boolean isSpecialType(String tn) {
     return tn.equals("xhtml");
-  }
-
-
-
-  public void close() throws IOException {
-    sch.close();
   }
 
 }

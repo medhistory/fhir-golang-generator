@@ -1,24 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
-  <name value="UDI Codes"/>
+  <meta>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+  </meta>
+  <name value="UDICodes"/>
+  <title value="UDI Codes"/>
   <status value="draft"/>
   <publisher value="Financial Management"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="This value set includes sample UDI codes."/>
   <copyright value="This is an example set."/>
-  <codeSystem>
-    <system value="http://hl7.org/fhir/ex-udi"/>
-    <caseSensitive value="true"/>
-    <concept>
-      <code value="{01}123456789"/>
-      <display value="{01}123456789"/>
-      <definition value="Example DI in GS1 format."/>
-    </concept>
-  </codeSystem>
+  <compose>
+    <include>
+      <system value="http://hl7.org/fhir/ex-udi"/>
+    </include>
+  </compose>
 </ValueSet>

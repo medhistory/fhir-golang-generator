@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <HealthcareService xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../schema/healthcareservice.xsd">
 	<id value="example"/>
 	<text>
@@ -20,23 +20,37 @@
 			</physicalType>
 		</Location>
 	</contained>
-	<serviceType>
-		<type>
+  <identifier>
+    <system value="http://example.org/shared-ids"/>
+    <value value="HS-12" />
+  </identifier>
+	<active value="true"/>
+  <providedBy>
+    <reference value="Organization/f001"/>
+    <display value="Burgers University Medical Center"/>
+  </providedBy>
+  <category>
+    <coding>
+      <system value="http://terminology.hl7.org/CodeSystem/service-category"/>
+      <code value="8"/>
+      <display value="Counselling"/>
+    </coding>
+    <text value="Counselling"/>
+  </category>
+	<type>
 			<coding>
 				<system value="http://snomed.info/sct"/>
 				<code value="394913002"/>
 				<display value="Psychotherapy"/>
 			</coding>
-		</type>
-	</serviceType>
-	<serviceType>
-		<type>
+	</type>
+	<type>
 			<coding>
 				<system value="http://snomed.info/sct"/>
 				<code value="394587001"/>
 				<display value="Psychiatry"/>
 			</coding>
-		</type>
+	</type>
 		<specialty>
 			<coding>
 				<system value="http://snomed.info/sct"/>
@@ -44,11 +58,10 @@
 				<display value="Posttraumatic stress disorder"/>
 			</coding>
 		</specialty>
-	</serviceType>
 	<location>
 		<reference value="Location/1"/>
 	</location>
-	<serviceName value="Consulting psychologists and/or psychology services"/>
+	<name value="Consulting psychologists and/or psychology services"/>
 	<comment value="Providing Specialist psychology services to the greater Den Burg area, many years of experience dealing with PTSD issues" />
 	<extraDetails value="Several assessments are required for these specialist services, and the waiting times can be greater than 3 months at times. Existing patients are prioritized when requesting appointments on the schedule."/>
 	<telecom>
@@ -65,13 +78,24 @@
 		<reference value="#DenBurg"/>
 		<display value="Greater Denburg area" />
 	</coverageArea>
+  <serviceProvisionCode>
+    <coding>
+      <system value="http://terminology.hl7.org/CodeSystem/service-provision-conditions"/>
+      <code value="cost"/>
+      <display value="Fees apply" />
+    </coding>
+  </serviceProvisionCode>
 	<eligibility>
-		<coding>
-			<display value="DVA Required"/>
-		</coding>
+		<code>
+			<coding>
+				<display value="DVA Required"/>
+			</coding>
+		</code>
+		<comment value="Evidence of application for DVA status may be sufficient for commencing assessment"/>
 	</eligibility>
-	<eligibilityNote value="Evidence of application for DVA status may be sufficient for commencing assessment"/>
-	<programName value="PTSD outreach"/>
+	<program>
+		<text value="PTSD outreach"/>
+	</program>
 	<characteristic>
 		<coding>
 			<display value="Wheelchair access"/>
@@ -101,12 +125,15 @@
 			<display value="Secure Email" />
 		</coding>
 	</referralMethod>
-	<publicKey value="*** Base64 public key goes here to be used for secure messaging ***"/>
 	<appointmentRequired value="false"/>
+	<availableTime>
+    <!-- This is a 24 hour service on wednesdays (due to weekly local service needs) -->
+		<daysOfWeek value="wed" />
+    <allDay value="true"/>
+	</availableTime>
 	<availableTime>
 		<daysOfWeek value="mon" />
 		<daysOfWeek value="tue" />
-		<daysOfWeek value="wed" />
 		<daysOfWeek value="thu" />
 		<daysOfWeek value="fri" />
 		<availableStartTime value="08:30:00"/>
@@ -133,4 +160,8 @@
 		</during>
 	</notAvailable>
 	<availabilityExceptions value="Reduced capacity is available during the Christmas period"/>
+  <endpoint>
+    <!--   Endpoint that handles the v2 messaging for the external organization   -->
+    <reference value="Endpoint/example"/>
+  </endpoint>
 </HealthcareService>

@@ -1,4 +1,4 @@
-<EnrollmentRequest xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ..\..\schema\remittance.xsd">
+<EnrollmentRequest xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../schema/remittance.xsd">
  <id value="22345"/>
 
  <text>
@@ -11,20 +11,23 @@
     <value value="EN22345"/>
   </identifier>
  
+  <status value="active"/>
+ 
   <created value="2014-08-16"/>
 
-  <organization>
+  <insurer>
+    <reference value="Organization/2"/>
+  </insurer>
+  
+  <provider>
     <reference value="Organization/1"/>
-  </organization>
+  </provider>
 
-  <subject>
+  <candidate>
     <reference value="Patient/1"/>
-  </subject>
+  </candidate>
   
   <coverage>
      <reference value="Coverage/9876B1"/>
   </coverage>
-  <relationship>
-     <code value="spouse"/>
-  </relationship>
  </EnrollmentRequest>

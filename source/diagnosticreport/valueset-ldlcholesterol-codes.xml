@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
   <id value="lipid-ldl-codes"/>
   <meta>
     <lastUpdated value="2015-06-23T10:59:44.264+10:00"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -40,9 +40,6 @@
       </ul>
     </div>
   </text>
-  <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
-    <valueUri value="2.16.840.1.113883.4.642.2.444"/>
-  </extension>
   <url value="http://hl7.org/fhir/ValueSet/lipid-ldl-codes"/>
   <version value="1.0.0"/>
   <name value="LDLCodes"/>
@@ -51,7 +48,7 @@
   <publisher value="HL7 (FHIR Project)"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
     <telecom>
@@ -79,7 +76,7 @@
       </concept>
       <concept>
         <code value="13457-7"/>
-        <display value="LDL Cholesterol (Calc)"/>
+        <display value="Cholesterol in LDL [Mass/volume] in Serum or Plasma by calculation"/>
         <designation>
           <use>
             <system value="http://snomed.info/sct"/>

@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <Bundle xmlns="http://hl7.org/fhir">
   <id value="3a0707d3-549e-4467-b8b8-5a2ab3800efe"/>
   <type value="message"/>
+  <timestamp value="2015-07-14T11:15:33+10:00"/>
   <entry>
     <fullUrl value="urn:uuid:d9d296d8-5afd-42e1-a0ce-3344e0e003ed"/>
     <resource>
@@ -16,11 +17,13 @@
            
           </div>
         </text>
-        <timestamp value="2015-07-14T11:15:33+10:00"/>
-        <event>
-          <system value="http://hl7.org/fhir/message-events"/>
+        <eventCoding>
+          <system value="http://example.org/fhir/message-events"/>
           <code value="patient-link"/>
-        </event>
+        </eventCoding>        
+        <source>
+          <endpoint value="http://acme.com/ehr/fhir"/>
+        </source>
         <response>
           <identifier value="efdd254b-0e09-4164-883e-35cf3871715f"/>
           <code value="ok"/>
@@ -28,24 +31,16 @@
             <reference value="OperationOutcome/03f9aa7d-b395-47b9-84e0-053678b6e4e3"/>
           </details>
         </response>
-        <source>
-          <endpoint value="http://acme.com/ehr/fhir"/>
-        </source>
-        <destination>
-          <endpoint value="http://example.org/clients/ehr-lite"/>
-        </destination>
-        <receiver>
-          <reference value="http://acme.com/ehr/fhir/Practitioner/2323-33-4"/>
-        </receiver>
+
       <!--  this message is posted to http://acme.com/ehr/fhir, 
              with an event 'link' to link 2 patient records, and nominates
              2 patients on the server  -->
-        <data>
+        <focus>
           <reference value="http://acme.com/ehr/fhir/Patient/pat1"/>
-        </data>
-        <data>
+        </focus>
+        <focus>
           <reference value="http://acme.com/ehr/fhir/Patient/pat12"/>
-        </data>
+        </focus>
       </MessageHeader>
     </resource>
   </entry>
@@ -87,7 +82,7 @@
           <use value="usual"/>
           <type>
             <coding>
-              <system value="http://hl7.org/fhir/v2/0203"/>
+              <system value="http://terminology.hl7.org/CodeSystem/v2-0203"/>
               <code value="MR"/>
             </coding>
           </type>
@@ -104,8 +99,8 @@
         <contact>
           <relationship>
             <coding>
-              <system value="http://hl7.org/fhir/patient-contact-relationship"/>
-              <code value="owner"/>
+              <system value="http://example.org/fhir/CodeSystem/patient-contact-relationship"/>
+              <code value="E"/>
             </coding>
           </relationship>
           <organization>
@@ -143,7 +138,7 @@
           <use value="usual"/>
           <type>
             <coding>
-              <system value="http://hl7.org/fhir/v2/0203"/>
+              <system value="http://terminology.hl7.org/CodeSystem/v2-0203"/>
               <code value="MR"/>
             </coding>
           </type>
@@ -161,7 +156,7 @@
           <extension url="http://example.org/Profile/administrative-status">
             <valueCodeableConcept>
               <coding>
-                <system value="http://hl7.org/fhir/v2/0001"/>
+                <system value="http://terminology.hl7.org/CodeSystem/v2-0001"/>
                 <code value="A"/>
                 <display value="Ambiguous"/>
               </coding>

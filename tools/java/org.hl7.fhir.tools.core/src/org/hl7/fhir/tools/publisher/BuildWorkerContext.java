@@ -1,78 +1,77 @@
 package org.hl7.fhir.tools.publisher;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.fhir.ucum.UcumEssenceService;
+import org.fhir.ucum.UcumException;
+import org.fhir.ucum.UcumService;
 import org.hl7.fhir.definitions.model.Definitions;
-import org.hl7.fhir.instance.formats.IParser;
-import org.hl7.fhir.instance.formats.JsonParser;
-import org.hl7.fhir.instance.formats.ParserType;
-import org.hl7.fhir.instance.formats.XmlParser;
-import org.hl7.fhir.instance.formats.IParser.OutputStyle;
-import org.hl7.fhir.instance.model.Bundle;
-import org.hl7.fhir.instance.model.ConceptMap;
-import org.hl7.fhir.instance.model.Conformance;
-import org.hl7.fhir.instance.model.DataElement;
-import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.instance.model.OperationOutcome.IssueType;
-import org.hl7.fhir.instance.model.OperationOutcome;
-import org.hl7.fhir.instance.model.Parameters;
-import org.hl7.fhir.instance.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.instance.model.Questionnaire;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.SearchParameter;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.StructureDefinition;
-import org.hl7.fhir.instance.model.ValueSet;
-import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionDesignationComponent;
-import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetComposeComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.instance.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
-import org.hl7.fhir.instance.terminologies.ValueSetExpanderSimple;
-import org.hl7.fhir.instance.terminologies.ValueSetExpansionCache;
-import org.hl7.fhir.instance.utils.EOperationOutcome;
-import org.hl7.fhir.instance.utils.INarrativeGenerator;
-import org.hl7.fhir.instance.utils.IWorkerContext;
-import org.hl7.fhir.instance.utils.NarrativeGenerator;
-import org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult;
-import org.hl7.fhir.instance.utils.client.EFhirClientException;
-import org.hl7.fhir.instance.utils.client.FHIRToolingClient;
-import org.hl7.fhir.instance.validation.IResourceValidator;
-import org.hl7.fhir.instance.validation.InstanceValidator;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
+import org.hl7.fhir.r4.context.BaseWorkerContext;
+import org.hl7.fhir.r4.context.HTMLClientLogger;
+import org.hl7.fhir.r4.context.IWorkerContext;
+import org.hl7.fhir.r4.formats.IParser;
+import org.hl7.fhir.r4.formats.JsonParser;
+import org.hl7.fhir.r4.formats.ParserType;
+import org.hl7.fhir.r4.formats.XmlParser;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionDesignationComponent;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r4.model.ImplementationGuide;
+import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
+import org.hl7.fhir.r4.model.NamingSystem.NamingSystemUniqueIdComponent;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.hl7.fhir.r4.terminologies.TerminologyClient;
+import org.hl7.fhir.r4.terminologies.TerminologyClientR4;
+import org.hl7.fhir.r4.utils.INarrativeGenerator;
+import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.hl7.fhir.r4.utils.NarrativeGenerator;
+import org.hl7.fhir.r4.utils.client.EFhirClientException;
 import org.hl7.fhir.utilities.CSFileInputStream;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
+import org.hl7.fhir.utilities.OIDUtils;
+import org.hl7.fhir.utilities.TranslatorXml;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.xml.XMLUtil;
 import org.hl7.fhir.utilities.xml.XMLWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /*
  *  private static Map<String, StructureDefinition> loadProfiles() throws Exception {
@@ -94,108 +93,48 @@ import org.w3c.dom.Element;
  - list of resource names
 
  */
-public class BuildWorkerContext implements IWorkerContext {
+public class BuildWorkerContext extends BaseWorkerContext implements IWorkerContext {
 
-  private FHIRToolingClient client;
-  private Map<String, ValueSet> codeSystems = new HashMap<String, ValueSet>();
-  private Map<String, DataElement> dataElements = new HashMap<String, DataElement>();
-  private Map<String, ValueSet> valueSets = new HashMap<String, ValueSet>();
-  private Map<String, ConceptMap> maps = new HashMap<String, ConceptMap>();
-  private Map<String, StructureDefinition> profiles = new HashMap<String, StructureDefinition>();
-  private Map<String, SearchParameter> searchParameters = new HashMap<String, SearchParameter>();
-  private Map<String, StructureDefinition> extensionDefinitions = new HashMap<String, StructureDefinition>();
+  private static final String SNOMED_EDITION = "900000000000207008"; // international
+//  private static final String SNOMED_EDITION = "731000124108"; // us edition
+
+  
+  private UcumService ucum;
   private String version;
   private List<String> resourceNames = new ArrayList<String>();
-  private Map<String, Questionnaire> questionnaires = new HashMap<String, Questionnaire>();
   private Definitions definitions;
   private Map<String, Concept> snomedCodes = new HashMap<String, Concept>();
   private Map<String, Concept> loincCodes = new HashMap<String, Concept>();
   private boolean triedServer = false;
   private boolean serverOk = false;
-  private String cache;
-  private String tsServer;
-  private ValueSetExpansionCache expansionCache;
   
 
 
-  public BuildWorkerContext(Definitions definitions, FHIRToolingClient client, Map<String, ValueSet> codeSystems, Map<String, ValueSet> valueSets, Map<String, ConceptMap> maps, Map<String, StructureDefinition> profiles) {
-    super();
+  public BuildWorkerContext(Definitions definitions, TerminologyClient client, Map<String, CodeSystem> codeSystems, Map<String, ValueSet> valueSets, Map<String, ConceptMap> maps, Map<String, StructureDefinition> profiles, Map<String, ImplementationGuide> guides, String folder) throws UcumException, ParserConfigurationException, SAXException, IOException, FHIRException {
+    super(codeSystems, valueSets, maps, profiles, guides);
     this.definitions = definitions;
-    this.client = client;
-    this.codeSystems = codeSystems;
-    this.valueSets = valueSets;
-    this.maps = maps;
-    this.profiles = profiles;
+    this.txClient = client;
+    this.txLog = new HTMLClientLogger(null);
+    setExpansionProfile(buildExpansionProfile());
+    this.setTranslator(new TranslatorXml(Utilities.path(folder, "implementations", "translations.xml")));
+  }
+
+  private Parameters buildExpansionProfile() {
+    Parameters res = new Parameters();
+    res.addParameter("profile-url", "urn:uuid:"+UUID.randomUUID().toString().toLowerCase());
+    res.addParameter("excludeNested", false);
+    res.addParameter("includeDesignations", true);
+    // res.addParameter("activeOnly", true);
+    res.addParameter("system-version", "http://snomed.info/sct|http://snomed.info/sct/"+SNOMED_EDITION); // value sets are allowed to override this. for now
+    return res;
   }
 
   public boolean hasClient() {
-    return client != null;
+    return txClient != null;
   }
 
-  public FHIRToolingClient getClient() {
-    return client;
-  }
-
-  public Map<String, ValueSet> getCodeSystems() {
-    return codeSystems;
-  }
-
-  public Map<String, DataElement> getDataElements() {
-    return dataElements;
-  }
-
-  public Map<String, ValueSet> getValueSets() {
-    return valueSets;
-  }
-
-  public Map<String, ConceptMap> getMaps() {
-    return maps;
-  }
-
-  public Map<String, StructureDefinition> getProfiles() {
-    return profiles;
-  }
-
-  public Map<String, StructureDefinition> getExtensionDefinitions() {
-    return extensionDefinitions;
-  }
-
-  public Map<String, Questionnaire> getQuestionnaires() {
-    return questionnaires;
-  }
-
-  public void seeExtensionDefinition(String url, StructureDefinition ed) throws Exception {
-    if (extensionDefinitions.get(ed.getUrl()) != null)
-      throw new Exception("duplicate extension definition: " + ed.getUrl());
-    extensionDefinitions.put(ed.getId(), ed);
-    extensionDefinitions.put(url, ed);
-    extensionDefinitions.put(ed.getUrl(), ed);
-  }
-
-  public void seeQuestionnaire(String url, Questionnaire theQuestionnaire) throws Exception {
-    if (questionnaires.get(theQuestionnaire.getId()) != null)
-      throw new Exception("duplicate extension definition: "+theQuestionnaire.getId());
-    questionnaires.put(theQuestionnaire.getId(), theQuestionnaire);
-    questionnaires.put(url, theQuestionnaire);
-  }
-
-  public void seeValueSet(String url, ValueSet vs) throws Exception {
-    if (valueSets.containsKey(vs.getUrl()))
-      throw new Exception("Duplicate Profile "+vs.getUrl());
-    valueSets.put(vs.getId(), vs);
-    valueSets.put(url, vs);
-    valueSets.put(vs.getUrl(), vs);
-	  if (vs.hasCodeSystem()) {
-	    codeSystems.put(vs.getCodeSystem().getSystem().toString(), vs);
-    }
-  }
-
-  public void seeProfile(String url, StructureDefinition p) throws Exception {
-    if (profiles.containsKey(p.getUrl()))
-      throw new Exception("Duplicate Profile "+p.getUrl());
-    profiles.put(p.getId(), p);
-    profiles.put(url, p);
-    profiles.put(p.getUrl(), p);
+  public TerminologyClient getClient() {
+    return txClient;
   }
 
   public StructureDefinition getExtensionStructure(StructureDefinition context, String url) throws Exception {
@@ -204,9 +143,7 @@ public class BuildWorkerContext implements IWorkerContext {
     } else {
       if (url.contains("#"))
         url = url.substring(0, url.indexOf("#"));
-      StructureDefinition res = extensionDefinitions.get(url);
-      if (res == null)
-        res = profiles.get(url);
+      StructureDefinition res = getStructure(url);
       if (res == null)
         return null;
       if (res.getSnapshot() == null || res.getSnapshot().getElement().isEmpty())
@@ -227,8 +164,8 @@ public class BuildWorkerContext implements IWorkerContext {
   public boolean isResource(String name) {
     if (resourceNames.contains(name))
       return true;
-    StructureDefinition sd = profiles.get("http://hl7.org/fhir/StructureDefinition/" + name);
-    return sd != null && (sd.getBase().endsWith("Resource") || sd.getBase().endsWith("DomainResource"));
+    StructureDefinition sd = getStructure("http://hl7.org/fhir/StructureDefinition/" + name);
+    return sd != null && (sd.getBaseDefinition().endsWith("Resource") || sd.getBaseDefinition().endsWith("DomainResource"));
   }
 
   public List<String> getResourceNames() {
@@ -237,13 +174,9 @@ public class BuildWorkerContext implements IWorkerContext {
 
   public StructureDefinition getTypeStructure(TypeRefComponent type) {
     if (type.hasProfile())
-      return profiles.get(type.getProfile().get(0).getValue());
+      return getStructure(type.getProfile().get(0).getValue());
     else
-      return profiles.get(type.getCode());
-  }
-
-  public Map<String, SearchParameter> getSearchParameters() {
-    return searchParameters;
+      return getStructure(type.getCode());
   }
 
   @Override
@@ -275,81 +208,31 @@ public class BuildWorkerContext implements IWorkerContext {
     return new XmlParser();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T extends Resource> T fetchResource(Class<T> class_, String uri) throws EOperationOutcome, Exception {
-    if (class_ == StructureDefinition.class && !uri.contains("/"))
-      uri = "http://hl7.org/fhir/StructureDefinition/"+uri;
-    
-    if (uri.startsWith("http:")) {
-      if (uri.contains("#"))
-        uri = uri.substring(0, uri.indexOf("#"));
-      if (class_ == StructureDefinition.class) {
-        if (profiles.containsKey(uri))
-          return (T) profiles.get(uri);
-        else if (extensionDefinitions.containsKey(uri))
-          return (T) extensionDefinitions.get(uri);
-        else
-          return null;
-      } else if (class_ == ValueSet.class) {
-        if (valueSets.containsKey(uri))
-          return (T) valueSets.get(uri);
-        else if (codeSystems.containsKey(uri))
-          return (T) codeSystems.get(uri);
-        else
-          return null;      
-      }
-    }
-    if (class_ == null && uri.contains("/")) {
-      return null;      
-    }
-      
-    throw new Error("not done yet");
-  }
-
-  @Override
-  public <T extends Resource> boolean hasResource(Class<T> class_, String uri) {
-    try {
-      return fetchResource(class_, uri) != null;
-    } catch (Exception e) {
-      return false;
-    }
-  }
-
   @Override
   public INarrativeGenerator getNarrativeGenerator(String prefix, String basePath) {
     return new NarrativeGenerator(prefix, basePath, this);
   }
 
   @Override
-  public IResourceValidator newValidator() throws Exception {
-    return new InstanceValidator(this, null);
+  public IResourceValidator newValidator() {
+    throw new Error("check this");
+//    return new InstanceValidator(this, null);
   }
 
   @Override
-  public List<ConceptMap> findMapsForSource(String url) {
+  public List<ConceptMap> findMapsForSource(String url) throws FHIRException {
     List<ConceptMap> res = new ArrayList<ConceptMap>();
-    for (ConceptMap map : maps.values())
-      if (((Reference) map.getSource()).getReference().equals(url)) 
+    for (ConceptMap map : listMaps())
+      if (map.getSourceCanonicalType().getValue().equals(url)) 
         res.add(map);
     return res;
   }
 
   @Override
-  public ValueSet fetchCodeSystem(String system) {
-    return codeSystems.get(system);
+  public boolean supportsSystem(String system) throws TerminologyServiceException {
+    return "http://snomed.info/sct".equals(system) || "http://www.nlm.nih.gov/research/umls/rxnorm".equals(system) || "http://loinc.org".equals(system) || "http://unitsofmeasure.org".equals(system) || super.supportsSystem(system) ;
   }
-
-  @Override
-  public ValidationResult validateCode(String system, String code, String display, ValueSet vs) {
-    throw new Error("not done yet");
-  }
-
-  @Override
-  public ValidationResult validateCode(String system, String code, String display, ConceptSetComponent vsi) {
-    throw new Error("not done yet");
-  }
-
+  
   public static class Concept {
     private String display; // preferred
     private List<String> displays = new ArrayList<String>();
@@ -395,7 +278,10 @@ public class BuildWorkerContext implements IWorkerContext {
       try {
         return locateLoinc(code);
       } catch (Exception e) {
-      }        
+      }     
+    CodeSystem cs = fetchCodeSystem(system);
+    if (cs != null)
+      return findCodeInConcept(cs.getConcept(), code);
     return null;
   }
 
@@ -415,7 +301,9 @@ public class BuildWorkerContext implements IWorkerContext {
     if (!snomedCodes.containsKey(code))
       response = queryForTerm(code);
     if (snomedCodes.containsKey(code))
-      if (display == null || snomedCodes.get(code).has(display))
+      if (display == null)
+        return new ValidationResult(new ConceptDefinitionComponent().setCode(code).setDisplay(snomedCodes.get(code).display));
+      else if (snomedCodes.get(code).has(display))
         return new ValidationResult(new ConceptDefinitionComponent().setCode(code).setDisplay(display));
       else 
         return new ValidationResult(IssueSeverity.WARNING, "Snomed Display Name for "+code+" must be one of '"+snomedCodes.get(code).summary()+"'");
@@ -436,10 +324,9 @@ public class BuildWorkerContext implements IWorkerContext {
   private SnomedServerResponse queryForTerm(String code) throws Exception {
     if (!triedServer || serverOk) {
       triedServer = true;
-      serverOk = false;
       HttpClient httpclient = new DefaultHttpClient();
-      // HttpGet httpget = new HttpGet("http://fhir.healthintersections.com.au/snomed/tool/"+URLEncoder.encode(code, "UTF-8").replace("+", "%20"));
-      HttpGet httpget = new HttpGet("http://localhost:960/snomed/tool/"+URLEncoder.encode(code, "UTF-8").replace("+", "%20")); // don't like the url encoded this way
+      HttpGet httpget = new HttpGet("http://tx.fhir.org/r4/snomed/tool/"+SNOMED_EDITION+"/"+URLEncoder.encode(code, "UTF-8").replace("+", "%20")); 
+//      HttpGet httpget = new HttpGet("http://local.fhir.org:960/r4/snomed/tool/"+SNOMED_EDITION+"/"+URLEncoder.encode(code, "UTF-8").replace("+", "%20")); // don't like the url encoded this way
       HttpResponse response = httpclient.execute(httpget);
       HttpEntity entity = response.getEntity();
       InputStream instream = entity.getContent();
@@ -447,9 +334,9 @@ public class BuildWorkerContext implements IWorkerContext {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document xdoc = builder.parse(instream);
-        serverOk = true;
         // we always get back a version, and a type. What we do depends on the type 
         String t = xdoc.getDocumentElement().getAttribute("type");
+        serverOk = true;
         if (t.equals("error")) 
           throw new Exception(xdoc.getDocumentElement().getAttribute("message"));
         if (t.equals("description"))
@@ -510,38 +397,24 @@ public class BuildWorkerContext implements IWorkerContext {
     return new ValidationResult(new ConceptDefinitionComponent().setCode(code).setDisplay(lc.display));
   }
 
-  private ValidationResult verifyCode(ValueSet vs, String code, String display) throws Exception {
-    if (vs.hasExpansion() && !vs.hasCodeSystem()) {
-      ValueSetExpansionContainsComponent cc = findCode(vs.getExpansion().getContains(), code);
-      if (cc == null)
-        return new ValidationResult(IssueSeverity.ERROR, "Unknown Code "+code+" in "+vs.getCodeSystem().getSystem());
-      if (display == null)
-        return new ValidationResult(new ConceptDefinitionComponent().setCode(code).setDisplay(cc.getDisplay()));
-      if (cc.hasDisplay()) {
-        if (display.equalsIgnoreCase(cc.getDisplay()))
-          return new ValidationResult(new ConceptDefinitionComponent().setCode(code).setDisplay(cc.getDisplay()));
-        return new ValidationResult(IssueSeverity.ERROR, "Display Name for "+code+" must be '"+cc.getDisplay()+"'");
-      }
-      return null;
-    } else {
-      ConceptDefinitionComponent cc = findCodeInConcept(vs.getCodeSystem().getConcept(), code);
-      if (cc == null)
-        return new ValidationResult(IssueSeverity.ERROR, "Unknown Code "+code+" in "+vs.getCodeSystem().getSystem());
-      if (display == null)
+  private ValidationResult verifyCode(CodeSystem cs, String code, String display) throws Exception {
+    ConceptDefinitionComponent cc = findCodeInConcept(cs.getConcept(), code);
+    if (cc == null)
+      return new ValidationResult(IssueSeverity.ERROR, "Unknown Code "+code+" in "+cs.getUrl());
+    if (display == null)
+      return new ValidationResult(cc);
+    CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
+    if (cc.hasDisplay()) {
+      b.append(cc.getDisplay());
+      if (display.equalsIgnoreCase(cc.getDisplay()))
         return new ValidationResult(cc);
-      CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
-      if (cc.hasDisplay()) {
-        b.append(cc.getDisplay());
-        if (display.equalsIgnoreCase(cc.getDisplay()))
-          return new ValidationResult(cc);
-      }
-      for (ConceptDefinitionDesignationComponent ds : cc.getDesignation()) {
-        b.append(ds.getValue());
-        if (display.equalsIgnoreCase(ds.getValue()))
-          return new ValidationResult(cc);
-      }
-      return new ValidationResult(IssueSeverity.ERROR, "Display Name for "+code+" must be one of '"+b.toString()+"'");
     }
+    for (ConceptDefinitionDesignationComponent ds : cc.getDesignation()) {
+      b.append(ds.getValue());
+      if (display.equalsIgnoreCase(ds.getValue()))
+        return new ValidationResult(cc);
+    }
+    return new ValidationResult(IssueSeverity.ERROR, "Display Name for "+code+" must be one of '"+b.toString()+"'");
   }
 
   private ValueSetExpansionContainsComponent findCode(List<ValueSetExpansionContainsComponent> contains, String code) {
@@ -571,22 +444,38 @@ public class BuildWorkerContext implements IWorkerContext {
     try {
       if (system.equals("http://snomed.info/sct"))
         return verifySnomed(code, display);
+    } catch (Exception e) {
+      return new ValidationResult(IssueSeverity.WARNING, "Error validating snomed code \""+code+"\": "+e.getMessage());
+    }
+    try {
       if (system.equals("http://loinc.org"))
         return verifyLoinc(code, display);
-      if (codeSystems.containsKey(system)) {
-        return verifyCode(codeSystems.get(system), code, display);
+      if (system.equals("http://unitsofmeasure.org"))
+        return verifyUcum(code, display);
+      CodeSystem cs = fetchCodeSystem(system);
+      if (cs != null) {
+        return verifyCode(cs, code, display);
       }
       if (system.startsWith("http://example.org"))
         return new ValidationResult(new ConceptDefinitionComponent());
     } catch (Exception e) {
       return new ValidationResult(IssueSeverity.ERROR, "Error validating code \""+code+"\" in system \""+system+"\": "+e.getMessage());
     }
-    return new ValidationResult(IssueSeverity.WARNING, "Unknown code system "+system);
+    return super.validateCode(system, code, display);
   }
 
   
-  public boolean supportsSystem(String system) {
-    return "http://snomed.info/sct".equals(system) || "http://loinc.org".equals(system) ;
+  private ValidationResult verifyUcum(String code, String display) {
+    String s = ucum.validate(code);
+    if (s != null)
+      System.out.println("UCUM eror: "+s);
+//      return new ValidationResult(IssueSeverity.ERROR, s);
+//    else {
+      ConceptDefinitionComponent def = new ConceptDefinitionComponent();
+      def.setCode(code);
+      def.setDisplay(ucum.getCommonDisplay(code));
+      return new ValidationResult(def);
+//    }
   }
 
   public void loadSnomed(String filename) throws Exception {
@@ -595,22 +484,29 @@ public class BuildWorkerContext implements IWorkerContext {
     Document xdoc = builder.parse(new CSFileInputStream(filename));
     Element code = XMLUtil.getFirstChild(xdoc.getDocumentElement());
     while (code != null) {
-      Concept c = new Concept();
-      c.display = code.getAttribute("display");
-      Element child = XMLUtil.getFirstChild(code);
-      while (child != null) {
-        c.displays.add(child.getAttribute("value"));
-        child = XMLUtil.getNextSibling(child);
+      if (Utilities.noString(code.getAttribute("no"))) {
+        Concept c = new Concept();
+        c.display = code.getAttribute("display");
+        Element child = XMLUtil.getFirstChild(code);
+        while (child != null) {
+          c.displays.add(child.getAttribute("value"));
+          child = XMLUtil.getNextSibling(child);
+        }
+        snomedCodes.put(code.getAttribute("id"), c);
       }
-      snomedCodes.put(code.getAttribute("id"), c);
       code = XMLUtil.getNextSibling(code);
     }
   }
 
+  public void loadUcum(String filename) throws UcumException {
+    this.ucum = new UcumEssenceService(filename);
+  }
+  
   public void saveSnomed(String filename) throws Exception {
     FileOutputStream file = new FileOutputStream(filename);
     XMLWriter xml = new XMLWriter(file, "UTF-8");
     xml.setPretty(true);
+    xml.setLineType(XMLWriter.LINE_UNIX);
     xml.start();
     xml.comment("the build tool builds these from the designated snomed server, when it can", true);
     xml.enter("snomed");
@@ -656,6 +552,7 @@ public class BuildWorkerContext implements IWorkerContext {
   public void saveLoinc(String filename) throws IOException {
     XMLWriter xml = new XMLWriter(new FileOutputStream(filename), "UTF-8");
     xml.setPretty(true);
+    xml.setLineType(XMLWriter.LINE_UNIX);
     xml.start();
     xml.enter("loinc");
     List<String> codes = new ArrayList<String>();
@@ -676,79 +573,29 @@ public class BuildWorkerContext implements IWorkerContext {
   public boolean verifiesSystem(String system) {
     return true;
   }
-
-  @Override
-  public ValueSetExpansionOutcome expandVS(ValueSet vs) {
-    try {
-      if (vs.hasExpansion()) {
-        return new ValueSetExpansionOutcome(vs.copy());
-      }
-      String cacheFn = Utilities.path(cache, determineCacheId(vs)+".json");
-      if (new File(cacheFn).exists())
-        return loadFromCache(vs.copy(), cacheFn);
-      if (vs.hasUrl()) {
-        ValueSetExpansionOutcome vse = expansionCache.getExpander().expand(vs);
-        if (vse.getValueset() != null) {
-          FileOutputStream s = new FileOutputStream(cacheFn);
-          newJsonParser().compose(new FileOutputStream(cacheFn), vse.getValueset());
-          s.close();
-          return vse;
-        }
-      }
-      return expandOnServer(vs, cacheFn);
-    } catch (Exception e) {
-      return new ValueSetExpansionOutcome(e.getMessage());
-    }
-  }
-
-  private String determineCacheId(ValueSet vs) throws Exception {
-    // just the content logical definition is hashed
-    ValueSet vsid = new ValueSet();
-    vsid.setCodeSystem(vs.getCodeSystem());
-    vsid.setCompose(vs.getCompose());
-    vsid.setLockedDate(vs.getLockedDate());
-    JsonParser parser = new JsonParser();
-    parser.setOutputStyle(OutputStyle.NORMAL);
-    ByteArrayOutputStream b = new  ByteArrayOutputStream();
-    parser.compose(b, vsid);
-    b.close();
-    String s = new String(b.toByteArray());
-    String r = Integer.toString(s.hashCode());
-//    TextFile.stringToFile(s, Utilities.path(cache, r+".id.json"));
-    return r;
-  }
-
-  private ValueSetExpansionOutcome loadFromCache(ValueSet vs, String cacheFn) throws FileNotFoundException, Exception {
-    JsonParser parser = new JsonParser();
-    Resource r = parser.parse(new FileInputStream(cacheFn));
-    if (r instanceof OperationOutcome)
-      return new ValueSetExpansionOutcome(((OperationOutcome) r).getIssue().get(0).getDiagnostics());
-    else {
-      vs.setExpansion(((ValueSet) r).getExpansion()); // because what is cached might be from a different value set
-      return new ValueSetExpansionOutcome(vs);
-    }
-  }
   
   private String lookupLoinc(String code) throws Exception {
     if (true) { //(!triedServer || serverOk) {
       try {
         triedServer = true;
-        serverOk = false;
         // for this, we use the FHIR client
-        if (client == null) {
-          client = new FHIRToolingClient(tsServer);
+        if (txClient == null) {
+          txClient = new TerminologyClientR4(tsServer);
+          this.txLog = new HTMLClientLogger(null);
         }
         Map<String, String> params = new HashMap<String, String>();
         params.put("code", code);
         params.put("system", "http://loinc.org");
-        Parameters result = client.lookupCode(params);
-        serverOk = true;
+        Parameters result = txClient.lookupCode(params);
 
         for (ParametersParameterComponent p : result.getParameter()) {
           if (p.getName().equals("display"))
             return ((StringType) p.getValue()).asStringValue();
         }
         throw new Exception("Did not find LOINC code in return values");
+      } catch (EFhirClientException e) {
+        serverOk = true;
+        throw e;
       } catch (Exception e) {
         serverOk = false;
         throw e;
@@ -757,49 +604,16 @@ public class BuildWorkerContext implements IWorkerContext {
       throw new Exception("Server is not available");
   }
 
-
-  private ValueSetExpansionOutcome expandOnServer(ValueSet vs, String cacheFn) throws Exception {
-    if (!triedServer || serverOk) {
-      JsonParser parser = new JsonParser();
-      try {
-        triedServer = true;
-        serverOk = false;
-        // for this, we use the FHIR client
-        if (client == null) {
-          client = new FHIRToolingClient(tsServer);
-        }
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("_limit", PageProcessor.CODE_LIMIT_EXPANSION);
-        params.put("_incomplete", "true");
-        params.put("profile", "http://www.healthintersections.com.au/fhir/expansion/no-details");
-        ValueSet result = client.expandValueset(vs, params);
-        serverOk = true;
-        FileOutputStream s = new FileOutputStream(cacheFn);
-        parser.compose(s, result);
-        s.close();
-
-        return new ValueSetExpansionOutcome(result);
-      } catch (EFhirClientException e) {
-        serverOk = true;
-        FileOutputStream s = new FileOutputStream(cacheFn);
-        if (e.getServerErrors().isEmpty())
-          parser.compose(s, buildOO(e.getMessage()));
-        else
-          parser.compose(s, e.getServerErrors().get(0));
-        s.close();
-
-        throw new Exception(e.getServerErrors().get(0).getIssue().get(0).getDiagnostics());
-      } catch (Exception e) {
-        serverOk = false;
-        throw e;
-      }
-    } else
-      throw new Exception("Server is not available");
+  private String systems(ValueSet vs) {
+    CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
+    for (ConceptSetComponent inc : vs.getCompose().getInclude())
+      b.append(inc.getSystem());
+    return b.toString();
   }
 
   private OperationOutcome buildOO(String message) {
     OperationOutcome oo = new OperationOutcome();
-    oo.addIssue().setSeverity(IssueSeverity.ERROR).setCode(IssueType.EXCEPTION).getDetails().setText(message);
+    oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setCode(OperationOutcome.IssueType.EXCEPTION).getDetails().setText(message);
     return oo;
   }
 
@@ -868,20 +682,117 @@ public class BuildWorkerContext implements IWorkerContext {
 //      throw new Exception("Server is not available");
 //  }
   
-  
-  @Override
-  public ValueSetExpansionComponent expandVS(ConceptSetComponent inc) {
-    ValueSet vs = new ValueSet();
-    vs.setCompose(new ValueSetComposeComponent());
-    vs.getCompose().getInclude().add(inc);
-    ValueSetExpansionOutcome vse = expandVS(vs);
-    return vse.getValueset().getExpansion();
+ 
+  public void saveCache() throws IOException {
+    txCache.save();
   }
 
-  public void initTS(String path, String tsServer) throws Exception {
-    cache = path;
-    this.tsServer = tsServer;
-    expansionCache = new ValueSetExpansionCache(this, null);
+
+  private List<String> sorted(Set<String> keySet) {
+    List<String> results = new ArrayList<String>();
+    results.addAll(keySet);
+    Collections.sort(results);
+    return results;
   }
+
+  private String makeFileName(String s) {
+    return s.replace("http://hl7.org/fhir/ValueSet/", "").replace("http://", "").replace("/", "_");
+  }
+
+  @Override
+  public String getAbbreviation(String name) {
+    String s = definitions.getTLAs().get(name.toLowerCase());
+    if (Utilities.noString(s))
+      return "xxx";
+    else
+      return s;
+  }
+
+  public void setDefinitions(Definitions definitions) {
+    this.definitions = definitions;    
+  }
+
+
+
+  @Override
+  public Set<String> typeTails() {
+    return new HashSet<String>(Arrays.asList("Integer","UnsignedInt","PositiveInt","Decimal","DateTime","Date","Time","Instant","String","Uri","Url","Canonical","Oid","Uuid","Id","Boolean","Code","Markdown","Base64Binary","Coding","CodeableConcept","Attachment","Identifier","Quantity","SampledData","Range","Period","Ratio","HumanName","Address","ContactPoint","Timing","Reference","Annotation","Signature","Meta"));
+  }
+
+  @Override
+  public List<StructureDefinition> allStructures() {
+    List<StructureDefinition> result = new ArrayList<StructureDefinition>();
+    result.addAll(listStructures());
+    return result;
+  }
+
+
+  @Override
+  public String oid2Uri(String oid) {
+    String uri = OIDUtils.getUriForOid(oid);
+    if (uri != null)
+      return uri;
+//    for (NamingSystem ns : systems) {
+//      if (hasOid(ns, oid)) {
+//        uri = getUri(ns);
+//        if (uri != null)
+//          return null;
+//      }
+//    }
+    return null;
+  }
+
+  private String getUri(NamingSystem ns) {
+    for (NamingSystemUniqueIdComponent id : ns.getUniqueId()) {
+      if (id.getType() == NamingSystemIdentifierType.URI)
+        return id.getValue();
+    }
+    return null;
+  }
+
+  private boolean hasOid(NamingSystem ns, String oid) {
+    for (NamingSystemUniqueIdComponent id : ns.getUniqueId()) {
+      if (id.getType() == NamingSystemIdentifierType.OID && id.getValue().equals(oid))
+        return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean hasCache() {
+    return true;
+  }
+
+  @Override
+  public List<String> getTypeNames() {
+    List<String> names = new ArrayList<String>();
+    for (TypeRef tr : definitions.getKnownTypes())
+      names.add(tr.getName());
+    return names;
+  }
+
+  public List<StructureDefinition> getExtensionDefinitions() {
+    List<StructureDefinition> res = new ArrayList<StructureDefinition>();
+    for (StructureDefinition sd : listStructures()) {
+      if (sd.getType().equals("Extension") && sd.getDerivation() == TypeDerivationRule.CONSTRAINT)
+        res.add(sd);
+    }
+    return res;
+  }
+
+  public List<StructureDefinition> getProfiles() {
+    List<StructureDefinition> res = new ArrayList<StructureDefinition>();
+    for (StructureDefinition sd : listStructures()) {
+      if (!sd.getType().equals("Extension") && sd.getDerivation() == TypeDerivationRule.CONSTRAINT)
+        res.add(sd);
+    }
+    return res;
+  }
+
+  @Override
+  public UcumService getUcumService() {
+    return ucum;
+  }
+
 
 }

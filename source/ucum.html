@@ -9,12 +9,12 @@
 <body>
 [%file newnavbar%]
 
-<div class="col-9">
+<div class="col-12">
 
 <%txheader%>
 
 <h2>Using UCUM with FHIR</h2>
-<table class="cols"><tr><td id="wg"><a _target="blank" href="[%wg vocab%]">[%wgt vocab%]</a> Work Group</td><td id="fmm"><a href="resource.html#maturity">Maturity Level</a>: N/A</td><td id="ballot"><a href="help.html#status">Ballot Status</a>: <a href="history.html#pubs">DSTU 2</a></td></tr></table>
+<table class="colstu"><tr><td id="wg"><a _target="blank" href="[%wg vocab%]">[%wgt vocab%]</a> Work Group</td><td id="fmm"><a href="versions.html#maturity">Maturity Level</a>: 5</td><td id="ballot"><a href="ballot-intro.html#process">Ballot Status</a>:<!--!ns!--><a href="versions.html#std-process">Trial Use</a></td></tr></table>
 
 <p>
 The <a href="http://unitsofmeasure.org">Units of Measure</a> Coding System (UCUM) is recommended 
@@ -30,6 +30,8 @@ for use with the <a href="datatypes.html#Quantity">Quantity</a> data type.
    in the <a href="datatypes.html#Coding">Coding</a> data type, only in <a href="valueset.html">Value sets</a> that use UCUM codes</td></tr>
  <tr><td>Code</td><td>Valid expressions using the case sensitive symbols</td></tr>
  <tr><td>Display</td><td>There is no defined display; the UCUM code is used directly for the display</td></tr>
+ <tr><td>Inactive</td><td>A few codes in UCUM are marked as deprecated (e.g. ppb, pptr)</td></tr>
+ <tr><td>Subsumption</td><td>No Subsumption relationships are defined by UCUM</td></tr>
  <tr><td>Filter Properties</td><td>Two filter properties are defined as described below</td></tr>
 </table>
 
@@ -40,6 +42,22 @@ UCUM is Copyright © 1999-2013 Regenstrief Institute, Inc. and The UCUM Organiza
 All rights reserved. See <a class="wiki" href="http://unitsofmeasure.org/trac//wiki/TermsOfUse">TermsOfUse</a> for details.
 </p>
 
+<h3>UCUM Expressions</h3>
+<p>
+UCUM is inherently a compositional code system; almost all
+UCUM codes are expressions composed using the UCUM expression
+syntax. Many servers, however, do not implement full support
+for the syntax, and rely on a large library of pre-built
+valid UCUM codes (FHIR includes a <a href="valueset-ucum-common.html">common UCUM codes value 
+set</a> for this purpose). 
+</p>
+<p>
+UCUM us always documented as a compositional code system. If 
+a server does not support the full grammar, it should document
+that in its <a href="terminologycapabilities-definitions.html#TerminologyCapabilities.codeSystem.version.compositional">Terminology Capabilities Statement</a>.
+</p>
+
+<a name="filters"></a>
 <h3>UCUM Filter Properties</h3>
 
 <p>
@@ -81,10 +99,10 @@ references are allowed to reference these value sets directly.
 </p>
 
 <p>
-The value set identifier http://unitsofmeasure.org/vs is a value set that contains all LOINC codes.
+The value set identifier http://unitsofmeasure.org/vs is a value set that contains all UCUM codes.
 </p>
 
-<h4>Multi-Axial Hierarchy Entry</h4>
+<h4>UCUM Comparable Value Set</h4>
 
 <p>
 A value set with an identifier of "http://unitsofmeasure.org/vs/[expression]" must 
@@ -104,7 +122,7 @@ conform to this template, where [expression] is a valid UCUM expression:
   &lt;name value=&quot;Ucum Expressions comparable to [expression]&quot;/&gt;
   &lt;description value=&quot;Ucum Expressions comparable to [expression]&quot;/&gt;
   &lt;status value=&quot;active&quot;/&gt;
-  &lt;date value=&quot;[optional date of LOINC release]&quot;/&gt;
+  &lt;date value=&quot;[optional date of UCUM release]&quot;/&gt;
   &lt;compose&gt;
     &lt;include&gt;
       &lt;system value=&quot;http://unitsofmeasure.org&quot;/&gt;

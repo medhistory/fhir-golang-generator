@@ -1,28 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
-  <name value="Process Outcome Codes"/>
+  <meta>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+  </meta>
+  <name value="ProcessOutcomeCodes"/>
+  <title value="Process Outcome Codes"/>
   <status value="draft"/>
   <publisher value="Financial Management"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="This value set includes sample Process Outcome codes."/>
   <copyright value="This is an example set."/>
-  <codeSystem>
-    <system value="http://hl7.org/fhir/processoutcomecodes"/>
-    <caseSensitive value="true"/>
-    <concept>
-      <code value="complete"/>
-    </concept>
-    <concept>
-      <code value="pended"/>
-    </concept>
-    <concept>
-      <code value="error"/>
-    </concept>
-  </codeSystem>
+  <compose>
+    <include>
+      <system value="http://hl7.org/fhir/processoutcomecodes"/>
+    </include>
+  </compose>
 </ValueSet>

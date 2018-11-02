@@ -3,27 +3,27 @@ package org.hl7.fhir.tools.implementations.java;
 Copyright (c) 2011+, HL7, Inc
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
- * Redistributions of source code must retain the above copyright notice, this 
+ * Redistributions of source code must retain the above copyright notice, this
    list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions and the following disclaimer in the documentation 
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
- * Neither the name of HL7 nor the names of its contributors may be used to 
-   endorse or promote products derived from this software without specific 
+ * Neither the name of HL7 nor the names of its contributors may be used to
+   endorse or promote products derived from this software without specific
    prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
  */
@@ -39,11 +39,12 @@ import java.util.Map;
 import org.hl7.fhir.definitions.Config;
 import org.hl7.fhir.definitions.model.BindingSpecification;
 import org.hl7.fhir.definitions.model.DefinedCode;
+import org.hl7.fhir.definitions.model.DefinedStringPattern;
 import org.hl7.fhir.definitions.model.Definitions;
 import org.hl7.fhir.definitions.model.ElementDefn;
 import org.hl7.fhir.definitions.model.ProfiledType;
 import org.hl7.fhir.definitions.model.ResourceDefn;
-import org.hl7.fhir.definitions.model.TypeRef;
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
 import org.hl7.fhir.tools.implementations.GeneratorUtils;
 import org.hl7.fhir.utilities.Utilities;
 
@@ -82,40 +83,45 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
     genElementParser();
     generateEnumParser();
 
-    for (DefinedCode dc : definitions.getPrimitives().values()) 
+    for (DefinedCode dc : definitions.getPrimitives().values())
       generatePrimitiveParser(dc);
 
     for (ElementDefn n : definitions.getInfrastructure().values()) {
       if (!n.getName().equals("Element") && !n.getName().equals("BackboneElement")) {
         generateParser(n, JavaGenClass.Structure);
         String t = upFirst(n.getName());
-        //      regt.append("    else if (xpp.getName().equals(prefix+\""+n.getName()+"\"))\r\n      return parse"+t+"(xpp);\r\n");
-        //    regn.append("    if (xpp.getName().equals(prefix+\""+n.getName()+"\"))\r\n      return true;\r\n");
+        regt.append("    else if (json.has(prefix+\""+n.getName()+"\"))\r\n      return parse"+t+"(json.getAsJsonObject(prefix+\""+n.getName()+"\"));\r\n");
+        regt2.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json);\r\n");
+        regn.append("    if (json.has(prefix+\""+n.getName()+"\"))\r\n      return true;\r\n");
         regf.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json);\r\n");
       }
     }
 
     for (ElementDefn n : definitions.getTypes().values()) {
-      generateParser(n, JavaGenClass.Type);
-      regt.append("    else if (json.has(prefix+\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json.getAsJsonObject(prefix+\""+n.getName()+"\"));\r\n");
-      regt2.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json);\r\n");
-      regf.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(xpp);\r\n");
-      regn.append("    if (json.has(prefix+\""+n.getName()+"\"))\r\n      return true;\r\n");
+      if (!n.getName().equals("SimpleQuantity")) {
+        generateParser(n, JavaGenClass.Type);
+        regt.append("    else if (json.has(prefix+\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json.getAsJsonObject(prefix+\""+n.getName()+"\"));\r\n");
+        regt2.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json);\r\n");
+        regf.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(xpp);\r\n");
+        regn.append("    if (json.has(prefix+\""+n.getName()+"\"))\r\n      return true;\r\n");
+      }
     }
 
-    for (ProfiledType n : definitions.getConstraints().values()) {
-      generateConstraintParser(n);
-      regt.append("    else if (json.has(prefix+\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json.getAsJsonObject(prefix+\""+n.getName()+"\"));\r\n");
-      regt2.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json);\r\n");
-      regf.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(xpp);\r\n");
-      regn.append("    if (json.has(prefix+\""+n.getName()+"\"))\r\n      return true;\r\n");
-    }
+//    for (ProfiledType n : definitions.getConstraints().values()) {
+//      if (!n.getName().equals("SimpleQuantity")) {
+//        generateConstraintParser(n);
+//        regt.append("    else if (json.has(prefix+\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json.getAsJsonObject(prefix+\""+n.getName()+"\"));\r\n");
+//        regt2.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json);\r\n");
+//        regf.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(xpp);\r\n");
+//        regn.append("    if (json.has(prefix+\""+n.getName()+"\"))\r\n      return true;\r\n");
+//      }
+//    }
     for (ElementDefn n : definitions.getStructures().values()) {
       generateParser(n, JavaGenClass.Structure);
-      regt.append("    else if (json.has(prefix+\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json.getAsJsonObject(prefix+\""+n.getName()+"\"));\r\n");
-      regt2.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json);\r\n");
-      regf.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(xpp);\r\n");
-      regn.append("    if (json.has(prefix+\""+n.getName()+"\"))\r\n      return true;\r\n");
+//      regt.append("    else if (json.has(prefix+\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json.getAsJsonObject(prefix+\""+n.getName()+"\"));\r\n");
+//      regt2.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(json);\r\n");
+//      regf.append("    else if (type.equals(\""+n.getName()+"\"))\r\n      return parse"+n.getName()+"(xpp);\r\n");
+//      regn.append("    if (json.has(prefix+\""+n.getName()+"\"))\r\n      return true;\r\n");
     }
 
     for (String s : definitions.getBaseResources().keySet()) {
@@ -155,7 +161,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
   }
 
   private void genElementParser() throws Exception {
-    write("  protected void parseElementProperties(JsonObject json, Element element) throws Exception {\r\n");
+    write("  protected void parseElementProperties(JsonObject json, Element element) throws IOException, FHIRFormatError {\r\n");
     write("    super.parseElementProperties(json, element);\r\n");
     write("    if (json.has(\"extension\")) {\r\n");
     write("      JsonArray array = json.getAsJsonArray(\"extension\");\r\n");
@@ -165,7 +171,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
     write("    };\r\n");
     write("  }\r\n");
     write("\r\n");
-    write("  protected void parseBackboneProperties(JsonObject json, BackboneElement element) throws Exception {\r\n");
+    write("  protected void parseBackboneElementProperties(JsonObject json, BackboneElement element) throws IOException, FHIRFormatError {\r\n");
     write("    parseElementProperties(json, element);\r\n");
     write("    if (json.has(\"modifierExtension\")) {\r\n");
     write("      JsonArray array = json.getAsJsonArray(\"modifierExtension\");\r\n");
@@ -175,7 +181,17 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
     write("    }\r\n");
     write("  }\r\n");
     write("\r\n");
-    write("  protected void parseTypeProperties(JsonObject json, Element element) throws Exception {\r\n");
+    write("  protected void parseBackboneElementProperties(JsonObject json, BackboneType element) throws IOException, FHIRFormatError {\r\n");
+    write("    parseElementProperties(json, element);\r\n");
+    write("    if (json.has(\"modifierExtension\")) {\r\n");
+    write("      JsonArray array = json.getAsJsonArray(\"modifierExtension\");\r\n");
+    write("      for (int i = 0; i < array.size(); i++) {\r\n");
+    write("        element.getModifierExtension().add(parseExtension(array.get(i).getAsJsonObject()));\r\n");
+    write("      }\r\n");
+    write("    }\r\n");
+    write("  }\r\n");
+    write("\r\n");
+    write("  protected void parseTypeProperties(JsonObject json, Element element) throws IOException, FHIRFormatError {\r\n");
     write("    parseElementProperties(json, element);\r\n");
     write("  }\r\n");
     write("\r\n");
@@ -183,7 +199,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
   private void generateEnumParser() throws Exception {
     write("  @SuppressWarnings(\"unchecked\")\r\n");
-    write("  protected <E extends Enum<E>> Enumeration<E> parseEnumeration(String s, E item, EnumFactory e) throws Exception {\r\n");
+    write("  protected <E extends Enum<E>> Enumeration<E> parseEnumeration(String s, E item, EnumFactory e) throws IOException, FHIRFormatError {\r\n");
     write("    Enumeration<E> res = new Enumeration<E>(e);\r\n");
     //    write("    parseElementProperties(json, res);\r\n");
     write("    if (s != null)\r\n");
@@ -196,10 +212,11 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
   private void generatePrimitiveParser(DefinedCode dc) throws Exception {
     String tn = getPrimitiveTypeModelName(dc.getCode());
     String jpn = getAsJsonPrimitive(dc.getCode(), false);
-    write("  protected "+tn+" parse"+upFirst(dc.getCode())+"("+jpn+" v) throws Exception {\r\n");
+    write("  protected "+tn+" parse"+upFirst(dc.getCode())+"("+jpn+" v) throws IOException, FHIRFormatError {\r\n");
     write("    "+tn+" res = new "+tn+"(v);\r\n");
-//    write("    if (v != null)\r\n");
-//    write("      res.setValue(parse"+upFirst(dc.getCode())+"Primitive(v));\r\n");
+    if (dc.getCode().equals("decimal")) {
+      write("    if (v instanceof PresentedBigDecimal)\r\n      res.setRepresentation(((PresentedBigDecimal) v).getPresentation());\r\n");
+    }
     write("    return res;\r\n");
     write("  }\r\n");
     write("\r\n");
@@ -212,21 +229,26 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
       return shrt ? "BigDecimal" : "java.math.BigDecimal";
     if ("integer".equals(code))
       return shrt ? "Long" : "java.lang.Long";
-    else         
+    else
       return "String";
   }
 
   private void start(String version, Date genDate) throws Exception {
-    write("package org.hl7.fhir.instance.formats;\r\n");
+    write("package org.hl7.fhir.r4.formats;\r\n");
     write("\r\n/*\r\n"+Config.FULL_LICENSE_CODE+"*/\r\n\r\n");
     write("// Generated on "+Config.DATE_FORMAT().format(genDate)+" for FHIR v"+version+"\r\n\r\n");
-    for (DefinedCode dc : definitions.getPrimitives().values()) 
-      write("import org.hl7.fhir.instance.model."+getPrimitiveTypeModelName(dc.getCode())+";\r\n");
-    write("import org.hl7.fhir.instance.model.*;\r\n");
+    for (DefinedCode dc : definitions.getPrimitives().values())
+      write("import org.hl7.fhir.r4.model."+getPrimitiveTypeModelName(dc.getCode())+";\r\n");
+    write("import org.hl7.fhir.r4.model.*;\r\n");
     write("import org.hl7.fhir.utilities.Utilities;\r\n");
-
+    write("import org.hl7.fhir.r4.utils.formats.JsonTrackingParser.PresentedBigDecimal;\r\n");
+    write("import org.hl7.fhir.utilities.xhtml.XhtmlNode;\r\n");
+    write("import org.hl7.fhir.exceptions.FHIRFormatError;\r\n");
+    write("import org.hl7.fhir.exceptions.FHIRException;\r\n");
     write("import com.google.gson.JsonObject;\r\n");
     write("import com.google.gson.JsonArray;\r\n");
+    write("import com.google.gson.JsonElement;\r\n");
+    write("import java.io.IOException;\r\n");
     //  write("import java.util.*;\r\n");
     write("\r\n");
     write("public class JsonParser extends JsonParserBase {\r\n");
@@ -235,6 +257,8 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
 
   private void generateParser(ElementDefn n, JavaGenClass clss) throws Exception {
+    if (n.getName().equals("SimpleQuantity"))
+      return;
     typeNames.clear();
     typeNameStrings.clear();
     enums.clear();
@@ -259,12 +283,14 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
   private String javaClassName(String name) {
     if (name.equals("List"))
-      return "List_";
-    else 
+      return "ListResource";
+    else
       return name;
   }
 
   private void generateConstraintParser(ProfiledType cd) throws Exception {
+    if (cd.getName().equals("SimpleQuantity"))
+      return;
     typeNames.clear();
     typeNameStrings.clear();
     enums.clear();
@@ -293,28 +319,38 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
     String pn = tn.contains("<") ? "\""+tn.substring(tn.indexOf('<')+1).replace(">", "") + "\"" : "";
 
     if (tn.contains(".")) {
-      write("  protected "+tn+" parse"+upFirst(tn).replace(".", "")+"(JsonObject json, "+pathClass(tn)+" owner) throws Exception {\r\n");
+      write("  protected "+tn+" parse"+upFirst(tn).replace(".", "")+"(JsonObject json, "+pathClass(tn)+" owner) throws IOException, FHIRFormatError {\r\n");
       write("    "+tn+" res = new "+tn+"("+pn+");\r\n");
+      write("    parse"+upFirst(tn).replace(".", "")+"Properties(json, owner, res);\r\n");
       bUseOwner = true;
     } else {
-      write("  protected "+tn+" parse"+upFirst(tn).replace(".", "")+"(JsonObject json) throws Exception {\r\n");
+      write("  protected "+tn+" parse"+upFirst(tn).replace(".", "")+"(JsonObject json) throws IOException, FHIRFormatError {\r\n");
       write("    "+tn+" res = new "+tn+"("+pn+");\r\n");
+      write("    parse"+upFirst(tn).replace(".", "")+"Properties(json, res);\r\n");
+    }
+    write("    return res;\r\n");
+    write("  }\r\n\r\n");
+    if (tn.contains(".")) {
+      write("  protected void parse"+upFirst(tn).replace(".", "")+"Properties(JsonObject json, "+pathClass(tn)+" owner, "+tn+" res) throws IOException, FHIRFormatError {\r\n");
+    } else {
+      write("  protected void parse"+upFirst(tn).replace(".", "")+"Properties(JsonObject json, "+tn+" res) throws IOException, FHIRFormatError {\r\n");
     }
     if (clss == JavaGenClass.Resource)
       write("    parse"+n.typeCode()+"Properties(json, res);\r\n");
-    else if (clss == JavaGenClass.Backbone)
-      write("    parseBackboneProperties(json, res);\r\n");
-    else if (clss == JavaGenClass.Type && !tn.contains("."))
+    else if (clss == JavaGenClass.Backbone || n.typeCode().equals("Structure"))
+      write("    parseBackboneElementProperties(json, res);\r\n");
+//    else if (clss == JavaGenClass.Type && !tn.contains("."))
+//      write("    parseTypeProperties(json, res);\r\n");
+    else if (Utilities.noString(n.typeCode()) || n.typeCode().equals("Type"))
       write("    parseTypeProperties(json, res);\r\n");
+    else if (Utilities.noString(n.typeCode()) || n.typeCode().equals("BackboneElement"))
+      write("    parseBackboneElementProperties(json, res);\r\n");
     else
-      write("    parseElementProperties(json, res);\r\n");
-    boolean first = true;
+      write("    parse"+n.typeCode()+"Properties(json, res);\r\n");
     for (ElementDefn e : n.getElements()) {
-      genElementParser(n, e, first, clss, bUseOwner);
-      first = false;
+      genElementParser(n, e, clss, bUseOwner);
     }
-    write("    return res;\r\n");
-    write("  }\r\n\r\n");    
+    write("  }\r\n\r\n");
   }
 
   private void genInnerAbstract(ElementDefn n) throws IOException, Exception {
@@ -323,20 +359,18 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
     String pn = tn.contains("<") ? "\""+tn.substring(tn.indexOf('<')+1).replace(">", "") + "\"" : "";
 
-    write("  protected void parse"+upFirst(tn).replace(".", "")+"Properties(JsonObject json, "+tn+" res) throws Exception {\r\n");
+    write("  protected void parse"+upFirst(tn).replace(".", "")+"Properties(JsonObject json, "+tn+" res) throws IOException, FHIRFormatError {\r\n");
 
     if (!Utilities.noString(n.typeCode()))
       write("    parse"+n.typeCode()+"Properties(json, res);\r\n");
 
-    boolean first = true;
     for (ElementDefn e : n.getElements()) {
-      genElementParser(n, e, first, JavaGenClass.Resource, bUseOwner);
-      first = false;
+      genElementParser(n, e, JavaGenClass.Resource, bUseOwner);
     }
-    write("  }\r\n\r\n");    
+    write("  }\r\n\r\n");
   }
 
-  private void genElementParser(ElementDefn root, ElementDefn e, boolean first, JavaGenClass clss, boolean bUseOwner) throws Exception {
+  private void genElementParser(ElementDefn root, ElementDefn e, JavaGenClass clss, boolean bUseOwner) throws Exception {
     String name = e.getName();
     if (name.endsWith("[x]") || name.equals("[type]")) {
       String en = name.endsWith("[x]") && !name.equals("[x]") ? name.replace("[x]", "") : "value";
@@ -358,7 +392,16 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
         aprsr = "parseEnumeration(array.get(i).getAsString(), "+en+".NULL, new "+en.substring(0, en.indexOf("."))+"."+en.substring(en.indexOf(".")+1)+"EnumFactory())"; // en+".fromCode(parseString(xpp))";
         anprsr = "parseEnumeration(null, "+en+".NULL, new "+en.substring(0, en.indexOf("."))+"."+en.substring(en.indexOf(".")+1)+"EnumFactory())"; // en+".fromCode(parseString(xpp))";
         // parseEnumeration(xpp, Narrative.NarrativeStatus.additional, new Narrative.NarrativeStatusEnumFactory())
-      } else {   
+      } else if (e.typeCode().equals("code") && cd != null && isEnum(cd)) {
+          String en = typeNames.get(e); // getCodeListType(cd.getBinding());
+          if (e.getBinding().isShared())
+            en = "Enumerations."+e.getBinding().getValueSet().getName();
+
+          prsr = "parseEnumeration(json.get(\""+name+"\").getAsString(), "+en+".NULL, new "+en.substring(0, en.indexOf("."))+"."+en.substring(en.indexOf(".")+1)+"EnumFactory())"; // en+".fromCode(parseString(xpp))";
+          aprsr = "parseEnumeration(array.get(i).getAsString(), "+en+".NULL, new "+en.substring(0, en.indexOf("."))+"."+en.substring(en.indexOf(".")+1)+"EnumFactory())"; // en+".fromCode(parseString(xpp))";
+          anprsr = "parseEnumeration(null, "+en+".NULL, new "+en.substring(0, en.indexOf("."))+"."+en.substring(en.indexOf(".")+1)+"EnumFactory())"; // en+".fromCode(parseString(xpp))";
+          // parseEnumeration(xpp, Narrative.NarrativeStatus.additional, new Narrative.NarrativeStatusEnumFactory())
+      } else {
         String tn = typeName(root, e).replace(".", "");
         if (name.equals("extension")) {
           name = "extension";
@@ -370,6 +413,10 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
           prsr = "parseReference(json.getAsJsonObject(\""+name+"\"))";
           aprsr = "parseReference(array.get(i).getAsJsonObject())";
           anprsr = "parseReference(null)";
+        } else if (tn.contains("canonical(")) {
+          prsr = "parseCanonical(json.get(\""+name+"\").getAsString())";
+          aprsr = "parseCanonical(array.get(i).getAsString())";
+          anprsr = "parseCanonical(null)";
         } else if (tn.startsWith(context) && !tn.equals(context) && !definitions.hasType(tn)) {
           if (bUseOwner) {
             prsr = "parse"+upFirst(tn)+"(json.getAsJsonObject(\""+name+"\"), owner)";
@@ -400,13 +447,13 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
       }
 
       if (e.unbounded()) {
-        if (isPrimitive(e)) {
+        if (isPrimitive(e) || e.typeCode().startsWith("canonical(")) {
           write("    if (json.has(\""+name+"\")) {\r\n");
           write("      JsonArray array = json.getAsJsonArray(\""+name+"\");\r\n");
           write("      for (int i = 0; i < array.size(); i++) {\r\n");
           write("        res.get"+upFirst(name)+"().add("+aprsr+");\r\n");
           write("      }\r\n");
-          write("    };\r\n");          
+          write("    };\r\n");
           write("    if (json.has(\"_"+name+"\")) {\r\n");
           write("      JsonArray array = json.getAsJsonArray(\"_"+name+"\");\r\n");
           write("      for (int i = 0; i < array.size(); i++) {\r\n");
@@ -415,18 +462,18 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
           write("        if (array.get(i) instanceof JsonObject) \r\n");
           write("          parseElementProperties(array.get(i).getAsJsonObject(), res.get"+upFirst(name)+"().get(i));\r\n");
           write("      }\r\n");
-          write("    };\r\n");          
+          write("    };\r\n");
         } else {
           write("    if (json.has(\""+name+"\")) {\r\n");
           write("      JsonArray array = json.getAsJsonArray(\""+name+"\");\r\n");
           write("      for (int i = 0; i < array.size(); i++) {\r\n");
-          write("        res.get"+upFirst(name)+"().add("+aprsr+");\r\n");
+          write("        res.get"+upFirst(getElementName(name, false))+"().add("+aprsr+");\r\n");
           write("      }\r\n");
           write("    };\r\n");
         }
       } else {
         write("    if (json.has(\""+name+"\"))\r\n");
-        if (isPrimitive(e)) {
+        if (isPrimitive(e) || e.typeCode().startsWith("canonical(")) {
           write("      res.set"+upFirst(getElementName(name, false))+"Element("+prsr+");\r\n");
           write("    if (json.has(\"_"+name+"\"))\r\n");
           write("      parseElementProperties(json.getAsJsonObject(\"_"+name+"\"), res.get"+upFirst(getElementName(name, false))+"Element());\r\n");
@@ -438,14 +485,16 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
   private String typeName(ElementDefn root, ElementDefn elem) throws Exception {
     String t = elem.typeCode();
-    if (elem.usesCompositeType()) { 
+    if (elem.usesCompositeType()) {
       if (typeNames.containsKey(elem) && typeNames.get(elem) != null)
         return typeNames.get(elem);
-      else  
-        return root.getName();      
+      else
+        return root.getName();
     } else if (elem.getTypes().size() == 0) {
       return typeNames.get(elem);
-    } else if (typeNames.containsKey(elem))
+    } else if (t.equals("SimpleQuantity"))
+      return "Quantity";
+    else if (typeNames.containsKey(elem))
       return typeNames.get(elem);
     else
       return upFirst(t);
@@ -453,33 +502,42 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
   private void finishParser() throws Exception {
     write("  @Override\r\n");
-    write("  protected Resource parseResource(JsonObject json) throws Exception {\r\n");
+    write("  protected Resource parseResource(JsonObject json) throws IOException, FHIRFormatError {\r\n");
     write("    String t = json.get(\"resourceType\").getAsString();\r\n");
     write("    if (Utilities.noString(t))\r\n");
-    write("      throw new Exception(\"Unable to find resource type - maybe not a FHIR resource?\");\r\n");
+    write("      throw new FHIRFormatError(\"Unable to find resource type - maybe not a FHIR resource?\");\r\n");
     write("    "+reg.toString().substring(9));
     write("    else if (t.equals(\"Binary\"))\r\n");
     write("      return parseBinary(json);\r\n");
-    write("    throw new Exception(\"Unknown.Unrecognised resource type '\"+t+\"' (in property 'resourceType')\");\r\n");
+    write("    throw new FHIRFormatError(\"Unknown.Unrecognised resource type '\"+t+\"' (in property 'resourceType')\");\r\n");
     write("  }\r\n\r\n");
-    write("  protected Type parseType(String prefix, JsonObject json) throws Exception {\r\n");
+    write("  protected Type parseType(String prefix, JsonObject json) throws IOException, FHIRFormatError {\r\n");
     write("    "+regt.toString().substring(9));
     write("    return null;\r\n");
     write("  }\r\n\r\n");
-    write("  protected Type parseType(JsonObject json, String type) throws Exception {\r\n");
+    write("  protected Type parseType(JsonObject json, String type) throws IOException, FHIRFormatError {\r\n");
     write("    "+regt2.toString().substring(9));
-    write("    throw new Exception(\"Unknown Type \"+type);\r\n");
+    write("    throw new FHIRFormatError(\"Unknown Type \"+type);\r\n");
     write("  }\r\n\r\n");
 
-    //    write("  public Element parseFragment(XmlPullParser xpp, String type) throws Exception {\r\n");
+    //    write("  public Element parseFragment(XmlPullParser xpp, String type) {\r\n");
     //    write("    "+regf.toString().substring(9));
-    //    write("    throw new Exception(\"Unknown type \"+type);\r\n");
+    //    write("    throw new FHIRException(\"Unknown type \"+type);\r\n");
     //    write("  }\r\n\r\n");
     //
     write("  protected boolean hasTypeName(JsonObject json, String prefix) {\r\n");
     write("    "+regn.toString());
     write("    return false;\r\n");
-    write("  }\r\n");
+    write("  }\r\n\r\n");
+    
+    write("  protected Type parseAnyType(JsonObject json, String type) throws IOException, FHIRFormatError {\r\n");
+    write("    if (type.equals(\"ElementDefinition\"))\r\n");
+    write("      return parseElementDefinition(json);\r\n");
+    write("    else if (type.equals(\"DataRequirement\"))\r\n");
+    write("      return parseDataRequirement(json);\r\n");
+    write("    else\r\n");
+    write("      return parseType(json, type);\r\n");
+    write("  }\r\n\r\n");
   }
 
   public void finish() throws Exception {
@@ -499,7 +557,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
         b.append(Character.toUpperCase(ch));
         up = false;
       }
-      else        
+      else
         b.append(ch);
     }
     return b.toString();
@@ -517,6 +575,14 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
         }
         typeNames.put(e,  rootOf(path)+"."+upFirst(tn));
       }
+      if (cd != null && isEnum(cd)) {
+        tn = getCodeListType(cd.getName());
+        if (!enumNames.contains(tn)) {
+          enumNames.add(tn);
+          enums.add(e);
+        }
+        typeNames.put(e,  rootOf(path)+"."+upFirst(tn));
+      }
     }
     if (tn == null) {
       if (e.getTypes().size() > 0 && !e.usesCompositeType()) {
@@ -524,7 +590,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
         TypeRef tr = e.getTypes().get(0);
         if (tr.isUnboundGenericParam())
           tn = genparam;
-        else if (tr.isXhtml()) 
+        else if (tr.isXhtml())
           tn = "char[]";
         else if (tr.isWildcardType())
           tn ="Type";
@@ -536,7 +602,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
           tn = typeNames.get(getElementForPath(root, e.typeCode().substring(1)));
           typeNames.put(e,  tn);
         } else {
-          if (e.getDeclaredTypeName() != null) 
+          if (e.getDeclaredTypeName() != null)
             tn = e.getDeclaredTypeName();
           else
             tn = upFirst(e.getName());
@@ -558,7 +624,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
           }
         }
       }
-    } 
+    }
   }
 
   private Object getElementForPath(ElementDefn root, String pathname) throws Exception {
@@ -571,11 +637,11 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
       String en = path[i];
       if (en.length() == 0)
         throw new Exception("Improper path "+pathname);
-      ElementDefn t = res.getElementByName(en);
+      ElementDefn t = res.getElementByName(definitions, en, true, false);
       if (t == null) {
         throw new Exception("unable to resolve "+pathname);
       }
-      res = t; 
+      res = t;
     }
     return res;
 
@@ -601,32 +667,46 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
     genElementComposer();
     generateEnumComposer();
-    for (DefinedCode dc : definitions.getPrimitives().values()) 
+    for (DefinedCode dc : definitions.getPrimitives().values())
       generatePrimitiveComposer(dc);
 
     for (ElementDefn n : definitions.getInfrastructure().values()) {
       if (!n.getName().equals("Element") && !n.getName().equals("BackboneElement")) {
         generateComposer(n, JavaGenClass.Structure);
-        //      String t = upFirst(n.getName());
-        //      regt.append("    else if (type instanceof "+t+")\r\n       compose"+n.getName()+"(prefix+\""+n.getName()+"\", ("+t+") type);\r\n");
+        regtn.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"(prefix+\""+n.getName()+"\", ("+n.getName()+") type);\r\n");
+        regti.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"Inner(("+n.getName()+") type);\r\n");
       }
     }
 
     for (ElementDefn n : definitions.getTypes().values()) {
-      generateComposer(n, JavaGenClass.Type);
-      regtn.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"(prefix+\""+n.getName()+"\", ("+n.getName()+") type);\r\n");
-      regti.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"Inner(("+n.getName()+") type);\r\n");
-    }
-
-    for (ProfiledType n : definitions.getConstraints().values()) {
-      generateConstraintComposer(n);
-      regtp.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"(prefix+\""+n.getName()+"\", ("+n.getName()+") type);\r\n");
-      regti.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"Inner(("+n.getName()+") type);\r\n");
-    }
-    for (ElementDefn n : definitions.getStructures().values()) {
-        generateComposer(n, JavaGenClass.Structure);
+      if (!(n.typeCode().equals("Element") || n.typeCode().equals("Type") || n.typeCode().equals("Structure"))) {
+        generateComposer(n, JavaGenClass.Type);
         regtn.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"(prefix+\""+n.getName()+"\", ("+n.getName()+") type);\r\n");
         regti.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"Inner(("+n.getName()+") type);\r\n");
+      }
+    }
+
+    for (ElementDefn n : definitions.getTypes().values()) {
+      if (n.typeCode().equals("Element") || n.typeCode().equals("Type") || n.typeCode().equals("Structure")) {
+        if (!n.getName().equals("SimpleQuantity")) {
+          generateComposer(n, JavaGenClass.Type);
+          regtn.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"(prefix+\""+n.getName()+"\", ("+n.getName()+") type);\r\n");
+          regti.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"Inner(("+n.getName()+") type);\r\n");
+        }
+      }
+    }
+
+//    for (ProfiledType n : definitions.getConstraints().values()) {
+//      if (!n.getName().equals("SimpleQuantity")) {
+//        generateConstraintComposer(n);
+//        regtp.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"(prefix+\""+n.getName()+"\", ("+n.getName()+") type);\r\n");
+//        regti.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"Inner(("+n.getName()+") type);\r\n");
+//      }
+//    }
+    for (ElementDefn n : definitions.getStructures().values()) {
+        generateComposer(n, JavaGenClass.Structure);
+//        regtn.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"(prefix+\""+n.getName()+"\", ("+n.getName()+") type);\r\n");
+//        regti.append("    else if (type instanceof "+n.getName()+")\r\n       compose"+n.getName()+"Inner(("+n.getName()+") type);\r\n");
     }
 
     for (String s : definitions.getBaseResources().keySet()) {
@@ -648,12 +728,25 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
     }
 
     for (DefinedCode cd : definitions.getPrimitives().values()) {
+      if (cd instanceof DefinedStringPattern) {
       String n = upFirst(cd.getCode());
       String t = upFirst(cd.getCode())+"Type";
       regtn.append("    else if (type instanceof "+t+") {\r\n");
       regtn.append("      compose"+upFirst(n)+"Core(prefix+\""+n+"\", ("+t+") type, false);\r\n");
       regtn.append("      compose"+upFirst(n)+"Extras(prefix+\""+n+"\", ("+t+") type, false);\r\n");
       regtn.append("    }\r\n");
+      }
+    }
+
+    for (DefinedCode cd : definitions.getPrimitives().values()) {
+      if (!(cd instanceof DefinedStringPattern)) {
+        String n = upFirst(cd.getCode());
+        String t = upFirst(cd.getCode())+"Type";
+        regtn.append("    else if (type instanceof "+t+") {\r\n");
+        regtn.append("      compose"+upFirst(n)+"Core(prefix+\""+n+"\", ("+t+") type, false);\r\n");
+        regtn.append("      compose"+upFirst(n)+"Extras(prefix+\""+n+"\", ("+t+") type, false);\r\n");
+        regtn.append("    }\r\n");
+      }
     }
 
     finishComposer();
@@ -661,7 +754,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
   private void genElementComposer() throws Exception {
 
-    write("  protected void composeElement(Element element) throws Exception {\r\n");
+    write("  protected void composeElement(Element element) throws IOException {\r\n");
     write("    if (element.hasId())\r\n");
     write("      prop(\"id\", element.getId());\r\n");
     write("      if (makeComments(element)) {\r\n");
@@ -680,7 +773,19 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
     write("    }\r\n");
     write("  }\r\n");
     write("\r\n");
-    write("  protected void composeBackbone(BackboneElement element) throws Exception {\r\n");
+    write("  protected void composeBackboneElementInner(BackboneElement element) throws IOException {\r\n");
+    write("    composeBackbone(element);\r\n");
+    write("  }\r\n\r\n");
+    write("  protected void composeBackbone(BackboneElement element) throws IOException {\r\n");
+    write("    composeElement(element);\r\n");
+    write("    if (element.hasModifierExtension()) {\r\n");
+    write("      openArray(\"modifierExtension\");\r\n");
+    write("      for (Extension e : element.getModifierExtension())\r\n");
+    write("        composeExtension(null, e);\r\n");
+    write("      closeArray();\r\n");
+    write("    }\r\n");
+    write("  }\r\n\r\n");
+    write("  protected void composeBackbone(BackboneType element) throws IOException {\r\n");
     write("    composeElement(element);\r\n");
     write("    if (element.hasModifierExtension()) {\r\n");
     write("      openArray(\"modifierExtension\");\r\n");
@@ -698,14 +803,14 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
 
   private void generateEnumComposer() throws Exception {
-    write("  protected <E extends Enum<E>> void composeEnumerationCore(String name, Enumeration<E> value, EnumFactory e, boolean inArray) throws Exception {\r\n");
+    write("  protected <E extends Enum<E>> void composeEnumerationCore(String name, Enumeration<E> value, EnumFactory e, boolean inArray) throws IOException {\r\n");
     write("    if (value != null && value.getValue() != null) {\r\n");
     write("      prop(name, e.toCode(value.getValue()));\r\n");
     write("    } else if (inArray)   \r\n");
     write("      writeNull(name);\r\n");
     write("  }    \r\n");
     write("\r\n");
-    write("  protected <E extends Enum<E>> void composeEnumerationExtras(String name, Enumeration<E> value, EnumFactory e, boolean inArray) throws Exception {\r\n");
+    write("  protected <E extends Enum<E>> void composeEnumerationExtras(String name, Enumeration<E> value, EnumFactory e, boolean inArray) throws IOException {\r\n");
     write("    if (value != null && (!Utilities.noString(value.getId()) || ExtensionHelper.hasExtensions(value) || makeComments(value))) {\r\n");
     write("      open(inArray ? null : \"_\"+name);\r\n");
     write("      composeElement(value);\r\n");
@@ -727,15 +832,15 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
   private void generatePrimitiveComposer(DefinedCode dc) throws Exception {
     String tn = getPrimitiveTypeModelName(dc.getCode());
 
-    write("  protected void compose"+upFirst(dc.getCode())+"Core(String name, "+tn+" value, boolean inArray) throws Exception {\r\n");
+    write("  protected void compose"+upFirst(dc.getCode())+"Core(String name, "+tn+" value, boolean inArray) throws IOException {\r\n");
     write("    if (value != null && value.hasValue()) {\r\n");
     if (dc.getCode().equals("integer") || dc.getCode().equals("positiveInt") || dc.getCode().equals("unsignedInt"))
       write("        prop(name, Integer.valueOf(value.getValue()));\r\n");
-    else  if (dc.getCode().equals("boolean")) 
+    else  if (dc.getCode().equals("boolean"))
       write("        prop(name, value.getValue());\r\n");
-    else  if (dc.getCode().equals("decimal")) 
+    else  if (dc.getCode().equals("decimal"))
       write("        prop(name, value.getValue());\r\n");
-    else  if (dc.getCode().equals("date") || dc.getCode().equals("dateTime") || dc.getCode().equals("instant") || dc.getCode().equals("time")) 
+    else  if (dc.getCode().equals("date") || dc.getCode().equals("dateTime") || dc.getCode().equals("instant") || dc.getCode().equals("time"))
       write("        prop(name, value.asStringValue());\r\n");
     else {
       write("        prop(name, toString(value.getValue()));\r\n");
@@ -746,7 +851,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
     write("  }    \r\n");
     write("\r\n");
 
-    write("  protected void compose"+upFirst(dc.getCode())+"Extras(String name, "+tn+" value, boolean inArray) throws Exception {\r\n");
+    write("  protected void compose"+upFirst(dc.getCode())+"Extras(String name, "+tn+" value, boolean inArray) throws IOException {\r\n");
     write("    if (value != null && (!Utilities.noString(value.getId()) || ExtensionHelper.hasExtensions(value) || makeComments(value))) {\r\n");
     write("      open(inArray ? null : \"_\"+name);\r\n");
     write("      composeElement(value);\r\n");
@@ -807,38 +912,40 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
   private void genInnerComposer(ElementDefn n, JavaGenClass clss) throws IOException, Exception {
     String tn = typeNames.containsKey(n) ? typeNames.get(n) : javaClassName(n.getName());
 
-    write("  protected void compose"+upFirst(tn).replace(".", "")+"(String name, "+tn+" element) throws Exception {\r\n");
+    write("  protected void compose"+upFirst(tn).replace(".", "")+"(String name, "+tn+" element) throws IOException {\r\n");
     write("    if (element != null) {\r\n");
-    if (clss == JavaGenClass.Resource) 
+    if (clss == JavaGenClass.Resource)
       write("      prop(\"resourceType\", name);\r\n");
     else
       write("      open(name);\r\n");
     write("      compose"+upFirst(tn).replace(".", "")+"Inner(element);\r\n");
-    if (clss != JavaGenClass.Resource)  
+    if (clss != JavaGenClass.Resource)
       write("      close();\r\n");
-    write("    }\r\n");    
-    write("  }\r\n\r\n");    
-    write("  protected void compose"+upFirst(tn).replace(".", "")+"Inner("+tn+" element) throws Exception {\r\n");
-    if (clss == JavaGenClass.Resource) 
+    write("    }\r\n");
+    write("  }\r\n\r\n");
+    write("  protected void compose"+upFirst(tn).replace(".", "")+"Inner("+tn+" element) throws IOException {\r\n");
+    if (clss == JavaGenClass.Resource)
       write("      compose"+n.typeCode()+"Elements(element);\r\n");
-    else if (clss == JavaGenClass.Backbone) 
+    else if (clss == JavaGenClass.Backbone || n.typeCode().equals("BackboneElement"))
       write("      composeBackbone(element);\r\n");
-    else
+    else if (Utilities.noString(n.typeCode()) || n.typeCode().equals("Type") || n.typeCode().equals("Element"))
       write("      composeElement(element);\r\n");
-    for (ElementDefn e : n.getElements()) 
+    else
+      write("      compose"+n.typeCode()+"Inner(element);\r\n");
+    for (ElementDefn e : n.getElements())
       genElementComposer(n, e, clss);
-    write("  }\r\n\r\n");    
+    write("  }\r\n\r\n");
   }
 
   private void genInnerAbstractComposer(ElementDefn n) throws IOException, Exception {
     String tn = typeNames.containsKey(n) ? typeNames.get(n) : javaClassName(n.getName());
 
-    write("  protected void compose"+upFirst(tn).replace(".", "")+"Elements("+tn+" element) throws Exception {\r\n");
-    if (!Utilities.noString(n.typeCode())) 
+    write("  protected void compose"+upFirst(tn).replace(".", "")+"Elements("+tn+" element) throws IOException {\r\n");
+    if (!Utilities.noString(n.typeCode()))
       write("      compose"+n.typeCode()+"Elements(element);\r\n");
-    for (ElementDefn e : n.getElements()) 
+    for (ElementDefn e : n.getElements())
       genElementComposer(n, e, JavaGenClass.Backbone);
-    write("  }\r\n\r\n");    
+    write("  }\r\n\r\n");
   }
 
   private String pathClass(String tn) {
@@ -865,7 +972,10 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
       if (e.typeCode().equals("code") && cd != null && cd.getBinding() == BindingSpecification.BindingMethod.CodeList) {
         en = typeNames.get(e); // getCodeListType(cd.getBinding());
         comp = null;
-      } else {   
+      } else if (e.typeCode().equals("code") && cd != null && isEnum(cd)) {
+          en = typeNames.get(e); // getCodeListType(cd.getBinding());
+          comp = null;
+      } else {
         if (name.equals("extension")) {
           name = "extension";
           tn = "Extension";
@@ -880,14 +990,19 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
         if (tn.contains("Reference(")) {
           comp = "composeReference";
           tn = "Reference";
+        } else if (tn.contains("canonical(")) {
+          comp = "composeCanonical";
+          tn = "CanonicalType"; 
         } else if (tn.contains("("))
           comp = "compose"+tn;
         else if (tn.startsWith(context) && !tn.equals(context)) {
           comp = "compose"+upFirst(leaf(tn)).replace(".", "");
-        } else
+        } else if (tn.equals("SimpleQuantity"))
+          comp = "composeQuantity";
+        else
           comp = "compose"+upFirst(leaf(tn)).replace(".", "");
       }
-      //      if ((!contentsHaveId && typeIsSimple(e)) || e.typeCode().equals("xml:lang")) 
+      //      if ((!contentsHaveId && typeIsSimple(e)) || e.typeCode().equals("xml:lang"))
       //        comp = comp+"Simple";
 
       if (e.unbounded()) {
@@ -895,15 +1010,21 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
         if (tn.contains("Reference(")) {
           comp = "composeReference";
           tn = "Reference";
+        } else if (tn.contains("canonical(")) {
+          comp = "composeCanonical";
+          tn = "CanonicalType";
         }
-        write("      if (element.has"+upFirst(name)+"()) {\r\n");
+
+        write("      if (element.has"+upFirst(getElementName(name, false))+"()) {\r\n");
         if (en == null) {
           if (tn.equals("String"))
             tn = "StringType";
+          if (tn.equals("SimpleQuantity"))
+            tn = "Quantity";
           if (definitions.hasPrimitiveType(tn))
             tn = upFirst(tn)+"Type";
 
-          if (isPrimitive(e)) {
+          if (isPrimitive(e) || e.typeCode().startsWith("canonical(")) {
             write("        openArray(\""+name+"\");\r\n");
             write("        for ("+(tn.contains("(") ? tn : upFirst(tn))+" e : element.get"+upFirst(getElementName(name, false))+"()) \r\n");
             write("          "+comp+"Core(null, e, true);\r\n");
@@ -949,22 +1070,30 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
           write("        composeEnumerationExtras(\""+name+"\", element.get"+upFirst(getElementName(name, false))+"Element(), new Enumerations."+upFirst(en.substring(en.indexOf(".")+1))+"EnumFactory(), false);\r\n");
         } else {
           write("        composeEnumerationCore(\""+name+"\", element.get"+upFirst(getElementName(name, false))+"Element(), new "+context+"."+upFirst(en.substring(en.indexOf(".")+1))+"EnumFactory(), false);\r\n");
-          write("        composeEnumerationExtras(\""+name+"\", element.get"+upFirst(getElementName(name, false))+"Element(), new "+context+"."+upFirst(en.substring(en.indexOf(".")+1))+"EnumFactory(), false);\r\n");        
+          write("        composeEnumerationExtras(\""+name+"\", element.get"+upFirst(getElementName(name, false))+"Element(), new "+context+"."+upFirst(en.substring(en.indexOf(".")+1))+"EnumFactory(), false);\r\n");
         }
         write("      }\r\n");
-        //write("        composeString(\""+name+"\", element.get"+upFirst(getElementName(name, false))+"().toCode());\r\n");        
+        //write("        composeString(\""+name+"\", element.get"+upFirst(getElementName(name, false))+"().toCode());\r\n");
       } else if (e.typeCode().equals("Resource")){
         write("        if (element.has"+upFirst(getElementName(name, false))+"()) {\r\n");
         write("          open(\""+name+"\");\r\n");
         write("          "+comp+"(element.get"+upFirst(getElementName(name, false))+"());\r\n");
         write("          close();\r\n");
         write("        }\r\n");
-      } else if (isPrimitive(e)) {
+      } else if (isPrimitive(e) || e.typeCode().startsWith("canonical(")) {
         write("      if (element.has"+upFirst(getElementName(name, false))+"Element()) {\r\n");
         write("        "+comp+"Core(\""+name+"\", element.get"+upFirst(getElementName(name, false))+"Element(), false);\r\n");
         write("        "+comp+"Extras(\""+name+"\", element.get"+upFirst(getElementName(name, false))+"Element(), false);\r\n");
         write("      }\r\n");
-      } else {  
+      } else if (tn.equals("xhtml")) {
+        write("      if (element.has"+upFirst(getElementName(name, false))+"()) {\r\n");
+        write("        XhtmlNode node = element.getDiv();\r\n");
+        write("        if (node.getNsDecl() == null) {\r\n");
+        write("          node.attribute(\"xmlns\", XHTML_NS);\r\n");
+        write("        }\r\n");
+        write("        "+comp+"(\""+name+"\", node);\r\n");
+        write("      }\r\n");
+      } else {
         write("      if (element.has"+upFirst(getElementName(name, false))+"()) {\r\n");
         write("        "+comp+"(\""+name+"\", element.get"+upFirst(getElementName(name, false))+"());\r\n");
         write("      }\r\n");
@@ -1013,17 +1142,17 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
     //        return "DateTime";
     //      else if (t.equals("date"))
     //        return "Date";
-    //      else 
+    //      else
     //        return "String";
     ////        return upFirst(t);
     //    }  else if (t.equals("xml:lang"))
     //        return formal ? "string" : "Code";
-    //    else 
-    if (elem.usesCompositeType()) { 
+    //    else
+    if (elem.usesCompositeType()) {
       if (typeNames.containsKey(elem) && typeNames.get(elem) != null)
         return typeNames.get(elem);
-      else  
-        return root.getName();      
+      else
+        return root.getName();
     } else if (elem.getTypes().size() == 0) {
       return typeNames.get(elem);
     } else if (typeNames.containsKey(elem))
@@ -1034,41 +1163,41 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
   private void finishComposer() throws Exception {
     write("  @Override\r\n");
-    write("  protected void composeResource(Resource resource) throws Exception {\r\n");
+    write("  protected void composeResource(Resource resource) throws IOException {\r\n");
     write("    "+reg.toString().substring(9));
     write("    else if (resource instanceof Binary)\r\n");
     write("      composeBinary(\"Binary\", (Binary)resource);\r\n");
     write("    else\r\n");
-    write("      throw new Exception(\"Unhanded resource type \"+resource.getClass().getName());\r\n");
+    write("      throw new Error(\"Unhandled resource type \"+resource.getClass().getName());\r\n");
     write("  }\r\n\r\n");
-    write("  protected void composeNamedReference(String name, Resource resource) throws Exception {\r\n");
+    write("  protected void composeNamedReference(String name, Resource resource) throws IOException {\r\n");
     write("    "+regn.toString().substring(9));
     write("    else if (resource instanceof Binary)\r\n");
     write("      composeBinary(name, (Binary)resource);\r\n");
     write("    else\r\n");
-    write("      throw new Exception(\"Unhanded resource type \"+resource.getClass().getName());\r\n");
+    write("      throw new Error(\"Unhandled resource type \"+resource.getClass().getName());\r\n");
     write("  }\r\n\r\n");
-    write("  protected void composeType(String prefix, Type type) throws Exception {\r\n");
+    write("  protected void composeType(String prefix, Type type) throws IOException {\r\n");
     write("    if (type == null)\r\n");
     write("      ;\r\n");
     write(regtp.toString());
     write(regtn.toString());
     write("    else\r\n");
-    write("      throw new Exception(\"Unhanded type\");\r\n");
+    write("      throw new Error(\"Unhandled type\");\r\n");
     write("  }\r\n\r\n");
-    write("  protected void composeTypeInner(Type type) throws Exception {\r\n");
+    write("  protected void composeTypeInner(Type type) throws IOException {\r\n");
     write("    if (type == null)\r\n");
     write("      ;\r\n");
     write(regti.toString());
     write("    else\r\n");
-    write("      throw new Exception(\"Unhanded type\");\r\n");
+    write("      throw new Error(\"Unhandled type\");\r\n");
     write("  }\r\n\r\n");
     //
     //    write("  private boolean nameIsTypeName(XmlPullParser xpp, String prefix) {\r\n");
     //    write("    "+regn.toString());
     //    write("    return false;\r\n");
     //    write("  }\r\n");
-    //    
+    //
   }
 
   private void scanNestedTypesComposer(ElementDefn root, String path, ElementDefn e) throws Exception {
@@ -1077,6 +1206,14 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
       BindingSpecification cd = e.getBinding();
       if (cd != null && cd.getBinding() == BindingSpecification.BindingMethod.CodeList) {
         tn = getCodeListType(cd.getValueSet().getName());
+        if (!enumNames.contains(tn)) {
+          enumNames.add(tn);
+          enums.add(e);
+        }
+        typeNames.put(e,  rootOf(path)+"."+tn);
+      }
+      if (cd != null && isEnum(cd)) {
+        tn = getCodeListType(cd.getName());
         if (!enumNames.contains(tn)) {
           enumNames.add(tn);
           enums.add(e);
@@ -1094,7 +1231,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
 
         if (tr.isUnboundGenericParam())
           tn = genparam;
-        else if (tr.isXhtml()) 
+        else if (tr.isXhtml())
           tn = "char[]";
         else if (tr.isWildcardType())
           tn ="Type";
@@ -1106,7 +1243,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
           tn = tn.substring(0, tn.indexOf('<')+1)+tn.substring(tn.indexOf('<')+1, tn.indexOf('<')+2).toUpperCase()+tn.substring(tn.indexOf('<')+2);
         typeNames.put(e,  tn);
       } else {
-        if (e.getDeclaredTypeName() != null) 
+        if (e.getDeclaredTypeName() != null)
           tn = e.getDeclaredTypeName();
         else
           tn = upFirst(e.getName());
@@ -1127,7 +1264,7 @@ public class JavaParserJsonGenerator extends JavaBaseGenerator {
           scanNestedTypesComposer(root, path, c);
         }
       }
-    } 
+    }
   }
 
   private String rootOf(String path) {

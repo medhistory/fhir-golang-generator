@@ -11,7 +11,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.hl7.fhir.definitions.model.Definitions;
 import org.hl7.fhir.definitions.model.Profile;
 import org.hl7.fhir.definitions.model.ResourceDefn;
-import org.hl7.fhir.instance.utils.Translations;
+import org.hl7.fhir.r4.context.IWorkerContext;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition.ExtensionContextType;
+import org.hl7.fhir.r4.utils.Translations;
 import org.hl7.fhir.utilities.CSFile;
 import org.hl7.fhir.utilities.CSFileInputStream;
 import org.hl7.fhir.utilities.Utilities;
@@ -25,6 +28,7 @@ public class BreadCrumbManager {
   
   private Translations translations;
   private Definitions definitions;
+  private IWorkerContext context;
 
   public BreadCrumbManager(Translations translations) {
     super();
@@ -45,6 +49,8 @@ public class BreadCrumbManager {
     private String filename;
     private String source;
     private String resource;
+    private String icon;
+    
     private List<Node> children = new ArrayList<BreadCrumbManager.Node>();
     
     public String getTitle() {
@@ -86,6 +92,12 @@ public class BreadCrumbManager {
     public void setSource(String source) {
       this.source = source;
     }
+    public String getIcon() {
+      return icon;
+    }
+    public void setIcon(String icon) {
+      this.icon = icon;
+    }
     
   }
   
@@ -113,7 +125,6 @@ public class BreadCrumbManager {
   private Map<String, String> map = new HashMap<String, String>();
   private Map<String, Page> pages = new HashMap<String, BreadCrumbManager.Page>();
   private Map<String, Pages> pagesMap = new HashMap<String, BreadCrumbManager.Pages>();
-  
   
   public void parse(String filename) throws Exception {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -171,6 +182,7 @@ public class BreadCrumbManager {
   private Page parsePage(Element node) throws Exception {
     Page page = new Page();
     page.setTitle(node.getAttribute("title"));
+    page.setIcon(node.getAttribute("icon"));
     if (node.hasAttribute("type")) {
       if (node.getAttribute("type").equals("resource")) {
         page.setType(PageType.resource);
@@ -221,9 +233,9 @@ public class BreadCrumbManager {
 
   public String navlist(String name, String prefix) {
     StringBuilder b = new StringBuilder();
-    b.append("              <li><a href=\""+prefix+"index.html\">"+translations.getMessage("HOME", "Home")+"</a></li>\r\n");
+//    b.append("              <li><a href=\""+prefix+"index.html\">"+translations.getMessage("HOME", "Home")+"</a></li>\r\n");
     for (Node n : home.getChildren()) {
-      b.append("              <li><a href=\""+prefix+((Page) n).getFilename()+"\">"+((Page) n).getTitle()+"</a></li>\r\n");
+      b.append("              <li><a href=\""+prefix+((Page) n).getFilename()+"\">"+imgLink(prefix, (Page) n)+((Page) n).getTitle()+"</a></li>\r\n");
     }
     return b.toString();
   }
@@ -233,7 +245,7 @@ public class BreadCrumbManager {
     if (name.equals("index")) {
       b.append("        <li><b>Home</b></li>\r\n");      
     } else {
-      b.append("        <li><a href=\""+prefix+"index.html\">"+translations.getMessage("HOME", "Home")+"</a></li>\r\n");
+      //b.append("        <li><a href=\""+prefix+"index.html\">"+translations.getMessage("HOME", "Home")+"</a></li>\r\n");
       if (!name.endsWith(".html"))
         name = name + ".html";
       String nt = Utilities.changeFileExt(name, "");
@@ -243,225 +255,307 @@ public class BreadCrumbManager {
         for (int i = 0; i < path.length - 1; i++) {
           focus = getChild(focus, path[i]);
           if (focus.getFilename() != null)
-            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>\r\n");
+            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>\r\n");
         }
         focus = getChild(focus, path[path.length - 1]);
-        b.append("        <li><b>"+focus.resource+"</b></li>");
+        b.append("        <li><b>"+imgLink(prefix, focus)+focus.resource+"</b></li>");
       } else if (map.containsKey(name)) {
         String[] path = map.get(name).split("\\.");
         Page focus = home;
         for (int i = 0; i < path.length - 1; i++) {
           focus = getChild(focus, path[i]);
           if (focus.getFilename() != null)
-            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>\r\n");
+            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>\r\n");
         }
         focus = getChild(focus, path[path.length - 1]);
-        b.append("        <li><b>"+focus.getTitle()+"</b></li>");
-      } else if (map.containsKey(type)) {
+        b.append("        <li><b>"+imgLink(prefix, focus)+focus.getTitle()+"</b></li>");
+      } else if (map.containsKey(type) && !type.equals("resource")) {
         String[] path = map.get(type).split("\\.");
         Page focus = home;
         for (int i = 0; i < path.length - 1; i++) {
           focus = getChild(focus, path[i]);
-          b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
+          b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
         }
-        b.append("        <li><b>"+Utilities.escapeXml(title)+"</b></li>");
+        b.append("        <li><b>"+imgLink(prefix, focus)+Utilities.escapeXml(title)+"</b></li>");
       } else if (type.equals("example") && name.contains("-") && map.containsKey(name.substring(0, name.indexOf("-")))) {
         String[] path = map.get(name.substring(0, name.indexOf("-"))).split("\\.");
         Page focus = home;
         for (int i = 0; i < path.length; i++) {
           focus = getChild(focus, path[i]);
           if (focus.type == PageType.resource)
-            b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
+            b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
           else
-            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
+            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
         }
         b.append("        <li><b>Example</b></li>");
-      } else if (type.startsWith("resource-instance") && type.contains(":")) {
-        String[] path = map.get(type.substring(type.indexOf(":")+1).toLowerCase()).split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length; i++) {
-          focus = getChild(focus, path[i]);
-          if (focus.type == PageType.resource)
-            b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-          else
-            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        if (type.startsWith("resource-instance"))
-          b.append("        <li><b>Example Instance</b></li>");
-        else
-          b.append("        <li><b>Profile Instance</b></li>");
-      } else if (type.startsWith("resource-questionnaire") && type.contains(":")) {
-        String[] path = map.get(type.substring(type.indexOf(":")+1).toLowerCase()).split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length; i++) {
-          focus = getChild(focus, path[i]);
-          if (focus.type == PageType.resource)
-            b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-          else
-            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        b.append("        <li><b>Generated Questionnaire</b></li>");
-      } else if (type.equals("valueset-instance") && name.contains(".")) {
-        String[] path = map.get("terminologies-valuesets.html").split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length; i++) {
-          focus = getChild(focus, path[i]);
-          if (focus.type == PageType.resource)
-            b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-          else
-            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        b.append("        <li><a href=\""+prefix+name.substring(0, name.indexOf("."))+".html\">"+name.substring(0, name.indexOf("."))+"</a></li>");
-        b.append("        <li><b>Instance</b></li>");
-      } else if (type.equals("conceptmap-instance") && name.contains(".")) {
-        String[] path = map.get("terminologies-conceptmaps.html").split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length; i++) {
-          focus = getChild(focus, path[i]);
-          if (focus.type == PageType.resource)
-            b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-          else
-            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        b.append("        <li><b>Example</b></li>");
-      } else if (type.startsWith("res") && map.containsKey(Utilities.fileTitle(name))) {
-        String[] path = map.get(Utilities.fileTitle(name)).split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length - 1; i++) {
-          focus = getChild(focus, path[i]);
-          b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        focus = getChild(focus, path[path.length - 1]);
-        if (type.equals("resource")) {
-          b.append("        <li><b>"+focus.getReference()+"</b></li>");
-        } else {
-          b.append("        <li><a href=\""+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-          b.append("        <li><b>"+type.substring(4)+"</b></li>");          
-        }
-      } else if (type.startsWith("profile:")) {
-        String p = map.get(type.substring(type.indexOf(":")+1).toLowerCase());
-        if (p == null) {
-          // the bit after profile is resource.pack.profile
-          String[] path = type.substring(type.indexOf(":")+1).split("\\/");
-          if (map.containsKey(path[0].toLowerCase())) {
-            String[] path2 = map.get(path[0].toLowerCase()).split("\\.");
-            Page focus = home;
-            for (int i = 0; i < path2.length - 1; i++) {
-              focus = getChild(focus, path2[i]);
-              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-            }
-            focus = getChild(focus, path2[path2.length - 1]);
-            b.append("        <li><a href=\""+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-          } else {
-            if (!Utilities.noString(path[0]))
-              b.append("        <li><a href=\""+prefix+path[0].toLowerCase()+".html\">"+path[0]+"</a></li>");
-            if (Utilities.noString(path[0]) || definitions.hasResource(path[0]))
-              b.append("        <li><a href=\""+prefix+(Utilities.noString(path[0]) ? "profilelist" : path[0].toLowerCase()+"-profiles")+".html\">Profiles</a></li>");
-          }
-          
-          Profile pack = definitions.hasResource(path[0]) ? definitions.getResourceByName(path[0]).getConformancePackage(path[1]) : null;
-          if (pack == null || !("profile".equals(pack.metadata("navigation")) && pack.getProfiles().size() == 1))
-            b.append("        <li><a href=\""+prefix+path[1].toLowerCase()+".html\">Profile</a></li>");
-//          b.append("        <li><a href=\""+prefix+path[0].toLowerCase()+".html\">"+path[0]+"</a></li>");
-        } else {
-          String[] path = p.split("\\.");
-          Page focus = home;
-          for (int i = 0; i < path.length; i++) {
-            focus = getChild(focus, path[i]);
-            if (focus.type == PageType.resource)
-              b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-            else
-              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-          }
-        }
-        b.append("        <li><b>"+Utilities.escapeXml(title)+"</b></li>");
-      } else if (type.startsWith("profile-instance:type")) {
-        String[] path = map.get("datatypes.html").split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length; i++) {
-          focus = getChild(focus, path[i]);
-          if (focus.type == PageType.resource)
-            b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-          else
-            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        b.append("        <li><b>Profile</b></li>");
-      } else if (type.startsWith("profile-instance:resource")) {
-        String t = type.substring(type.lastIndexOf(":")+1);
-        if (t==null)
-          throw new Exception("Unable to read type "+type);
-        String obj = map.get(t.toLowerCase());
-        if (obj == null)
-          throw new Exception("Unable to find type "+t);
-        if (type.startsWith("profile-instance:resource")) {
-          String[] path = obj.split("\\.");
-          Page focus = home;
-          for (int i = 0; i < path.length; i++) {
-            focus = getChild(focus, path[i]);
-            if (focus.type == PageType.resource)
-              b.append("          <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-            else
-              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-          }
-          b.append("        <li><b>Profile Instance</b></li>");
-        } else if (type.startsWith("profile-instance:res:")) {
-          String[] path = obj.split("\\.");
-          Page focus = home;
-          for (int i = 0; i < path.length; i++) {
-            focus = getChild(focus, path[i]);
-            if (focus.type == PageType.resource)
-              b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-            else
-              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-          }
-          b.append("        <li><a href=\""+prefix+Utilities.fileTitle(name)+".html\">"+Utilities.escapeXml(title)+"</a></li>");
-          b.append("        <li><b>Profile Instance</b></li>");
-        }
-      } else if (type.startsWith("profile-instance")) {
-        String[] path = map.get("profilelist.html").split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length; i++) {
-          focus = getChild(focus, path[i]);
-          if (focus.type == PageType.resource)
-            b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+focus.getReference()+"</a></li>");
-          else
-            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        b.append("        <li><b>Profile</b></li>");
-      } else if (type.startsWith("v2:")) {
-        String[] path = map.get("v2Vocab").split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length - 1; i++) {
-          focus = getChild(focus, path[i]);
-          b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        b.append("        <li><a href=\"index.html\">"+Utilities.escapeXml(title)+"</a></li>");
-        b.append("        <li><b>Instance</b></li>");
-      } else if (type.startsWith("v3:")) {        
-        String[] path = map.get("v3Vocab").split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length - 1; i++) {
-          focus = getChild(focus, path[i]);
-          b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        b.append("        <li><a href=\"index.html\">"+Utilities.fileTitle(name.substring(3))+"</a></li>");
-        b.append("        <li><b>Instance</b></li>");
-      } else if (type.startsWith("sid:")) {        
-        String[] path = map.get("terminologies.html").split("\\.");
-        Page focus = home;
-        for (int i = 0; i < path.length - 1; i++) {
-          focus = getChild(focus, path[i]);
-          b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+focus.getTitle()+"</a></li>");
-        }
-        b.append("        <li><a href=\""+prefix+"terminologies.html\">Terminologies</a></li>");
-        b.append("        <li><a href=\""+prefix+"terminologies-systems.html\">Systems</a></li>");
-        b.append("        <li><b>SID: "+type.substring(4)+"</b></li>");
       } else {
-        b.append("        <li>??? "+Utilities.escapeXml(name)+" / "+Utilities.escapeXml(type)+"</li>\r\n");
+        String s = map.get(type.substring(type.indexOf(":")+1).toLowerCase());
+        if (type.startsWith("resource-instance") && type.contains(":")) {
+          if (s == null)
+            throw new Exception("Unable to find map for "+type);
+          String[] path = s.split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length; i++) {
+            focus = getChild(focus, path[i]);
+            if (focus.type == PageType.resource)
+              b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+            else
+              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          if (type.startsWith("resource-instance"))
+            b.append("        <li><b>Example Instance</b></li>");
+          else
+            b.append("        <li><b>Profile Instance</b></li>");
+        } else if (type.startsWith("resource-questionnaire") && type.contains(":")) {
+          if (s == null)
+            throw new Exception("Unable to find map for "+type);
+          String[] path = s.split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length; i++) {
+            focus = getChild(focus, path[i]);
+            if (focus.type == PageType.resource)
+              b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+            else
+              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          b.append("        <li><b>Generated Questionnaire</b></li>");
+        } else if (type.equals("valueset-instance") && name.contains(".")) {
+          String[] path = map.get("terminologies-valuesets.html").split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length; i++) {
+            focus = getChild(focus, path[i]);
+            if (focus.type == PageType.resource)
+              b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+            else
+              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          b.append("        <li><a href=\""+prefix+name.substring(0, name.indexOf("."))+".html\">"+name.substring(0, name.indexOf("."))+"</a></li>");
+          b.append("        <li><b>Instance</b></li>");
+        } else if (type.equals("conceptmap-instance") && name.contains(".")) {
+          String[] path = map.get("terminologies-conceptmaps.html").split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length; i++) {
+            focus = getChild(focus, path[i]);
+            if (focus.type == PageType.resource)
+              b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+            else
+              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          b.append("        <li><b>Example</b></li>");
+        } else if (type.startsWith("res") && map.containsKey(Utilities.fileTitle(name))) {
+          String[] path = map.get(Utilities.fileTitle(name)).split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length - 1; i++) {
+            focus = getChild(focus, path[i]);
+            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          focus = getChild(focus, path[path.length - 1]);
+          if (type.equals("resource")) {
+            b.append("        <li><b>"+focus.getReference()+"</b></li>");
+          } else {
+            b.append("        <li><a href=\""+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+            b.append("        <li><b>"+type.substring(4)+"</b></li>");          
+          }
+        } else if (type.startsWith("profile:")) {
+          String p = s;
+          if (p == null) {
+            // the bit after profile is resource.pack.profile
+            String[] path = type.substring(type.indexOf(":")+1).split("\\/");
+            if (map.containsKey(path[0].toLowerCase())) {
+              String[] path2 = map.get(path[0].toLowerCase()).split("\\.");
+              Page focus = home;
+              for (int i = 0; i < path2.length - 1; i++) {
+                focus = getChild(focus, path2[i]);
+                b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+              }
+              focus = getChild(focus, path2[path2.length - 1]);
+              b.append("        <li><a href=\""+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+            } else {
+              if (!Utilities.noString(path[0]))
+                b.append("        <li><a href=\""+prefix+path[0].toLowerCase()+".html\">"+path[0]+"</a></li>");
+              if (Utilities.noString(path[0]) || definitions.hasResource(path[0]))
+                b.append("        <li><a href=\""+prefix+(Utilities.noString(path[0]) ? "profilelist" : path[0].toLowerCase()+"-profiles")+".html\">Profiles</a></li>");
+            }
+            
+            Profile pack = definitions.hasResource(path[0]) ? definitions.getResourceByName(path[0]).getConformancePackage(path[1]) : null;
+            if (pack == null || !("profile".equals(pack.metadata("navigation")) && pack.getProfiles().size() == 1))
+              b.append("        <li><a href=\""+prefix+path[1].toLowerCase()+".html\">Profile</a></li>");
+//          b.append("        <li><a href=\""+prefix+path[0].toLowerCase()+".html\">"+path[0]+"</a></li>");
+          } else {
+            String[] path = p.split("\\.");
+            Page focus = home;
+            for (int i = 0; i < path.length; i++) {
+              focus = getChild(focus, path[i]);
+              if (focus.type == PageType.resource)
+                b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+              else
+                b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+            }
+          }
+          b.append("        <li><b>"+Utilities.escapeXml(title)+"</b></li>");
+        } else if (type.startsWith("profile-instance:type")) {
+          String[] path = map.get("datatypes.html").split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length; i++) {
+            focus = getChild(focus, path[i]);
+            if (focus.type == PageType.resource)
+              b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+            else
+              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          b.append("        <li><b>Profile</b></li>");
+        } else if (type.startsWith("profile-instance:resource")) { // TODO: profile-questionnaire:
+          String t = type.substring(type.lastIndexOf(":")+1);
+          if (t==null)
+            throw new Exception("Unable to read type "+type);
+          String obj = map.get(t.toLowerCase());
+          if (obj == null)
+            throw new Exception("Unable to find type "+t);
+          if (type.startsWith("profile-instance:resource")) {
+            String[] path = obj.split("\\.");
+            Page focus = home;
+            for (int i = 0; i < path.length; i++) {
+              focus = getChild(focus, path[i]);
+              if (focus.type == PageType.resource)
+                b.append("          <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+              else
+                b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+            }
+            b.append("        <li><b>Profile Instance</b></li>");
+          } else if (type.startsWith("profile-instance:res:")) {
+            String[] path = obj.split("\\.");
+            Page focus = home;
+            for (int i = 0; i < path.length; i++) {
+              focus = getChild(focus, path[i]);
+              if (focus.type == PageType.resource)
+                b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+              else
+                b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+            }
+            b.append("        <li><a href=\""+prefix+Utilities.fileTitle(name)+".html\">"+Utilities.escapeXml(title)+"</a></li>");
+            b.append("        <li><b>Profile Instance</b></li>");
+          }
+        } else if (type.startsWith("profile-instance") || type.startsWith("profile-questionnaire") ) {
+          String[] path = map.get("profilelist.html").split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length; i++) {
+            focus = getChild(focus, path[i]);
+            if (focus.type == PageType.resource)
+              b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+            else
+              b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          b.append("        <li><b>Profile</b></li>");
+        } else if (type.startsWith("v2:")) {
+          String[] path = map.get("v2Vocab").split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length - 1; i++) {
+            focus = getChild(focus, path[i]);
+            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          b.append("        <li><a href=\"index.html\">"+Utilities.escapeXml(title)+"</a></li>");
+          b.append("        <li><b>Instance</b></li>");
+        } else if (type.startsWith("v3:")) {        
+          String[] path = map.get("v3Vocab").split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length - 1; i++) {
+            focus = getChild(focus, path[i]);
+            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          b.append("        <li><a href=\"index.html\">"+Utilities.fileTitle(name.substring(3))+"</a></li>");
+          b.append("        <li><b>Instance</b></li>");
+        } else if (type.startsWith("sid:")) {        
+          String[] path = map.get("terminologies.html").split("\\.");
+          Page focus = home;
+          for (int i = 0; i < path.length - 1; i++) {
+            focus = getChild(focus, path[i]);
+            b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+          }
+          b.append("        <li><a href=\""+prefix+"terminologies.html\">Terminologies</a></li>");
+          b.append("        <li><a href=\""+prefix+"terminologies-systems.html\">Systems</a></li>");
+          b.append("        <li><b>SID: "+type.substring(4)+"</b></li>");
+        } else if ((name.startsWith("extension-") || name.startsWith("cqif\\extension-")) && name.endsWith(".html")) {
+          String url = title;
+          StructureDefinition ext = context.fetchResource(StructureDefinition.class, url);
+          if (!ext.hasContext() || ext.getContextFirstRep().getType() != ExtensionContextType.ELEMENT) { 
+            b.append("        <li>??? "+Utilities.escapeXml(name)+" / "+Utilities.escapeXml(type)+"</li>\r\n");
+            System.out.println("no breadcrumb: name = "+name+", type = "+type+", prefix = "+prefix+", title = '"+title+"'");
+          } else {
+            String[] path;
+            String ttl;
+            String fn;
+            String[] p = ext.getContextFirstRep().getExpression().split("\\.");
+            if (definitions.hasType(p[0])) {
+              path = map.get("datatypes.html").split("\\.");
+              ttl = "Data Types";
+              fn = "datatypes";
+            } else {
+              String rn = p[0];
+              ttl = rn;
+              if (ttl.equals("*"))
+                ttl = "Resource";
+              fn = ttl.toLowerCase();
+              String m = map.get(fn);
+              if (m == null)
+                path = new String[] { "??" };
+              else
+                path = m.split("\\.");
+            }
+            Page focus = home;
+            for (int i = 0; i < path.length; i++) {
+              focus = getChild(focus, path[i]);
+              if (focus.getFilename() != null)
+                b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>\r\n");
+            }
+            b.append("        <li><a href=\""+fn+".html\">"+ttl+"</a></li>");
+            b.append("        <li><b>Extension</b></li>");
+          }          
+        } else if (type.equals("logical-model")){
+          String m = map.get(head(name).toLowerCase()+".html");
+          if (m != null) {
+            String[] path = m.split("\\.");
+            Page focus = home;
+            for (int i = 0; i < path.length; i++) {
+              focus = getChild(focus, path[i]);
+              if (focus.type == PageType.resource)
+                b.append("        <li><a href=\""+prefix+focus.getReference().toLowerCase()+".html\">"+imgLink(prefix, focus)+focus.getReference()+"</a></li>");
+              else
+                b.append("        <li><a href=\""+prefix+focus.getFilename()+"\">"+imgLink(prefix, focus)+focus.getTitle()+"</a></li>");
+            }
+          } else
+            System.out.println("no breadcrumb: name = "+name+", type = "+type+", prefix = "+prefix+", title = '"+title+"'");
+          b.append("        <li><b>Logical Model</b></li>");
+        } else if (type.startsWith("search-parameter:") || type.equals("searchparam-instance")){
+          b.append("                  <li><a href=\"foundation-module.html\"><img src=\"foundation.png\"/> Foundation</a></li>\r\n");
+          b.append("                  <li><a href=\"http.html\">RESTful API</a></li>\r\n");
+          b.append("                  <li><a href=\"search.html\">Search</a></li>\r\n");
+          b.append("                  <li><b>Search Parameter</b></li>\r\n");
+        } else if (name.startsWith("codesystem-")) {
+          b.append("                  <li><a href=\"terminology-module.html\"><img src=\"terminology.png\"/> Terminology</a></li>\r\n");
+          b.append("                  <li><a href=\"terminologies-systems.html\">Code Systems</a></li>\r\n");
+          b.append("                  <li><b>Code System</b></li>\r\n");
+        } else if (name.equals("qa.html")){
+          b.append("                  <li><b>QA Page</b></li>\r\n");
+        } else {
+          System.out.println("no breadcrumb: name = "+name+", type = "+type+", prefix = "+prefix+", title = '"+title+"'");
+        }
       }
     }
     b.append("        <!-- "+Utilities.escapeXml(name)+" / "+Utilities.escapeXml(type)+" / "+Utilities.escapeXml(title)+"-->\r\n");
     return b.toString();
+  }
+
+  private String head(String name) {
+    if (name.contains("."))
+      return name.substring(0, name.indexOf("."));
+    else
+      return name;
+  }
+
+  private String imgLink(String prefix, Page focus) {
+    if (Utilities.noString(focus.icon))
+      return "";
+    return "<img src=\""+prefix+focus.icon+"\"/> ";
   }
 
   public String makeToc() {
@@ -619,6 +713,19 @@ public class BreadCrumbManager {
   public void setDefinitions(Definitions definitions) {
     this.definitions = definitions;
   }
+
+  public boolean knowsResource(String n) {
+    return map.containsKey(n.toLowerCase());
+  }
+
+  public IWorkerContext getContext() {
+    return context;
+  }
+
+  public void setContext(IWorkerContext context) {
+    this.context = context;
+  }
+  
   
 }
 

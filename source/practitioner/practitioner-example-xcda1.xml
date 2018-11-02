@@ -13,17 +13,4 @@
     <system value="email"/>
     <value value="john.doe@healthcare.example.org"/>
   </telecom>
-  <practitionerRole>
-
-    <managingOrganization>
-      <display value="Cleveland Clinic"/>
-    </managingOrganization>
-
-    <role>
-      <text value="Primary Surgon"/>
-    </role>
-    <specialty>
-      <text value="Orthopedic"/>
-    </specialty>
-  </practitionerRole>
 </Practitioner>

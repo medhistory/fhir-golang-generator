@@ -14,11 +14,17 @@
 		</Location>
 	</contained>
 	<status value="finished" />
-	<class value="virtual" />
+	<class>
+		<system value="http://terminology.hl7.org/CodeSystem/v3-ActCode"/>
+		<!-- Note that this value implies that the practitioner was at the patients home, 
+			if it was a tele-service, then the virtual code should be used. -->
+		<code value="HH"/>
+		<display value="home health"/>
+	</class>
 
-	<patient>
+	<subject>
 		<reference value="Patient/example"/>
-	</patient>
+	</subject>
 	<participant>
 		<period>
 			<start value="2015-01-17T16:00:00+10:00"/>

@@ -9,20 +9,16 @@
 <body>
 <%file newnavbar%>
 
-<div class="col-9">
+<div class="col-12">
 
 <%resheader%>
 <h1>Resource <%title%> - Content</h1>
-<%draft-note%>
 
-<table class="cols">
- <tr><td><%wg%></td><td><%fmm%></td><td><%complinks%></td></tr>
-</table>
+<table class="<%fmm-style%>"><tr><td><a href="<%wg%>"><%wgt%></a> Work Group</td><td><%fmm%></td><td><%sstatus%></td><td><%sec-cat%></td><!--!ns!--><td><%complinks%></td></tr></table>
 
-
-
-<p> 
-<%definition%> 
+[%normative resource %check%]
+<p>
+<%definition%>
 </p>
 
 <%introduction%>
@@ -33,9 +29,9 @@
 <h2>
 Resource Content
 </h2>
-<a name="def"> </a>
-<a name="<%name%>"> </a>
-<a name="<%title%>"> </a>
+<a name="def"></a>
+<a name="<%name%>"></a>
+<a name="<%title%>"></a>
 
 <div id="tabs">
   <ul>
@@ -43,6 +39,8 @@ Resource Content
     <li><a href="#tabs-uml">UML</a></li>
     <li><a href="#tabs-xml">XML</a></li>
     <li><a href="#tabs-json">JSON</a></li>
+    <li><a href="#tabs-ttl">Turtle</a></li>
+    <li><a href="#tabs-diff">R3 Diff</a></li>
     <li><a href="#tabs-all">All</a></li>
   </ul>
   <div id="tabs-struc">
@@ -56,9 +54,9 @@ Resource Content
 
   </div>
   <div id="tabs-uml">
-  
+
 <div id="uml">
-<p><b>UML Diagram</b></p>
+<p><b>UML Diagram</b> (<a href="formats.html#uml">Legend</a>)</p>
  <div id="uml-inner">
  <%svg A%>
  </div>
@@ -85,58 +83,101 @@ Resource Content
 </div>
 
   </div>
+  <div id="tabs-ttl">
+
+<div id="ttl">
+<p><b>Turtle Template</b></p>
+ <div id="json-inner">
+  <%ttl%>
+ </div>
+</div>
+
+  </div>
+  <div id="tabs-diff">
+
+<div id="vdiff">
+<p><b>Changes since R3</b></p>
+ <div id="diff-inner">
+  <%diff-analysis%>
+  <p>
+  This analysis is available as <a href="<%name%>.diff.xml">XML</a> or <a href="<%name%>.diff.json">JSON</a>.
+  </p>
+  <%r3r4transforms%>
+ </div>
+</div>
+
+  </div>
   <div id="tabs-all">
 
 <div id="tbl">
-<a name="tbl"> </a>
+<a name="tbl"></a>
 <p><b>Structure</b></p>
  <div id="tbl-inner">
   <%resource-table%>
  </div>
 </div>
 
- 
+
 <div id="uml">
-<a name="uml"> </a>
-<p><b>UML Diagram</b></p>
+<a name="uml"></a>
+<p><b>UML Diagram</b> (<a href="formats.html#uml">Legend</a>)</p>
  <div id="uml-inner">
  <%svg B%>
  </div>
 </div>
 
 <div id="xml">
-<a name="xml"> </a>
+<a name="xml"></a>
 <p><b>XML Template</b></p>
  <div id="xml-inner">
   <%xml%>
  </div>
 </div>
 
-<div id="json">
-<a name="json"> </a>
+<div id="json2">
+<a name="json"></a>
 <p><b>JSON Template</b></p>
  <div id="json-inner">
   <%json%>
  </div>
 </div>
-  
+
+<div id="ttl2">
+<a name="ttl"></a>
+<p><b>Turtle Template</b></p>
+ <div id="ttl-inner">
+  <%ttl%>
+ </div>
+</div>
+
+<div id="vdiff2">
+<p><b>Changes since Release 3</b></p>
+ <div id="diff-inner2">
+  <%diff-analysis%>
+  <p>
+  This analysis is available as <a href="<%name%>.diff.xml">XML</a> or <a href="<%name%>.diff.json">JSON</a>.
+  </p>
+  <%r3r4transforms%>
+ </div>
+</div>
+
   </div>
 </div>
-  
-<p>&nbsp;</p>  
-<p>Alternate definitions: <a href="<%name%>.xsd">Schema</a>/<a href="<%name%>.sch">Schematron</a>, 
-Resource Profile (<a href="<%name%>.profile.xml.html">XML</a>, <a href="<%name%>.profile.json.html">JSON</a>), 
-<a href="<%name%>-questionnaire.html">Questionnaire</a></p>
 
+<p>&nbsp;</p>
+<p>[%res-ext-link%]alternate definitions:
+Master Definition <a href="<%name%>.profile.xml.html">XML</a> + <a href="<%name%>.profile.json.html">JSON</a>,
+<a href="xml.html">XML</a> <a href="<%name%>.xsd">Schema</a>/<a href="<%name%>.sch">Schematron</a> + <a href="json.html">JSON</a> 
+<a href="<%name%>.schema.json.html">Schema</a>, <a href="<%name%>.shex.html">ShEx</a> (for <a href="rdf.html">Turtle</a>) [%ext-link%] &amp; the <a href="<%name%>-dependencies.html">dependency analysis</a></p>
 
-<a name="tx"> </a>
+<a name="tx"></a>
 <%tx%>
 
 <%inv%>
 
 <%notes%>
 
-<a name="search"> </a>
+<a name="search"></a>
 <%search%>
 
 
@@ -152,7 +193,7 @@ Resource Profile (<a href="<%name%>.profile.xml.html">XML</a>, <a href="<%name%>
 try {
   var currentTabIndex = sessionStorage.getItem('fhir-resource-tab-index');
 }
-catch(exception){ 
+catch(exception){
 }
 
 if (!currentTabIndex)
@@ -167,11 +208,11 @@ $( '#tabs' ).tabs({
              try {
                sessionStorage.setItem('fhir-resource-tab-index', currentTabIndex);
              }
-             catch(exception){ 
+             catch(exception){
              }
          }
      });
 </script>
-    
+
 </body>
 </html>

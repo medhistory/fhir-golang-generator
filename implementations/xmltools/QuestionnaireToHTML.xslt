@@ -98,18 +98,22 @@
     </xsl:element>
   </xsl:template>
   <!-- label, hidden, instruction, security, tooltip, style, markup -->
-  <xsl:template mode="upgradeQuestionnaire" match="f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-label']|
+  <xsl:template mode="upgradeQuestionnaire" match="f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-category']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-label']|
                                                    f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-hidden']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation']|
                                                    f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-readOnly']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-deReference']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-deMap']|
                                                    f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-allowedResource']|
-                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-instruction']|
-                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-security']|
-                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-help']|
-                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-tooltip']| 
-                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-trailing']|
-                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-units']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory']|
                                                    f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-maxLength']|
-                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/questionnaire-sdc-endpoint']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/sdc-questionnaire-endpoint']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/sdc-questionnaire-optionalDisplay']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/sdc-questionnaire-provenanceSignatureRequired']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/valueset-conceptOrder']|
+                                                   f:extension[@url='http://hl7.org/fhir/StructureDefinition/valueset-label']|
                                                    f:extension[@url='http://hl7.org/fhir/StructureDefinition/minLength']|
                                                    f:extension[@url='http://hl7.org/fhir/StructureDefinition/regex']|
                                                    f:extension[@url='http://hl7.org/fhir/StructureDefinition/entryFormat']|
@@ -135,6 +139,25 @@
     </xsl:variable>
     <xsl:element name="_{$baseName}" namespace="http://hl7.org/fhir">
       <xsl:for-each select="*">
+        <xsl:apply-templates mode="upgradeQuestionnaire" select="@*|node()"/>
+      </xsl:for-each>
+    </xsl:element>  
+  </xsl:template>
+  <xsl:template match="f:item[f:type/@value='display']">
+    <xsl:variable name="baseName">
+      <!-- Todo: Add support for prompt, upper, lower; handle _instruction, _security and _trailing as display -->
+      <xsl:choose>
+        <xsl:when test="f:extension[@url='http://hl7.org/fhir/StructureDefinition/itemControl']/f:valueCodeableConcept/f:coding/f:code/@value='prompt'">prompt</xsl:when>
+        <xsl:when test="f:extension[@url='http://hl7.org/fhir/StructureDefinition/itemControl']/f:valueCodeableConcept/f:coding/f:code/@value='unit'">units</xsl:when>
+        <xsl:when test="f:extension[@url='http://hl7.org/fhir/StructureDefinition/itemControl']/f:valueCodeableConcept/f:coding/f:code/@value='lower'">lower</xsl:when>
+        <xsl:when test="f:extension[@url='http://hl7.org/fhir/StructureDefinition/itemControl']/f:valueCodeableConcept/f:coding/f:code/@value='upper'">upper</xsl:when>
+        <xsl:when test="f:extension[@url='http://hl7.org/fhir/StructureDefinition/itemControl']/f:valueCodeableConcept/f:coding/f:code/@value='flyover'">tooltip</xsl:when>
+        <xsl:when test="f:extension[@url='http://hl7.org/fhir/StructureDefinition/itemControl']/f:valueCodeableConcept/f:coding/f:code/@value='help'">help</xsl:when>
+        <xsl:otherwise>display</xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:element name="_{$baseName}" namespace="http://hl7.org/fhir">
+      <xsl:for-each select="*[not(self::f:extension[@url='http://hl7.org/fhir/StructureDefinition/itemControl'])]">
         <xsl:apply-templates mode="upgradeQuestionnaire" select="@*|node()"/>
       </xsl:for-each>
     </xsl:element>  
@@ -167,21 +190,12 @@
       <xsl:copy-of select="@*|node()"/>
     </f:code>
   </xsl:template>
-  <xsl:template mode="upgradeQuestionnaire" match="f:group">
-    <xsl:choose>
-      <xsl:when test="f:text/@value!='' or f:title/@value!='' or f:group or count(f:question)&gt;1 or count(f:extension[@url='http://www.healthintersections.com.au/fhir/StructureDefinition/metadata-type'])!=0 or f:repeats/@value='true'">
-        <xsl:copy>
-          <xsl:apply-templates mode="upgradeQuestionnaire" select="@*"/>
-          <xsl:call-template name="upgradeCardinality"/>
-          <xsl:apply-templates mode="upgradeQuestionnaire" select="node()"/>
-        </xsl:copy>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:apply-templates mode="upgradeQuestionnaire" select="f:question">
-          <xsl:with-param name="additionalPrefix" select="concat(f:linkId/@value, '[1]')"/>
-        </xsl:apply-templates>
-      </xsl:otherwise>
-    </xsl:choose>
+  <xsl:template mode="upgradeQuestionnaire" match="f:item[f:type/@value='group']">
+    <f:group>
+      <xsl:apply-templates mode="upgradeQuestionnaire" select="@*"/>
+      <xsl:call-template name="upgradeCardinality"/>
+      <xsl:apply-templates mode="upgradeQuestionnaire" select="node()"/>
+    </f:group>
   </xsl:template>
   <xsl:template name="upgradeCardinality">
     <f:_minOccurs>
@@ -220,14 +234,14 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  <xsl:template mode="upgradeQuestionnaire" match="f:header">
+<!--  <xsl:template mode="upgradeQuestionnaire" match="f:header">
     <f:title>
       <xsl:apply-templates mode="upgradeQuestionnaire" select="@*|node()"/>
     </f:title>
-  </xsl:template>
-  <xsl:template mode="upgradeQuestionnaire" match="f:question">
+  </xsl:template>-->
+  <xsl:template mode="upgradeQuestionnaire" match="f:item[not(f:type/@value='display' or f:type/@value='group')]">
     <xsl:param name="additionalPrefix"/>
-    <xsl:copy>
+    <f:question>
       <xsl:apply-templates mode="upgradeQuestionnaire" select="@*"/>
       <xsl:call-template name="upgradeCardinality"/>
       <xsl:if test="f:type[@value='choice' or @value='open-choice']">
@@ -270,7 +284,7 @@
       <xsl:apply-templates mode="upgradeQuestionnaire" select="node()">
         <xsl:with-param name="additionalPrefix" select="$additionalPrefix"/>
       </xsl:apply-templates>
-    </xsl:copy>
+    </f:question>
   </xsl:template>
   <xsl:template mode="upgradeQuestionnaire" match="f:linkId">
     <xsl:param name="additionalPrefix"/>
@@ -338,18 +352,21 @@
           <script type="text/javascript">
             <xsl:comment>
               <xsl:text>&#x0a;</xsl:text>
-              <xsl:text>var questionnaireAnswers = null;&#x0a;</xsl:text>
-              <xsl:text>var questionnaireAnswersId = null;&#x0a;</xsl:text>
-              <xsl:text>var questionnaireAnswersVersion = null;&#x0a;</xsl:text>
-              <xsl:text>var questionnaireAnswersEndpoint = null;&#x0a;</xsl:text>
-              <xsl:apply-templates mode="validateScript" select="//f:group|//f:question"/>
-              <xsl:apply-templates mode="serializeScript" select="//f:group|//f:question"/>
+			  <xsl:text>var questionnaire = null;&#x0a;</xsl:text>
+              <xsl:text>var questionnaireResponse = null;&#x0a;</xsl:text>
+              <xsl:text>var questionnaireResponseId = null;&#x0a;</xsl:text>
+              <xsl:text>var questionnaireResponseVersion = null;&#x0a;</xsl:text>
+              <xsl:text>var questionnaireResponseEndpoint = "http://localhost:8080";&#x0a;</xsl:text>
+			  <!-- Generated validation and serialization scripts replaced with recursive functions -->
+              <!--><xsl:apply-templates mode="validateScript" select="//f:group|//f:question"/>-->
+              <!--><xsl:apply-templates mode="serializeScript" select="//f:group|//f:question"/>-->
               <xsl:text>function validateQuestionnaire() {&#x0a;</xsl:text>
               <xsl:value-of select="concat('  return validate', f:group/f:linkId/@safeValue, '(document.getElementById(&quot;div-cnt&quot;));&#x0a;')"/>
               <xsl:text>}&#x0a;&#x0a;</xsl:text>
               <xsl:text>function populateQuestionnaire() {&#x0a;</xsl:text>
               <xsl:text>  return null;&#x0a;</xsl:text>
               <xsl:text>}&#x0a;&#x0a;</xsl:text>
+			  <!--
               <xsl:text>function serializeQuestionnaire() {&#x0a;</xsl:text>
               <xsl:value-of select="concat('  var rootGroup = serialize', f:group/f:linkId/@safeValue, '(document.getElementById(&quot;div-cnt&quot;));&#x0a;')"/>
               <xsl:text>  if (rootGroup.length == 0)&#x0a;</xsl:text>
@@ -357,7 +374,7 @@
               <xsl:text>  else&#x0a;</xsl:text>
               <xsl:text>    answers.group = rootGroup;&#x0a;</xsl:text>
               <xsl:text>  return answers;&#x0a;</xsl:text>
-              <xsl:text>}&#x0a;&#x0a;</xsl:text>
+              <xsl:text>}&#x0a;&#x0a;</xsl:text>-->
             </xsl:comment>
           </script>
         </xsl:if>
@@ -421,7 +438,7 @@
     <xsl:value-of select="concat('&#x0a;function change_', f:linkId/@safeValue, '() {&#x0a;')"/>
     <xsl:text>&#x0a;    }&#x0a;</xsl:text>
   </xsl:template>
-  <xsl:template mode="serializeScript" match="f:group">
+  <!--><xsl:template mode="serializeScript" match="f:group">
     <xsl:value-of select="concat('&#x0a;function serialize', f:linkId/@safeValue, '(node, groups) {&#x0a;')"/>
     <xsl:value-of select="concat('  var groupNodes = findDiv(node, &quot;', f:linkId/@value, '&quot;);&#x0a;')"/>
     <xsl:text disable-output-escaping="yes">  for (var i=0; i&lt;groupNodes.length;i++) {&#x0a;</xsl:text>
@@ -478,7 +495,7 @@
     <xsl:text>&#x0a;    }&#x0a;</xsl:text>
     <xsl:value-of select="concat('  var answerNodes = findAnswers(node, &quot;', f:linkId/@value, '&quot;);&#x0a;')"/>
     <xsl:text>  if (answerNodes.length != 0) {&#x0a;</xsl:text>
-    <xsl:text disable-output-escaping="yes">    for (int i=0; i &lt; answerNodes.length; i++) {</xsl:text>
+    <xsl:text disable-output-escaping="yes">    for (var i=0; i &lt; answerNodes.length; i++) {</xsl:text>
     <xsl:variable name="answerType">
       <xsl:choose>
         <xsl:when test="f:type/@value='string'">answerString</xsl:when>
@@ -503,7 +520,7 @@
       <xsl:text>      groups.push(group);&#x0a;</xsl:text>
       <xsl:text>    }&#x0a;</xsl:text>
     </xsl:if>
-<!--    <xsl:choose>
+    <xsl:choose>
       <xsl:when test="f:_minOccurs/@value!=0">
         <xsl:text disable-output-escaping="yes">  if (answerNodes == null || answerNodes.length &lt; </xsl:text>
         <xsl:value-of select="concat(f:_minOccurs/@value, ')&#x0a;')"/>
@@ -518,9 +535,11 @@
         <xsl:text disable-output-escaping="yes">&#x0a;         &amp;&amp; </xsl:text>
       </xsl:if>
       <xsl:value-of select="concat('serialize', f:linkId/@safeValue, '(findDiv(node, &quot;', f:linkId/@value, '&quot;))')"/>
-    </xsl:for-each>-->
+    </xsl:for-each>
     <xsl:text>&#x0a;}&#x0a;&#x0a;</xsl:text>
-  </xsl:template>
+  </xsl:template>-->
+  
+<!--
   <xsl:template mode="validateScript" match="f:group">
     <xsl:value-of select="concat('&#x0a;function validate', f:linkId/@safeValue, '(node) {&#x0a;')"/>
     <xsl:value-of select="concat('  var groupNodes = findDiv(node, &quot;', f:linkId/@value, '&quot;);&#x0a;')"/>
@@ -631,6 +650,7 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  -->
   <xsl:template name="scripts">
     <xsl:if test="$jQueryPath!=''">
       <script type="text/javascript" src="{$jQueryPath}/json2.js">&#xA0;</script>
@@ -678,6 +698,442 @@
       <xsl:text disable-output-escaping="yes">/html-form-delete.png" alt="Remove" style="width:10px;height:10px;"/&gt;'&#x0a;</xsl:text>
     </xsl:otherwise>
   </xsl:choose>
+
+///////////////////////////////////////////////////////////////////////////////
+// * VALIDATION AND SERIALIZATION FUNCTIONS                                  //
+// * For converting to/from FHIR resources                                   //
+///////////////////////////////////////////////////////////////////////////////
+
+// Serialize the HTML content of the page back into a JSON representation of a
+// Questionnaire resource
+// ** Note that not all elements of the resource are currently supported **
+function serializeQuestionnaire() {
+  if (questionnaire == null) {
+    initializeQuestionnaire();
+  }
+  
+  // Locate root node
+  var itemNodes =  $("body div:first-child");
+  if (itemNodes.length &lt; 1) {
+    alert('Must have at least 1 occurrence of: item');
+    return false;   
+  }
+  
+  // Serialize root node; recursively traverse the DOM tree and serialize
+  // all items
+  for (var i=0; i &lt; itemNodes.length; i++) {
+    var itemNode = itemNodes[i];
+    var itemTree = serializeQuestionnaireNode(itemNode);
+  }
+  questionnaire.item = itemTree;
+  return true;
+  }  
+
+// Serialize the HTML content of the page and the user's responses  into a JSON
+// representation of a QuestionnaireResponse resource
+// ** Note that not all elements of the resource are currently supported **
+function serializeResponse() {
+  if (questionnaireResponse == null) {
+    initializeAnswers();
+  }
+  
+  // Locate root node
+  var itemNodes =  $("body div:first-child");
+  if (itemNodes.length &lt; 1) {
+    alert('Must have at least 1 occurrence of: item');
+    return false;   
+  }
+  
+  // Serialize root node; recursively traverse the DOM tree and serialize
+  // all groups/questions/answers
+  for (var i=0; i &lt; itemNodes.length; i++) {
+    var itemNode = itemNodes[i];
+    var itemTree = serializeResponseNode(itemNode);
+  }
+  questionnaireResponse.item = itemTree;
+  return true;
+}
+
+// Recursive function called by serializeQuestionnaire(). Traverses the DOM to
+// build a Questionnaire resource
+// ** Note that not all elements of the resource are currently supported **
+function serializeQuestionnaireNode(node) {
+  // Serialize the current group's metadata
+  var groupItemLinkId = "group";   
+  var linkIdSpan = $(node).children("span");
+  if (linkIdSpan.length &gt; 0) {
+    groupItemLinkId = linkIdSpan[0].innerHTML;
+  }
+  
+  // Note: using groupLinkId as a group title for now. Not all elements are supported
+  // EDIT HERE to add additional group elements
+  // Initialize the group
+  var groupItem = {
+    "linkId":groupItemLinkId,
+	//"concept":"",
+	//"text":"",
+	"type":"group",
+	//"required":"",
+	//"repeats":"",
+	//"options":"",
+	//"option":"",
+	"item":[]
+  }
+  
+  // Serialize questions in this group
+  // Questions are always contained in a table
+  var childTables = $(node).children("table");
+  var questionItemLinkId;
+  var itemText;
+  var item;
+  
+  for (var i=0; i &lt; childTables.length; i++) {
+    var tableNode = childTables[i];
+    var childNodes = $(tableNode).find("span").filter(function() {
+      return this.style.display == "none";
+    });
+
+	// The span elements for questions are always contained in a table cell, so checking the parent
+	// node of each span element lets us confirm if a span element pertains to a question
+    for (var j=0; j &lt; childNodes.length; j++) {
+      if (childNodes[j].parentNode.nodeName === "TD") {
+	    // childNodes[j] contains the span element corresponding to a question, so grab
+		// question metadata and initialize the question
+        questionItemLinkId = childNodes[j].innerHTML;
+		itemText = childNodes[j].parentNode.innerHTML;
+		itemText = itemText.substring(itemText.indexOf("/span") + "/span".length + 1).trim();
+		while (itemText.indexOf("&lt;") >= 0) {
+		  if (itemText.indexOf("&gt;") >= 0) {
+		    itemText = itemText.substring(0, itemText.indexOf("&lt;")) + itemText.substring(itemText.indexOf("&gt;")+1);
+	      }
+		}
+		itemText = itemText.trim();
+		
+		// EDIT HERE to add additional question elements
+		questionItem = {
+	      "linkId":questionItemLinkId,
+	  	  //"concept":"",
+	   	  "text":itemText,
+	  	  "type":"question",
+	  	  //"required":"",
+	  	  //"repeats":"",
+	  	  //"options":"",
+	  	  //"option":"",
+	  	  "item":[] // TODO: Support nested questions. Currently the XSLT does not support this (March 2016)
+	    }
+
+		groupItem.item.push(questionItem);
+	  }
+    }
+  }
+  
+  // Serialize child groups (and their subtrees)
+  var itemNodes = $(node).children("div").filter(function() {
+  	return this.style.display != "none";
+  });
+  var g;
+  for (var i=0; i &lt; itemNodes.length; i++) {
+    var divNode = itemNodes[i];
+    g = serializeQuestionnaireNode(divNode);
+	groupItem.item.push(g);
+  }
+  
+  return groupItem;
+}
+  
+// Recursive function called by serializeResponse(). Traverses the DOM to
+// build a QuestionnaireResponse resource
+// ** Note that not all elements of the resource are currently supported **
+function serializeResponseNode(node) {
+  // Serialize the current group's metadata
+  var groupItemLinkId = "group";   
+  var linkIdSpan = $(node).children("span");
+  if (linkIdSpan.length &gt; 0) {
+    groupItemLinkId = linkIdSpan[0].innerHTML;
+  }
+  
+  // Note: using groupLinkId as a group title for now. Not all elements are supported
+  // EDIT HERE to add additional item elements
+  // Inialize the group
+  var groupItem = {
+    "linkId":groupItemLinkId,
+	//"text":"",
+	//"subject":"",
+	"answer":[],
+	"item":[]
+  }
+  
+  // Serialize questions in this group
+  // Questions are always contained in a table
+  var childTables = $(node).children("table");
+  var itemLinkId;
+  var itemText;
+  var item;
+  
+  for (var i=0; i &lt; childTables.length; i++) {
+    var tableNode = childTables[i];
+    var childNodes = $(tableNode).find("span").filter(function() {
+      return this.style.display == "none";
+    });
+
+	// The span elements for questions are always contained in a table cell, so checking the parent
+	// node of each span element lets us confirm if a span element pertains to a question
+    for (var j=0; j &lt; childNodes.length; j++) {
+      if (childNodes[j].parentNode.nodeName === "TD") {
+	    // childNodes[j] contains the span element corresponding to a question, so grab
+		// question metadata and initialize the question
+        itemLinkId = childNodes[j].innerHTML;
+		itemText = childNodes[j].parentNode.innerHTML;
+		itemText = itemText.substring(itemText.indexOf("/span") + "/span".length + 1).trim();
+		while (itemText.indexOf("&lt;") >= 0) {
+		  if (itemText.indexOf("&gt;") >= 0) {
+		    itemText = itemText.substring(0, itemText.indexOf("&lt;")) + itemText.substring(itemText.indexOf("&gt;")+1);
+	      }
+		}
+		itemText = itemText.trim();
+		
+		// EDIT HERE to add additional item elements
+		item = {
+		  "linkId":itemLinkId,
+	      "text":itemText,
+		  //"subject":"",
+	      "answer":[],
+		  "item":[]
+		}
+
+		var answerNodes = findAnswers(node, childNodes[j].innerHTML);
+		for (var k=0; k &lt; answerNodes.length; k++) {
+	      var inputCell = answerCell(node, itemLinkId);
+		  if (inputCell == null) continue;
+		  var inputType = answerType(inputCell);
+		  var answer;
+		  //TODO: Data type choices in this switch block need to be checked
+		  switch(inputType) {
+		    case "radio":
+              answer = {
+                "valueString":answerNodes[i]
+              }
+			  break;
+		    case "checkbox":
+              answer = {
+                "valueString":answerNodes[i]
+              }
+		      break;
+		    case "select":
+              answer = {
+                "valueString":answerNodes[i]
+              }
+		      break;
+		    case "boolean":
+			  answer = {
+			    "valueBoolean":answerNodes[i]
+			  }
+			  break;
+		    case "coding":
+		      answer = {
+		        "valueCoding":answerNodes[i]
+		      }
+		      break;
+		    case "reference":
+              answer = {
+                "valueReference":answerNodes[i]
+              }
+		      break;
+		    case "repeating-text":
+	          answer = {
+	            "valueString":answerNodes[i]
+	          }
+		      break;
+		    case "repeating-textarea":
+	          answer = {
+	            "valueString":answerNodes[i]
+	          }
+		      break;
+		    case "text":
+		      answer = {
+		        "valueString":answerNodes[i]
+		      }
+		      break;
+		    case "textarea":
+	          answer = {
+	            "valueString":answerNodes[i]
+	          }
+		      break;
+		    case "none":
+		      break;
+		  }
+		  item.answer.push(answer);
+		}
+		if (item.answer.length &lt; 1) {
+			delete(item["answer"]);
+		}
+		if (item.item.length &lt; 1) {
+			delete(item["item"]);
+		}
+		groupItem.item.push(item);
+	  }
+    }
+  }
+  
+  // Serialize child groups (and their subtrees)
+  var itemNodes = $(node).children("div").filter(function() {
+  	return this.style.display != "none";
+  });
+  var g;
+  for (var i=0; i &lt; itemNodes.length; i++) {
+    var divNode = itemNodes[i];
+    g = serializeResponseNode(divNode);
+	groupItem.item.push(g);
+  }
+  
+  if (groupItem.answer.length &lt; 1) {
+	delete(groupItem["answer"]);
+  }
+  if (groupItem.item.length &lt; 1) {
+	delete(groupItem["item"]);
+  }
+  
+  return groupItem;
+}
+
+// Attempt to populate the HTML form based on a JSON-encoded
+// QuestionnaireResponse resource. Argument is assumed to contain the
+// JSON-encoded QuestionnaireResponse.
+// ** Note that not all elements of the resource are currently supported ** 
+function deserializeResponse(resp) {
+	// Locate root node
+	var itemNodes =  $("body div:first-child");
+	if (itemNodes.length &lt; 1) {
+  	  	return false;   
+	}
+	var rootNode = itemNodes[0];
+
+	if (resp.item != null) {
+		deserializeResponseItem(resp.item, rootNode)
+	}
+}
+
+function deserializeResponseItem(respItem, rootNode) {
+	if (respItem.hasOwnProperty("answer")) {
+		if (respItem.answer.length > 0) {
+			var linkId = respItem.linkId
+	    	inputType = $( "input[name*='" + linkId + "']" ).attr('type');
+			if (inputType == "text") {
+				var answer = respItem.answer[0].valueString;
+				$( "input[name*='" + linkId + "']" ).val(answer);
+			} else {
+				console.log("input type: " + inputType)
+			}
+			
+			// Other input types...
+			// First, get the answer value
+			var answer = respItem.answer[0].valueString;
+			
+			// Try radio buttons
+			var radios = $( "input[type|='radio']" );
+			for (var i=0; i &lt; radios.length; i++) {
+				if(radios[i].value == answer){
+					radios[i].checked = true;
+				}
+			}
+			
+			// Try drop-down lists
+			var options = $( "option" )
+			for (var i=0; i &lt; options.length; i++) {
+				if(options[i].value == answer){
+					dropdownLinkId = options[i].parentElement.parentElement.previousElementSibling.firstElementChild.innerHTML;
+					if(dropdownLinkId == linkId) {
+						options[i].parentElement.value = answer;
+					}
+				}
+			}
+		}
+	}
+	
+	if (respItem.hasOwnProperty("item")) {
+		if (respItem.item != null) {
+			for (var i=0; i &lt; respItem.item.length; i++) {
+				deserializeResponseItem(respItem.item[i], rootNode)
+			}
+		}
+	}
+}
+ 
+// Attempt to validate the HTML representation of the Questionnaire and the
+// user's responses. 
+// ** Note that not all elements of the resource are currently supported ** 
+function validateQuestionnaire() {
+  // Locate the root node; throw an error if missing
+  var itemNodes =  $("body div:first-child");
+  if (itemNodes.length &lt; 1) {
+    setAddFocus(node, "root");
+    node.focus()
+    alert('Must have at least 1 occurrence of: item');
+    return false;
+  }
+  
+  // Recursively validate child nodes
+  var valid = true;
+  for (var i=0; i &lt; itemNodes.length &amp;&amp; valid; i++) {
+    var divNode = itemNodes[i];
+    valid = validateItem(divNode);
+  }
+  return valid;
+}
+
+// Validate a node as well as any child items. Called by validateQuestionnaire(). 
+// This function is recursive, and will validate the entire subtree rooted
+// at the node provided as an argument. The 'node' argument is expected to 
+// be a reference to a div element in the DOM
+// ** Note that not all elements of the resource are currently supported ** 
+function validateItem(node) {
+  // Find any questions within this group
+  // APPROACH: Since question span elements are never the first child of a div, we can't use jQuery's
+  // children function. We can't use find, either, because that would also match questions contained
+  // in child groups. The solution is to find the table containing the questions for the current group,
+  // since the table element is always a direct child of the group div, then use find within the table
+  var valid = true
+  var childTables = $(node).children("table");
+  
+  for (var i=0; i &lt; childTables.length &amp;&amp; valid; i++) {
+    var tableNode = childTables[i];
+    var childNodes = $(tableNode).find("span").filter(function() {
+      return this.style.display == "none";
+    });
+
+	// The span elements for questions are always contained in a table cell, so checking the parent
+	// node of each span element lets us confirm if a span element pertains to a question
+    for (var j=0; j &lt; childNodes.length &amp;&amp; valid; j++) {
+      if (childNodes[j].parentNode.nodeName === "TD") {
+        // childNodes[j] contains a span element for a question
+		var answerNodes = findAnswers(node, childNodes[j].innerHTML);
+		if (answerNodes != null) {
+		  valid = true;
+		}
+	  }
+    }
+  }
+  
+  if (valid == false) {
+    return valid;
+  }
+  
+  // Find and recursively validate child groups, assuming any and all
+  // questions in the current group are valid
+  var itemNodes = $(node).children("div").filter(function() {
+  	return this.style.display != "none";
+  });
+  for (var i=0; i &lt; itemNodes.length &amp;&amp; valid; i++) {
+    var divNode = itemNodes[i];
+    valid = validateItem(divNode);
+  }
+ 
+  return valid;
+  
+}
+
+// Locate a particular div element with the specified linkId in the subtree
+// rooted at the referenced DOM node
 function findDiv(node, linkId) {
   return $(node).children("div").filter(function() {
     return $(this).children("span:first-child").text() == linkId
@@ -691,6 +1147,8 @@ function setAddFocus(node, linkId) {
   }).last().next(":input").focus();
 }
 
+// Locates the "answer cell" that corresponds to a question with the specified
+// linkID in the subtree rooted at the referenced DOM node
 function answerCell(node, linkId) {
   var answerRows = $(node).children("table").children("tbody").children("tr").filter(function() {
     return $(this).children("td:first-child").children("span:first-child").text() === linkId;
@@ -707,6 +1165,8 @@ function answerCell(node, linkId) {
   return inputCell = answerRows[0].cells[1];
 }
 
+// Detemines the answer type (radio button, checkbox, etc.) of a specified/
+// "answer cell"
 function answerType(inputCell) {
   if ($(inputCell).children("input:radio").length > 0)
     return "radio"
@@ -754,6 +1214,8 @@ function answerType(inputCell) {
   else alert("Unknown type");
 }
 
+// Find the answers for a particular question, given a reference to the div
+// element containing the question and the question's linkId
 function findAnswers(node, linkId, lookupArray, isNumber) {
   var inputCell = answerCell(node, linkId);
 
@@ -850,35 +1312,63 @@ function findAnswers(node, linkId, lookupArray, isNumber) {
       
     case "none":
   }
-  
+
   return answers;
 }
 
+function initializeAnswers(){
+  // EDIT HERE to add additional QuestionnaireResponse elements
+  questionnaireResponse =
+  {
+  	"resourceType":"QuestionnaireResponse",
+	"id":"12345",
+	"text": {
+		"status":"generated",
+		"div":"TODO"
+	},
+	"resourceType":"QuestionnaireResponse",
+    // "identifier": "",
+    // "questionnaire": "",
+    "status": "draft",
+    // "subject": "",
+    // "author": "",
+	"authored": currentTime(),
+    // "source": "",
+    // "encounter": "",
+    "item": null
+  }
+}
+
+function initializeQuestionnaire(){
+  // EDIT HERE to add additional Questionnaire elements
+  questionnaire =
+  {
+  	resourceType:"Questionnaire",
+    // "identifier": "",
+	// "version": "",
+    "status": "published",
+	// "date": currentTime(),
+    // "publisher": "",
+    // "telecom": "",
+	"title":document.title,
+	// "concept":""
+    // "subjectType":"",
+    "item": null
+  }
+}
+
 function loadAnswers() {
-  if (questionnaireAnswers == null) {
-    questionnaireAnswers =
-    {
-      "resourceType": "QuestionnaireAnswers",
-      "text": {
-        "status": "generated",
-        "div": null
-      },
-      // "questionnaire": TODO,
-      "status": "draft",
-      // "subject": TODO,
-      // "author": TODO,
-      "authored": "2001-01-01T00:00:00",
-      // "encounter": TODO,
-      "group": null
-    }
+  if (typeof questionnaireResponse == 'undefined') {
+    initializeAnswers();
   } else {
     populateQuestionnaire();
   }
 }
 
+// Returns the current date/time in the format YYYY-MM-DDTHH:MM:SS
 function currentTime() {
   var now = new Date();
-  return now.getYear + "-" + padTime(now.getMonth) + "-" + padTime(now.getDay) + "T" + padTime(now.getHours) + ':' + padTime(now.getMinutes) + ':' + padTime(now.getSeconds);
+  return now.getFullYear() + "-" + padTime(now.getMonth() + 1) + "-" + padTime(now.getDate()) + "T" + padTime(now.getHours()) + ':' + padTime(now.getMinutes()) + ':' + padTime(now.getSeconds());
 }
 
 function padTime(num) {
@@ -890,26 +1380,65 @@ function padTime(num) {
 
 function saveDraft() {
   serializeQuestionnaire();
-  questionnaireAnswers.status = "draft"
-  questionnaireAnswers.authored = currentTime();
-  saveQuestionnaire(questionnaireAnswers);
+  serializeResponse();
+  questionnaireResponse.status = "draft"
+  questionnaireResponse.authored = currentTime();
+  saveQuestionnaire();
 }
 
 function saveFinal() {
   if (validateQuestionnaire()) {
     serializeQuestionnaire();
-    if (questionnaireAnswers.status == "completed")
-      questionnaireAnswers.status = "amended"
+	serializeResponse();
+    if (questionnaireResponse.status == "completed")
+      questionnaireResponse.status = "amended"
      else
-      questionnaireAnswers.status = "completed";
-    questionnaireAnswers.authored = currentTime();
+      questionnaireResponse.status = "completed";
+    questionnaireResponse.authored = currentTime();
     saveQuestionnaire();
+  } else {
+  	alert("Questionnaire validation failed!");
   }
 }
 
+// Attempts to actually create/update a QuestionnaireResponse resource on a 
+// FHIR server (via XmlHTTPRequest HTTP POST)
+// NOT YET FULLY TESTED - consider this a rough draft or skeleton
+// implementation. Target endpoint must be in the same domain as the server
+// hosting the Questionnaire form EDIT HERE to complete REST operation
+// implementation
 function saveQuestionnaire() {
-  // Todo: save stuff
+	var request = new XMLHttpRequest();
+	var targetURL = questionnaireResponseEndpoint;
+	
+	request.overrideMimeType("application/json+fhir");
+	
+	// Create an anonymous callback function to handle the result
+	request.onreadystatechange = function () {
+    	if (request.readyState !== XMLHttpRequest.DONE) {
+        	return;
+    	}
+    	if (request.status !== 200) {
+			alert("Save operation failed! (Request status: " + request.status + ")");
+        	return;
+    	}
+		alert("Save succeeded");
+		var response = request.responseText;
+		// EDIT HERE to do something with the response from the FHIR server
+	};
+	
+	// Send the request
+	requestBody = JSON.stringify(questionnaireResponse);
+	request.open("POST", targetURL, true);
+	request.setRequestHeader("Content-type", "application/json+fhir");
+	request.setRequestHeader("Content-length", requestBody.length);
+	request.setRequestHeader("Connection", "close");
+	request.send('data=' + requestBody);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// * END VALIDATION AND SERIALIZATION FUNCTIONS                              //
+///////////////////////////////////////////////////////////////////////////////
 
 function showError() {
   alert('Error');
@@ -2492,7 +3021,7 @@ function closeReferenceSelect() {
         <xsl:for-each select="f:expansion//f:contains">
           <xsl:if test="not(f:abstract/@value='true')">
             <f:coding>
-              <xsl:copy-of select="f:system|f:version|f:code|f:display|f:extension"/>
+              <xsl:apply-templates mode="upgradeQuestionnaire" select="f:system|f:version|f:code|f:display|f:extension"/>
             </f:coding>
           </xsl:if>
         </xsl:for-each>
@@ -2508,17 +3037,17 @@ function closeReferenceSelect() {
         <xsl:for-each select="f:define//f:concept">
           <xsl:if test="not(f:abstract/@value='true')">
             <f:coding>
-              <xsl:copy-of select="f:extension"/>
-              <xsl:copy-of select="parent::f:define/f:system|parent::f:define/f:version"/>
-              <xsl:copy-of select="f:code|f:display|f:definition"/>
+              <xsl:apply-templates mode="upgradeQuestionnaire" select="f:extension"/>
+              <xsl:apply-templates mode="upgradeQuestionnaire" select="parent::f:define/f:system|parent::f:define/f:version"/>
+              <xsl:apply-templates mode="upgradeQuestionnaire" select="f:code|f:display|f:definition"/>
             </f:coding>
           </xsl:if>
         </xsl:for-each>
         <xsl:for-each select="f:compose/f:include/f:concept">
           <f:coding>
-            <xsl:copy-of select="f:extension"/>
-            <xsl:copy-of select="parent::f:include/f:system|parent::f:include/f:version"/>
-            <xsl:copy-of select="f:code|f:display"/>
+            <xsl:apply-templates mode="upgradeQuestionnaire" select="f:extension"/>
+            <xsl:apply-templates mode="upgradeQuestionnaire" select="parent::f:include/f:system|parent::f:include/f:version"/>
+            <xsl:apply-templates mode="upgradeQuestionnaire" select="f:code|f:display"/>
           </f:coding>
         </xsl:for-each>
       </xsl:otherwise>
@@ -2549,4 +3078,3 @@ function closeReferenceSelect() {
     </xsl:choose>
   </xsl:template>
 </xsl:stylesheet>
-

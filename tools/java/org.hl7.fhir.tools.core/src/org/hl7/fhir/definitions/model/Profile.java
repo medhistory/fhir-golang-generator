@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.Composition;
-import org.hl7.fhir.instance.model.SearchParameter;
-import org.hl7.fhir.instance.model.StructureDefinition;
-import org.hl7.fhir.instance.model.ValueSet;
+import org.hl7.fhir.igtools.spreadsheets.MappingSpace;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 
 // a named set of profiles and extensions
@@ -16,7 +19,7 @@ import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 public class Profile {
 
   public enum ConformancePackageSourceType {
-    Spreadsheet, Bundle;
+    Spreadsheet, Bundle, StructureDefinition;
   }
 
   // settings
@@ -114,7 +117,7 @@ public class Profile {
     putMetadata("date", c.getDateElement().asStringValue());
     putMetadata("title", c.getTitle());
     putMetadata("status", c.getStatus().toCode());
-    putMetadata("description", new XhtmlComposer().compose(c.getText().getDiv()));
+    putMetadata("description", new XhtmlComposer(XhtmlComposer.HTML).compose(c.getText().getDiv()));
     title = c.getTitle();
     this.source = source;
   }
@@ -161,13 +164,41 @@ public class Profile {
     return null;
   }
   public boolean coversResource(ResourceDefn resource) {
-    for (ConstraintStructure item : profiles)
+    for (ConstraintStructure item : profiles) {
       if (item.getDefn() != null && item.getDefn().getName().equals(resource.getName()))
         return true;
+      if (item.getDefn() == null && item.getResource() != null && item.getResource().getType().equals(resource.getName()))
+        return true;
+    }
     return false;
   }
   public List<Operation> getOperations() {
     return operations;
+  }
+  public String getFmmLevel() {
+    return metadata("fmm-level");
+  }
+  public String getWg() {
+    return metadata("workgroup");
+  }
+  public String describeKind() {
+    CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
+    if (!profiles.isEmpty())
+      b.append("profiles");
+    if (!extensions.isEmpty())
+      b.append("extensions");
+    if (!valuesets.isEmpty())
+      b.append("valuesets");
+    if (!searchParameters.isEmpty())
+      b.append("search parameters");
+    return b.toString();
+  }
+  public MetadataResource getCandidateResource() {
+    if (!profiles.isEmpty())
+      return profiles.get(0).getResource();
+    if (!extensions.isEmpty())
+      return extensions.get(0);
+    return null;
   }
 
   

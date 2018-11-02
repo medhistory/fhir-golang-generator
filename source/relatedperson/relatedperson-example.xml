@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <RelatedPerson xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://hl7.org/fhir ../../schema/relatedperson.xsd">
  <id value="benedicte"/>
@@ -31,6 +31,7 @@
     <system value="urn:oid:1.2.250.1.61"/>
     <value value="272117510400399"/>
   </identifier>
+  <active value="true"/>
 
   <patient>
     <reference value="Patient/example" />
@@ -38,23 +39,22 @@
   
   <relationship>
     <coding>
-      <system value="http://hl7.org/fhir/patient-contact-relationship" />
-      <code value="partner" />
+      <system value="http://terminology.hl7.org/CodeSystem/v2-0131" />
+      <code value="N" />
     </coding>
     <coding>
-      <system value="http://hl7.org/fhir/v3/RoleCode" />
+      <system value="http://terminology.hl7.org/CodeSystem/v3-RoleCode" />
       <code value="WIFE" />
     </coding>    
   </relationship>
   
   <name>
-    <family value="du">
-      <!-- the "du" part is a family name prefix (VV in iso 21090) -->
-      <extension url="http://hl7.org/fhir/StructureDefinitioniso-21090#qualifier">
-        <valueCode value="VV"/>
+    <family value="du Marché">
+    <!--  the "du" part is a family name prefix (VV in iso 21090)  -->
+      <extension url="http://hl7.org/fhir/StructureDefinition/humanname-own-prefix">
+        <valueString value="VV"/>
       </extension>
     </family>
-    <family value="Marché"/>
     <given value="Bénédicte"/>
   </name>
 

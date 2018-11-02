@@ -1130,7 +1130,7 @@
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The longest content allowed to be sent by conformant systems.  Only allowed for simple data types</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Short Label</Data><Comment
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Short Name</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Short description or code1 | code2 | code3 +</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -4657,7 +4657,7 @@
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The longest content allowed to be sent by conformant systems.  Only allowed for simple data types</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Short Label</Data><Comment
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Short Name</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Short description or code1 | code2 | code3 +</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -8569,8 +8569,8 @@
     <Cell ss:StyleID="s106"><Data ss:Type="String">International nomenclature for variant naming</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="String">preferred</Data></Cell>
-    <Cell ss:StyleID="s148" ss:HRef="http://www.hgvs.org/mutnomen/"><Data
-      ss:Type="String">http://www.hgvs.org/mutnomen/</Data></Cell>
+    <Cell ss:StyleID="s148" ss:HRef="http://varnomen.hgvs.org//"><Data
+      ss:Type="String">http://varnomen.hgvs.org//</Data></Cell>
     <Cell><Data ss:Type="String">Sequence Variation Nomenclature</Data></Cell>
     <Cell><Data ss:Type="String">2.16.840.1.113883.6.282</Data></Cell>
     <Cell ss:StyleID="s137"/>
@@ -9986,7 +9986,7 @@
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The maximum length for Maximum length (length all systems must support).  Only allowed for simple data types</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Short Label</Data><Comment
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Short Name</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Short description or code1 | code2 | code3 +</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -10608,7 +10608,7 @@
     <Cell ss:StyleID="s106"><Data ss:Type="String">CodeableConcept</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s106"><Data ss:Type="String">!LOINC 48002-0 answerlist</Data><NamedCell
+    <Cell ss:StyleID="s106"><Data ss:Type="String">!http://loinc.org/vs/LL378-1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><NamedCell ss:Name="_FilterDatabase"/></Cell>

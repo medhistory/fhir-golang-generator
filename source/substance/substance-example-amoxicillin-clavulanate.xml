@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Substance xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ..\..\schema\observation.xsd">
+<Substance xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../schema/observation.xsd">
 	<id value="f205"/>
 	<contained>
 		<Substance>
@@ -55,9 +55,9 @@
 				<code value="mg"/>
 			</denominator>
 		</quantity>
-		<substance>
+		<substanceReference>
 			<reference value="#ingr1"/>
-		</substance>
+		</substanceReference>
 	</ingredient>
 	<ingredient>
 		<quantity>
@@ -74,8 +74,8 @@
 				<code value="mg"/>
 			</denominator>
 		</quantity>
-		<substance>
+		<substanceReference>
 			<reference value="#ingr2"/>
-		</substance>
+		</substanceReference>
 	</ingredient>
 </Substance>

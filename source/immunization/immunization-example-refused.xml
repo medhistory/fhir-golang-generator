@@ -1,9 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!--Refused Immunization Example-->
-<Immunization xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ..\..\schema\immunization.xsd">
+<Immunization xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../schema/immunization.xsd">
 	<id value="notGiven"/>
-	<status value="completed"/>
-	<date value="2013-01-10"/>
+	<status value="not-done"/>
+	<statusReason>
+		<coding>
+			<system value="http://terminology.hl7.org/CodeSystem/v3-ActReason"/>
+			<code value="MEDPREC"/>
+			<display value="medical precaution"/>
+		</coding>
+	</statusReason>
 	<vaccineCode>
 		<coding>
 			<system value="http://hl7.org/fhir/sid/cvx"/>
@@ -14,15 +20,6 @@
 	<patient>
 		<reference value="Patient/example"/>
 	</patient>
-	<wasNotGiven value="true"/>
-	<reported value="false"/>
-	<explanation>
-		<reasonNotGiven>
-			<coding>
-				<system value="http://hl7.org/fhir/v3/ActReason"/>
-				<code value="MEDPREC"/>
-				<display value="medical precaution"/>
-			</coding>
-		</reasonNotGiven>
-	</explanation>
+	<occurrenceDateTime value="2013-01-10"/>
+	<primarySource value="true"/>
 </Immunization>

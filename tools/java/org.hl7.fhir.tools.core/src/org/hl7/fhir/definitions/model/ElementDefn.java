@@ -33,8 +33,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.ElementDefinition;
-import org.hl7.fhir.instance.model.Type;
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.Utilities;
 
 public class ElementDefn {
@@ -47,7 +49,8 @@ public class ElementDefn {
 	private Integer minCardinality;
 	private Integer maxCardinality;
 	private List<Invariant> statedInvariants = new ArrayList<Invariant>(); // a reference to an invariant defined on another element, but which constrains this one
-	private Boolean modifier;
+  private Boolean modifier;
+  private String modifierReason;
 	private Boolean mustSupport;
 	private Boolean summaryItem; // whether this is included in a summary
 	private String regex;
@@ -71,13 +74,12 @@ public class ElementDefn {
 	private String committeeNotes;
 	private String condition;
 	private String maxLength;
-	private List<String> tasks = new ArrayList<String>();
 	
 	private String profileName; // only in a profile, for slicing
 	private List<String> discriminator = new ArrayList<String>(); // when slicing
   private Type example;
   private Map<Integer, Type> otherExamples = new HashMap<Integer, Type>();
-  private Type defaultValue;
+//  private Type defaultValue;
   private String meaningWhenMissing;
   private Type fixed; // only in a profile
   private Type pattern; // only in a profile
@@ -90,6 +92,10 @@ public class ElementDefn {
 	private String displayHint; // hits for generated narrative
 	private String w5;
 	private boolean noBindingAllowed; // note to validator 
+	private boolean translatable;
+	private String orderMeaning;
+	private StandardsStatus standardsStatus; // defaults to container value
+	private Boolean hierarchy;
 	
 	public ElementDefn() {
 		super();
@@ -255,24 +261,35 @@ public class ElementDefn {
     this.maxLength = maxLength;
   }
 
-  public ElementDefn getElementByName(String name, boolean throughChoice, Definitions definitions, String purpose) throws Exception {
+  public ElementDefn getElementByName(String name, boolean throughChoice, Definitions definitions, String purpose, boolean followType) throws Exception {
+    return getElementByName(name, throughChoice, definitions, purpose, followType, new ArrayList<ElementDefn>());
+  }
+  
+  public ElementDefn getElementByName(String name, boolean throughChoice, Definitions definitions, String purpose, boolean followType, List<ElementDefn> trace) throws Exception {
     String n = name.contains(".") ? name.substring(0, name.indexOf(".")) : name;
     String t = name.contains(".") ? name.substring(name.indexOf(".") + 1) : null;
-    if (n.equals(this.name) && t != null)
-      return getElementByName(t);
+    if (n.equals(this.name) && t != null) {
+      if (trace != null)
+        trace.add(this);
+      return getElementByName(definitions, t, throughChoice, followType, trace);
+    }
     
     ElementDefn focus = this;
     
     if (typeCode().startsWith("@")) {
       String s = typeCode().substring(1);
       focus = definitions.getElementDefn(s.substring(0, s.indexOf(".")));
-      focus = focus.getElementForPath(s, definitions, purpose, throughChoice);
+      focus = focus.getElementForPath(s, definitions, purpose, throughChoice, followType);
     }
       
     for (int i = focus.elements.size() - 1; i >= 0; i--) {
       ElementDefn e = focus.elements.get(i);
       if (nameMatches(n, e, throughChoice, definitions))
-        return t == null ? e : e.getElementByName(t);
+        return t == null ? e : e.getElementByName(definitions, t, throughChoice, followType, trace);
+    }
+    if (followType && focus.types.size() == 1 && !focus.getElements().isEmpty()) {
+      ElementDefn parent = definitions.getElementDefn("Type".equals(focus.typeCode()) || "Structure".equals(focus.typeCode())  ? "Element" : focus.typeCode());
+      return parent.getElementByName(definitions, name, throughChoice, followType, trace);
     }
     return null;
   }
@@ -301,24 +318,42 @@ public class ElementDefn {
     }
   }
 
-	public ElementDefn getElementByName(String name) {
+  public ElementDefn getElementByName(Definitions definitions, String name, boolean throughChoice, boolean followType) {
+    return getElementByName(definitions, name, throughChoice, followType, null);
+  }
+  public ElementDefn getElementByName(Definitions definitions, String name, boolean throughChoice, boolean followType, List<ElementDefn> trace) {
 		String n = name.contains(".") ? name.substring(0, name.indexOf("."))
 				: name;
 		String t = name.contains(".") ? name.substring(name.indexOf(".") + 1)
 				: null;
 		if (n.equals(this.name) && t != null)
-			return getElementByName(t);
+			return getElementByName(definitions, t, throughChoice, followType, trace);
 
 		for (int i = elements.size() - 1; i >= 0; i--) {
 			ElementDefn e = elements.get(i);
-			if (nameMatches(n, e, false, null))
-				return t == null ? e : e.getElementByName(t);
-//			if (e.getName().length() > name.length()
-//					&& e.getName().substring(0, name.length())
-//							.equalsIgnoreCase(name)
-//					&& e.getElements().size() == 1
-//					&& e.getElements().get(0).getName().equalsIgnoreCase(name))
-//				return e.getElements().get(0);
+			if (nameMatches(n, e, throughChoice, null)) {
+			  if (trace != null)
+	        trace.add(e);
+				return t == null ? e : e.getElementByName(definitions, t, throughChoice, followType, trace);
+			}
+		}
+		// ok, didn't find it. do we have a reference or a type to follow?
+		if (followType && !Utilities.noString(typeCode())) {
+		  if (typeCode().startsWith("@")) {
+        try {
+          ElementDefn ed = definitions.getElementByPath(typeCode().substring(1).split("\\."), "resolution", true);
+          return ed.getElementByName(definitions, n, throughChoice, followType, trace);
+        } catch (Exception e) {
+          return null;
+        }
+		  } else {
+		    try {
+		      TypeDefn type = definitions.getElementDefn(typeCode());
+		      return type.getElementByName(definitions, name, throughChoice, followType, trace);
+		    } catch (Exception e) {
+		      return null;
+		    }
+		  }
 		}
 		return null;
 	}
@@ -359,7 +394,7 @@ public class ElementDefn {
 
 	public Integer getMaxCardinality() {
 		return maxCardinality;
-	}
+	}  
 
 	public void setMaxCardinality(Integer maxCardinality) {
 		this.maxCardinality = maxCardinality;
@@ -560,7 +595,7 @@ public class ElementDefn {
 	}
 
 	
-	public ElementDefn getElementForPath(String pathname, Definitions definitions, String purpose, boolean throughChoice) throws Exception {
+	public ElementDefn getElementForPath(String pathname, Definitions definitions, String purpose, boolean throughChoice, boolean followType) throws Exception {
 		String[] path = pathname.split("\\.");
 
 		if (!path[0].equals(getName()))
@@ -578,15 +613,15 @@ public class ElementDefn {
 			ElementDefn t = null;
 
 			if (res.typeCode().startsWith("@")) {
-			  res = this.getElementForPath(res.typeCode().substring(1), definitions, purpose, throughChoice);
+			  res = this.getElementForPath(res.typeCode().substring(1), definitions, purpose, throughChoice, followType);
 			} else if (definitions.dataTypeIsSharedInfo(res.typeCode())) {
 				res = definitions.getElementDefn(res.typeCode());
 			} else if (definitions.hasType(res.typeCode())) {
 				res = definitions.getElementDefn(res.typeCode());
 			}
-			t = res.getElementByName(en, throughChoice, definitions, purpose);
+			t = res.getElementByName(en, throughChoice, definitions, purpose, followType);
 			if (t == null) {
-				throw new Exception("unable to resolve " + pathname+" for purpose "+purpose);
+			  return null;
 			}
 			res = t;
 
@@ -637,16 +672,11 @@ public class ElementDefn {
 			    return invariants;
 	   }
 	   
-	   private List<String> acceptableGenericTypes = new ArrayList<String>();
-
     private String sliceDescription;
 
     private String path;
 
-	   public List<String> getAcceptableGenericTypes()
-	   {
-		   return acceptableGenericTypes;
-	   }
+    private boolean fromTemplate;
 
     public boolean hasComments() {
       return comments != null && !"".equals(comments);
@@ -764,7 +794,7 @@ public class ElementDefn {
 
   public boolean usesType(String name) {
     for (TypeRef t : getTypes()) {
-      if (t.summary().equals(name))
+      if (t.summary().equals(name) || (t.getName().equals(name) && name.equals("Reference")))
         return true;
     }
     return false;
@@ -788,10 +818,6 @@ public class ElementDefn {
 
   public void setDisplayHint(String displayHint) {
     this.displayHint = displayHint;
-  }
-
-  public List<String> getTasks() {
-    return tasks;
   }
 
   public boolean hasStatedProfile() {
@@ -819,13 +845,13 @@ public class ElementDefn {
     this.sliceDescription = sliceDescription;
   }
 
-  public Type getDefaultValue() {
-    return defaultValue;
-  }
-
-  public void setDefaultValue(Type defaultValue) {
-    this.defaultValue = defaultValue;
-  }
+//  public Type getDefaultValue() {
+//    return defaultValue;
+//  }
+//
+//  public void setDefaultValue(Type defaultValue) {
+//    this.defaultValue = defaultValue;
+//  }
 
   public String getMeaningWhenMissing() {
     return meaningWhenMissing;
@@ -873,7 +899,118 @@ public class ElementDefn {
 
   public Map<Integer, Type> getOtherExamples() {
     return otherExamples;
+  }
+
+  public String getPathTail() {
+    return path.contains(".") ? path.substring(path.lastIndexOf(".")+1) : path;
+  }
+
+  public void copyFrom(ElementDefn other, String rootName, String title) {
+    String titles = Utilities.pluralize(title, 2);
+    types.clear();
+    types.addAll(other.types);
+    minCardinality = other.minCardinality;
+    maxCardinality = other.maxCardinality;
+    statedInvariants.clear();
+    statedInvariants.addAll(other.statedInvariants);
+    modifier = other.modifier;
+    modifierReason = other.modifierReason;
+    mustSupport = other.mustSupport;
+    summaryItem = other.summaryItem; 
+    regex = other.regex;
+    xmlAttribute = other.xmlAttribute;
+    mappings.clear();
+    mappings.putAll(other.mappings);
+    binding = other.binding;
+    umlDir = other.umlDir;
+    umlBreak = other.umlBreak;
+    svgLeft = other.svgLeft;
+    svgTop = other.svgTop;
+    svgWidth = other.svgWidth;
+    name = other.name == null ? null : other.name.replace("{{title}}", title).replace("{{titles}}", titles);
+    shortDefn = other.shortDefn == null ? null : other.shortDefn.replace("{{title}}", title).replace("{{titles}}", titles);
+    definition = other.definition == null ? null : other.definition.replace("{{title}}", title).replace("{{titles}}", titles);
+    requirements = other.requirements == null ? null : other.requirements.replace("{{title}}", title).replace("{{titles}}", titles);
+    comments = other.comments == null ? null : other.comments.replace("{{title}}", title).replace("{{titles}}", titles);
+    todo = other.todo;
+    aliases.clear();
+    aliases.addAll(other.aliases);
+    committeeNotes = other.committeeNotes == null ? null : other.committeeNotes.replace("{{title}}", title).replace("{{titles}}", titles);
+    condition = other.condition;
+    maxLength = other.maxLength;
+    profileName = other.profileName;
+    discriminator.clear();
+    discriminator.addAll(other.discriminator);
+    example = other.example;
+    otherExamples.clear();
+    otherExamples.putAll(other.otherExamples);
+//    defaultValue = other.defaultValue;
+    meaningWhenMissing = other.meaningWhenMissing == null ? null : other.meaningWhenMissing.replace("{{title}}", title).replace("{{titles}}", titles);
+    fixed = other.fixed;
+    pattern = other.pattern;
+    derivation = other.derivation;
+    inherited = other.inherited;
+    statedType = other.statedType;
+    isCoveredByExample = other.isCoveredByExample;
+    displayHint = other.displayHint;
+    w5 = other.w5;
+    noBindingAllowed = other.noBindingAllowed;
+    fromTemplate = true; 
+  }
+
+  public boolean isFromTemplate() {
+    return fromTemplate;
+  }
+
+  public boolean isTranslatable() {
+    return translatable;
+  }
+
+  public void setTranslatable(boolean translatable) {
+    this.translatable = translatable;
+  }
+
+  public String getOrderMeaning() {
+    return orderMeaning;
+  }
+
+  public void setOrderMeaning(String orderMeaning) {
+    this.orderMeaning = orderMeaning;
+  }
+
+  public boolean hasDescriminator() {
+    return !discriminator.isEmpty();
+  }
+
+  public StandardsStatus getStandardsStatus() {
+    return standardsStatus;
+  }
+
+  public void setStandardsStatus(StandardsStatus standardsStatus) {
+    this.standardsStatus = standardsStatus;
+  }
+
+  public String getModifierReason() {
+    return modifierReason;
+  }
+
+  public void setModifierReason(String modifierReason) {
+    this.modifierReason = modifierReason;
+  }
+
+  public Boolean getHierarchy() {
+    return hierarchy;
+  }
+
+  public boolean hasHierarchy() {
+    return hierarchy != null;
+  }
+
+  public void setHierarchy(Boolean hierarchy) {
+    this.hierarchy = hierarchy;
   }	
+  
+  
   
 }
 

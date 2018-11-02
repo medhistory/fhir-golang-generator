@@ -3,18 +3,21 @@
 HTTP/1.1 200 OK
 [other headers]
 
-<Parameters>
-  <return>
-    <profile value="http://hl7.org/fhir/StructureDefinition/daf-patient"/>
-    <tag>
-      <system value="http://example.org/codes/tags"/>
-      <code value="current"/>
-      <display value="Current Inpatient"/>
-    </tag>
-    <tag>
-      <system value="http://example.org/codes/tags"/>
-      <code value="record-lost"/>
-      <display value="Patient File Lost"/>
-    </tag>    
-  </return>
+<Parameters xmlns="http://hl7.org/fhir">
+  <parameter>
+    <name value="return"/>
+    <valueMeta>
+      <profile value="http://hl7.org/fhir/StructureDefinition/daf-patient"/>
+      <tag>
+        <system value="http://example.org/codes/tags"/>
+        <code value="current"/>
+        <display value="Current Inpatient"/>
+      </tag>
+      <tag>
+        <system value="http://example.org/codes/tags"/>
+        <code value="record-lost"/>
+        <display value="Patient File Lost"/>
+      </tag>    
+    </valueMeta>
+  </parameter>
 </Parameters>

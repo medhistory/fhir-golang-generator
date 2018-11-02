@@ -19,9 +19,8 @@
                 "James"
             ],
             "use": "official",
-            "family": ["Chalmers"]
-        },
-        {
+            "family": "Chalmers"
+        }, {
             "given": ["Jim"],
             "use": "usual"
         }
@@ -74,8 +73,8 @@
             "valueDecimal": 3.141592653589793
         },
         {
-            "url": "http://example.org/fhir/StructureDefinition/avogadro",
-            "valueDecimal": 6.0221416246424E23
+            "url": "http://example.org/fhir/StructureDefinition/max-decimal-precision",
+            "valueDecimal": 1.00065022141624642
         }
     ],
     "gender": "male",
@@ -120,35 +119,17 @@
     ],
     "contact": [{
         "name": {
-            "family": [
-                null,
-                "du",
-                null,
-                "Marché",
-                null
-            ],
-            "_family": [
-                {"extension": [{
-                    "url": "http://example.org/fhir/StructureDefinition/nullFlavor",
-                    "valueCode": "ASKU"
-                }]},
-                {
-                    "id": "a2",
-                    "extension": [{
-                        "url": "http://example.org/fhir/StructureDefinition/qualifier",
-                        "valueCode": "VV"
-                    }]
-                },
-                {"extension": [{
-                    "url": "http://hl7.org/fhir/StructureDefinitioniso-21090#nullFlavor",
-                    "valueCode": "ASKU"
-                }]},
-                null,
-                {"extension": [{
-                    "url": "http://hl7.org/fhir/StructureDefinition/nullFlavor",
-                    "valueCode": "ASKU"
-                }]}
-            ],
+            "family" : "du Marché",
+            "_family": {
+              "extension": [{
+                  "url": "http://example.org/fhir/StructureDefinition/qualifier",
+                  "valueString": "VV"
+                }, {
+                  "url": "http://hl7.org/fhir/StructureDefinitioniso-21090#nullFlavor",
+                  "valueCode": "ASKU"
+                }
+              ]
+            },
             "_given": [
                 null,
                 {
@@ -167,7 +148,7 @@
             ]
         },
         "relationship": [{"coding": [{
-            "system": "http://hl7.org/fhir/patient-contact-relationship",
+            "system": "http://example.org/fhir/CodeSystem/patient-contact-relationship",
             "code": "partner"
         }]}],
         "telecom": [{
@@ -175,7 +156,7 @@
             "value": "+33 (237) 998327"
         }]
     }],
-    "careProvider": [{"reference": "#org3141"}],
+    "generalPractitioner": [{"reference": "#org3141"}],
     "telecom": [
         {"use": "home"},
         {

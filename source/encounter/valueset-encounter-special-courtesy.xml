@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
   <name value="SpecialCourtesy"/>
@@ -6,14 +6,14 @@
   <publisher value="FHIR Project team"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="This value set defines a set of codes that can be used to indicate special courtesies provided to the patient."/>
   <compose>
     <include>
-      <system value="http://hl7.org/fhir/v3/EncounterSpecialCourtesy"/>
+      <system value="http://terminology.hl7.org/CodeSystem/v3-EncounterSpecialCourtesy"/>
       <concept>
         <code value="EXT"/>
       </concept>
@@ -31,7 +31,7 @@
       </concept>
     </include>
     <include>
-      <system value="http://hl7.org/fhir/v3/NullFlavor"/>
+      <system value="http://terminology.hl7.org/CodeSystem/v3-NullFlavor"/>
       <concept>
         <code value="UNK"/>
       </concept>

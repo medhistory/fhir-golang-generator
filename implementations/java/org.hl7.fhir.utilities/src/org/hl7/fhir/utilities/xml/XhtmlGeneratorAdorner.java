@@ -37,15 +37,18 @@ public interface XhtmlGeneratorAdorner {
     private String prefix;
     private String suffix;
     private String supressionMessage;
+    private String path;
     
-    public XhtmlGeneratorAdornerState(String prefix, String suffix) {
+    public XhtmlGeneratorAdornerState(String path, String prefix, String suffix) {
       super();
+      this.path = path;
       this.prefix = prefix;
       this.suffix = suffix;
     }
     
-    public XhtmlGeneratorAdornerState(String supressionMessage) {
+    public XhtmlGeneratorAdornerState(String path, String supressionMessage) {
       super();
+      this.path = path;
       this.supressionMessage = supressionMessage;
     }
 
@@ -61,11 +64,15 @@ public interface XhtmlGeneratorAdorner {
     public String getSupressionMessage() {
       return supressionMessage;
     }
+    public String getPath() {
+      return path;
+    }
   }
   
   XhtmlGeneratorAdornerState getState(XhtmlGenerator ref, XhtmlGeneratorAdornerState state, Element node) throws Exception;
   XhtmlGeneratorAdornerState getAttributeMarkup(XhtmlGenerator xhtmlGenerator, XhtmlGeneratorAdornerState state, Element node, String nodeName, String textContent) throws Exception;
   String getLink(XhtmlGenerator ref, XhtmlGeneratorAdornerState state, Element node) throws Exception;
+  String getNodeId(XhtmlGeneratorAdornerState state, Element node);
 
 }
 

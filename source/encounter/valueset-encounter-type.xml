@@ -1,34 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
+  <meta>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+  </meta>
   <name value="EncounterType"/>
   <status value="draft"/>
   <publisher value="FHIR Project team"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="This example value set defines a set of codes that can be used to indicate the type of encounter: a specific code indicating type of service provided."/>
-  <codeSystem>
-    <system value="http://hl7.org/fhir/encounter-type"/>
-    <caseSensitive value="true"/>
-    <concept>
-      <code value="ADMS"/>
-      <display value="Annual diabetes mellitus screening"/>
-    </concept>
-    <concept>
-      <code value="BD/BM-clin"/>
-      <display value="Bone drilling/bone marrow punction in clinic"/>
-    </concept>
-    <concept>
-      <code value="CCS60"/>
-      <display value="Infant colon screening - 60 minutes"/>
-    </concept>
-    <concept>
-      <code value="OKI"/>
-      <display value="Outpatient Kenacort injection"/>
-    </concept>
-  </codeSystem>
+  <compose>
+    <include>
+      <system value="http://terminology.hl7.org/CodeSystem/encounter-type"/>
+    </include>
+  </compose>
 </ValueSet>

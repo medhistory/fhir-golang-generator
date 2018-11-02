@@ -1,28 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
-  <name value="Payee Type Codes"/>
+  <id value="payeetype"/>
+  <meta>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+  </meta>
+  <name value="Claim Payee Type Codes"/>
   <status value="draft"/>
+  <experimental value="true"/>
   <publisher value="Financial Management"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="This value set includes sample Payee Type codes."/>
   <copyright value="This is an example set."/>
-  <codeSystem>
-    <system value="http://hl7.org/fhir/payeetype"/>
-    <caseSensitive value="true"/>
-    <concept>
-      <code value="subscriber"/>
-    </concept>
-    <concept>
-      <code value="provider"/>
-    </concept>
-    <concept>
-      <code value="other"/>
-    </concept>
-  </codeSystem>
+  <compose>
+    <include>
+      <system value="http://terminology.hl7.org/CodeSystem/payeetype"/>
+    </include>
+  </compose>
 </ValueSet>

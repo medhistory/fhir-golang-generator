@@ -1,25 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
-  <name value="Contract Type Codes"/>
+  <meta>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+  </meta>
+  <name value="ContractTypeCodes"/>
+  <title value="Contract Type Codes"/>
   <status value="draft"/>
   <publisher value="Financial Management"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="This value set includes sample Contract Type codes."/>
   <copyright value="This is an example set."/>
-  <codeSystem>
-    <system value="http://hl7.org/fhir/contracttypecodes"/>
-    <caseSensitive value="true"/>
-    <concept>
-      <code value="privacy"/>
-    </concept>
-    <concept>
-      <code value="disclosure"/>
-    </concept>
-  </codeSystem>
+  <compose>
+    <include>
+      <system value="http://terminology.hl7.org/CodeSystem/contract-type"/>
+    </include>
+  </compose>
 </ValueSet>

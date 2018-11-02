@@ -1,21 +1,27 @@
 package org.hl7.fhir.definitions.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hl7.fhir.definitions.model.ResourceDefn.PointSpec;
+import org.hl7.fhir.r4.model.StructureDefinition;
 
 public class LogicalModel {
  
-  private TypeDefn root;  
   private String id;
   private String source;
   private ResourceDefn resource;
-
-  public TypeDefn getRoot()
-  {
-    return root;
+  private StructureDefinition definition;
+  private WorkGroup wg;
+  private Map<String, PointSpec> layout = new HashMap<String, PointSpec>();
+  
+  public LogicalModel() {
+    super();
   }
 
-  public void setRoot(TypeDefn root)
-  {
-    this.root = root;
+  public LogicalModel(StructureDefinition definition) {
+    super();
+    this.definition = definition;
   }
 
   public String getId() {
@@ -42,5 +48,28 @@ public class LogicalModel {
     this.source = source;
   }
 
+  public StructureDefinition getDefinition() {
+    return definition;
+  }
+
+  public boolean hasResource() {
+    return resource != null;
+  }
+
+  public void setDefinition(StructureDefinition definition) {
+    this.definition = definition;
+  }
+
+  public WorkGroup getWg() {
+    return wg;
+  }
+
+  public void setWg(WorkGroup wg) {
+    this.wg = wg;
+  }
+
+  public Map<String, PointSpec> getLayout() {
+    return layout;
+  }
   
 }

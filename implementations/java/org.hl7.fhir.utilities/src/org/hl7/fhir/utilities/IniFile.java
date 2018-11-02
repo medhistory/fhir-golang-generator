@@ -23,7 +23,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.sql.Timestamp;
@@ -81,7 +84,15 @@ public final class IniFile
         if (checkFile(pstrPathAndName)) loadFile();
     }
 
-/*------------------------------------------------------------------------------
+    public IniFile(InputStream stream) {
+      this.mpropEnv = getEnvVars();
+      this.mhmapSections = new LinkedHashMap<String, INISection>();
+      this.mstrFile = null;
+      // Load the specified INI file.
+      loadStream(stream);
+    }
+
+    /*------------------------------------------------------------------------------
  * Getters
 ------------------------------------------------------------------------------*/
     /**
@@ -657,7 +668,7 @@ public final class IniFile
     /**
      * Flush changes back to the disk file. If the disk file does not exists then
      * creates the new one. 
-     * @throws Exception 
+     * @ 
      */
     public boolean save() 
     {
@@ -703,6 +714,47 @@ public final class IniFile
         return blnRet;
     }
 
+    public boolean save(OutputStream stream) 
+    {
+        boolean    blnRet    = false;
+        String     strName   = null;
+        String     strTemp   = null;
+        Iterator<String>   itrSec    = null;
+        INISection objSec    = null;
+        OutputStreamWriter objWriter = null;
+
+        try
+        {
+            if (this.mhmapSections.size() == 0) return false;
+            objWriter = new OutputStreamWriter(stream, "UTF-8");
+            itrSec = this.mhmapSections.keySet().iterator();
+            while (itrSec.hasNext())
+            {
+                strName = (String) itrSec.next();
+                objSec = (INISection) this.mhmapSections.get(strName);
+                strTemp = objSec.toString();
+                objWriter.write(strTemp);
+                objWriter.write("\r\n");
+                objSec = null;
+            }
+            blnRet = true;
+        }
+        catch (IOException IOExIgnore)
+        {
+        }
+        finally
+        {
+            if (objWriter != null)
+            {
+                closeWriter(objWriter);
+                objWriter = null;
+            }
+            if (itrSec != null) itrSec = null;
+        }
+        return blnRet;
+    }
+
+    
 /*------------------------------------------------------------------------------
  * Helper functions
  *----------------------------------------------------------------------------*/
@@ -777,6 +829,106 @@ public final class IniFile
             if (objFmt != null) objFmt = null;
         }
         return blnRet;
+    }
+
+    /**
+     * Reads the INI file and load its contentens into a section collection after 
+     * parsing the file line by line. 
+     */
+    private void loadStream(InputStream stream)
+    {
+        int            iPos       = -1;
+        String         strLine    = null;
+        String         strSection = null;
+        String         strRemarks = null;
+        BufferedReader objBRdr    = null;
+        InputStreamReader     objFRdr    = null;
+        INISection     objSec     = null;
+
+        try
+        {
+            objFRdr = new InputStreamReader(stream);
+            if (objFRdr != null)
+            {
+                objBRdr = new BufferedReader(objFRdr);
+                if (objBRdr != null)
+                {
+                    while (objBRdr.ready())
+                    {
+                        iPos = -1;
+                        strLine  = null;
+                        strLine = objBRdr.readLine().trim();
+                        if (strLine == null)
+                        {
+                        }
+                        else if (strLine.length() == 0)
+                        {
+                        }
+                        else if (strLine.substring(0, 1).equals(";"))
+                        {
+                            if (strRemarks == null)
+                                strRemarks = strLine.substring(1);
+                            else if (strRemarks.length() == 0)
+                                strRemarks = strLine.substring(1);
+                            else
+                                strRemarks = strRemarks + "\r\n" + strLine.substring(1);
+                        }
+                        else if (strLine.startsWith("[") && strLine.endsWith("]"))
+                        {
+                            // Section start reached create new section
+                            if (objSec != null) 
+                                this.mhmapSections.put(strSection.trim(), objSec);
+                            objSec = null;
+                            strSection = strLine.substring(1, strLine.length() - 1);
+                            objSec = new INISection(strSection.trim(), strRemarks);
+                            strRemarks = null;
+                        }
+                        else if ((iPos = strLine.indexOf("=")) > 0 && objSec != null)
+                        {
+                            // read the key value pair 012345=789
+                            objSec.setProperty(strLine.substring(0, iPos).trim(), 
+                                                strLine.substring(iPos + 1).trim(), 
+                                                strRemarks);
+                            strRemarks = null;
+                        }
+                        else 
+                        {
+                            objSec.setProperty(strLine, "", strRemarks);
+                      
+                        }
+                    }
+                    if (objSec != null)
+                        this.mhmapSections.put(strSection.trim(), objSec);
+                    this.mblnLoaded = true;
+                }
+            }
+        }
+        catch (FileNotFoundException FNFExIgnore)
+        {
+            this.mhmapSections.clear();
+        }
+        catch (IOException IOExIgnore)
+        {
+            this.mhmapSections.clear();
+        }
+        catch (NullPointerException NPExIgnore)
+        {
+            this.mhmapSections.clear();
+        }
+        finally
+        {
+            if (objBRdr != null)
+            {
+                closeReader(objBRdr);
+                objBRdr = null;
+            }
+            if (objFRdr != null)
+            {
+                closeReader(objFRdr);
+                objFRdr = null;
+            }
+            if (objSec != null) objSec = null;
+        }
     }
 
     /**
@@ -1073,9 +1225,9 @@ public final class IniFile
     /**
      * The main entry point for testing.
      * @param pstrArgs the command line arguments array if any.
-     * @throws Exception 
+     * @ 
      */
-    public static void main(String[] pstrArgs) throws Exception
+    public static void main(String[] pstrArgs) 
     {
         IniFile objINI = null;
         String  strFile = null;

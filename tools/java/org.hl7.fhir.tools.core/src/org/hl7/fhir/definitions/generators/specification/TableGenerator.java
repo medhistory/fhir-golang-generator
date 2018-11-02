@@ -1,14 +1,19 @@
 package org.hl7.fhir.definitions.generators.specification;
 
-import org.hl7.fhir.definitions.generators.specification.TableGenerator.RenderMode;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.hl7.fhir.definitions.model.BindingSpecification;
 import org.hl7.fhir.definitions.model.BindingSpecification.BindingMethod;
 import org.hl7.fhir.definitions.model.ElementDefn;
 import org.hl7.fhir.definitions.model.Invariant;
 import org.hl7.fhir.definitions.model.ProfiledType;
-import org.hl7.fhir.definitions.model.ResourceDefn;
-import org.hl7.fhir.definitions.model.TypeRef;
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.tools.publisher.PageProcessor;
+import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.HierarchicalTableGenerator;
 import org.hl7.fhir.utilities.xhtml.HierarchicalTableGenerator.Cell;
@@ -19,7 +24,7 @@ public class TableGenerator extends BaseGenerator {
     DATATYPE,
     RESOURCE,
     LOGICAL
-  }
+  } 
 
   private final boolean ADD_REFERENCE_TO_TABLE = true;
   
@@ -33,13 +38,13 @@ public class TableGenerator extends BaseGenerator {
     this.definitions = page.getDefinitions();
     this.page = page;
     this.pageName = pageName;
-    this.inlineGraphics = inlineGraphics;
+    this.inlineGraphics = inlineGraphics; 
   }
-
+  
   protected boolean dictLinks() {
     return pageName != null;
   }
-  protected Row genElement(ElementDefn e, HierarchicalTableGenerator gen, boolean resource, String path, boolean isProfile, String prefix, RenderMode mode) throws Exception {
+  protected Row genElement(ElementDefn e, HierarchicalTableGenerator gen, boolean resource, String path, boolean isProfile, String prefix, RenderMode mode, boolean isRoot, StandardsStatus rootStatus) throws Exception {
     Row row = gen.new Row();
 
     row.setAnchor(path);
@@ -48,20 +53,25 @@ public class TableGenerator extends BaseGenerator {
     Cell gc = gen.new Cell();
     row.getCells().add(gc);
     if (e.hasMustSupport() && e.isMustSupport()) 
-      gc.addImage("mustsupport.png", "This element must be supported", "S");
+      gc.addStyledText("This element must be supported", "S", "white", "red", prefix+"conformance-rules.html#mustSupport", false);
     if (e.isModifier()) 
-      gc.addImage("modifier.png", "This element is a modifier element", "?!");
+      gc.addStyledText("This element is a modifier element", "?!", null, null, prefix+"conformance-rules.html#isModifier", false);
     if (e.isSummary()) 
-      gc.addImage("summary.png", "This element is included in summaries", "Σ");
+      gc.addStyledText("This element is included in summaries", "\u03A3", null, null, prefix+"elementdefinition-definitions.html#ElementDefinition.isSummary", false);
     if (!e.getInvariants().isEmpty() || !e.getStatedInvariants().isEmpty()) 
-      gc.addImage("lock.png", "This element has or is affected by some invariants", "I");
-  
+      gc.addStyledText("This element has or is affected by some invariants", "I", null, null, prefix+"conformance-rules.html#constraints", false);
+    if (rootStatus != null)
+      gc.addStyledText("Ballot Status = "+rootStatus.toDisplay(), rootStatus.getAbbrev(), "black", rootStatus.getColor(), prefix+"versions.html#std-process", true);
+    else if (e.getStandardsStatus() != null)
+      gc.addStyledText("Ballot Status = "+e.getStandardsStatus().toDisplay(), e.getStandardsStatus().getAbbrev(), "black", e.getStandardsStatus().getColor(), prefix+"versions.html#std-process", true);
     if (resource) {
       row.getCells().add(gen.new Cell()); 
   
       row.setIcon("icon_resource.png", HierarchicalTableGenerator.TEXT_ICON_RESOURCE);
       if (Utilities.noString(e.typeCode()))
         row.getCells().add(gen.new Cell(null, null, "n/a", null, null)); 
+      else if ("Logical".equals(e.typeCode()))
+        row.getCells().add(gen.new Cell(null, prefix+"structuredefinition.html#logical", e.typeCode(), null, null)); 
       else
         row.getCells().add(gen.new Cell(null, prefix+e.typeCode().toLowerCase()+".html", e.typeCode(), null, null)); 
       // todo: base elements
@@ -71,6 +81,10 @@ public class TableGenerator extends BaseGenerator {
         row.setIcon("icon_element.gif", HierarchicalTableGenerator.TEXT_ICON_ELEMENT);
         if (mode == RenderMode.RESOURCE)
           row.getCells().add(gen.new Cell(null, prefix+"backboneelement.html", "BackboneElement", null, null));
+        else if (e.getName().equals("Element"))
+          row.getCells().add(gen.new Cell(null, null, "n/a", null, null)); 
+        else if (e.typeCode().equals("BackboneElement"))
+          row.getCells().add(gen.new Cell(null, prefix+"backboneelement.html", "BackBoneElement", null, null));   
         else
           row.getCells().add(gen.new Cell(null, prefix+"element.html", "Element", null, null));   
       } else if (e.getTypes().size() == 1) {
@@ -80,11 +94,11 @@ public class TableGenerator extends BaseGenerator {
         if (t.startsWith("@")) {
           row.setIcon("icon_reuse.png", HierarchicalTableGenerator.TEXT_ICON_REUSE);
           c = gen.new Cell("see ", "#"+t.substring(1), t.substring(t.lastIndexOf(".")+1), t.substring(1), null);
-        } else if (t.equals("Reference")) {
+        } else if (isReference(t)) {
           row.setIcon("icon_reference.png", HierarchicalTableGenerator.TEXT_ICON_REFERENCE);
           c = gen.new Cell();
           if (ADD_REFERENCE_TO_TABLE) {
-          c.getPieces().add(gen.new Piece(prefix+"references.html", "Reference", null));
+          c.getPieces().add(gen.new Piece(prefix+definitions.getSrcFile(t)+".html#"+t, t, null));
           c.getPieces().add(gen.new Piece(null, "(", null));
           }
           boolean first = true;
@@ -117,7 +131,7 @@ public class TableGenerator extends BaseGenerator {
       }
     }
       
-    Cell cc = gen.new Cell(null, Utilities.isURL(e.getShortDefn()) ? e.getShortDefn() : null, e.getShortDefn(), null, null);
+    Cell cc = gen.new Cell(null, e.getShortDefn() != null && Utilities.isURL(e.getShortDefn()) ? e.getShortDefn() : null, e.getShortDefn(), null, null);
     row.getCells().add(cc);
     
     // constraints
@@ -129,19 +143,59 @@ public class TableGenerator extends BaseGenerator {
     if (e.hasBinding() && e.getBinding() != null && e.getBinding().getBinding() != BindingMethod.Unbound) {
       if (cc.getPieces().size() == 1)
         cc.addPiece(gen.new Piece("br"));
-      cc.getPieces().add(gen.new Piece(getBindingLink(prefix, e), e.getBinding().getValueSet() != null ? e.getBinding().getValueSet().getName() : e.getBinding().getName(), 
+      cc.getPieces().add(gen.new Piece(getBindingLink(prefix, e), e.getBinding().getValueSet() != null ? e.getBinding().getValueSet().present() : e.getBinding().getName(), 
             e.getBinding().getDefinition()));
       cc.getPieces().add(gen.new Piece(null, " (", null));
       BindingSpecification b = e.getBinding();
-      cc.getPieces().add(gen.new Piece(prefix+"terminologies.html#"+b.getStrength().toCode(), b.getStrength().getDisplay(),  b.getStrength().getDefinition()));
+      if (b.hasMax() ) {
+        cc.getPieces().add(gen.new Piece(prefix+"terminologies.html#"+b.getStrength().toCode(), b.getStrength().getDisplay(),  b.getStrength().getDefinition()));
+        cc.getPieces().add(gen.new Piece(null, " but limited to ", null));
+        ValueSet vs = b.getMaxValueSet();
+        if (vs == null)
+          cc.getPieces().add(gen.new Piece(b.getMaxReference(), b.getMaxReference(), null));
+        else
+          cc.getPieces().add(gen.new Piece(vs.hasUserData("external.url") ? vs.getUserString("external.url") : vs.getUserString("path"), vs.getName(), null));
+      }  else
+        cc.getPieces().add(gen.new Piece(prefix+"terminologies.html#"+b.getStrength().toCode(), b.getStrength().getDisplay(),  b.getStrength().getDefinition()));
       cc.getPieces().add(gen.new Piece(null, ")", null));
     }
-    for (String name : e.getInvariants().keySet()) {
+    List<String> invs = new ArrayList<String>(e.getInvariants().keySet());
+    Collections.sort(invs, new ConstraintsSorter());
+    for (String name : invs) {
       Invariant inv = e.getInvariants().get(name);
       cc.addPiece(gen.new Piece("br"));
-      cc.getPieces().add(gen.new Piece(null, inv.getEnglish(), inv.getId()).setStyle("font-style: italic"));
+      cc.getPieces().add(gen.new Piece(null, "+ "+presentLevel(inv)+": "+inv.getEnglish(), inv.getId()).setStyle("font-style: italic"));
     }
-
+    if (e.unbounded() && !isRoot) {
+      if (cc.getPieces().size() > 0)
+        cc.addPiece(gen.new Piece("br"));
+      if (Utilities.noString(e.getOrderMeaning())) {
+        // don't show this, this it's important: cc.getPieces().add(gen.new Piece(null, "This repeating element has no defined order", null));
+      } else {
+        cc.getPieces().add(gen.new Piece(null, "This repeating element order: "+e.getOrderMeaning(), null));
+      }
+    }
+    if (isRoot && !Utilities.noString(e.typeCode()) && !"Logical".equals(e.typeCode())) {
+      List<ElementDefn> ancestors = new ArrayList<ElementDefn>();
+      ElementDefn f = definitions.getElementDefn(e.typeCode());
+      while (f != null) {
+        ancestors.add(0, f);
+        f = Utilities.noString(f.typeCode()) ? null : definitions.getElementDefn(f.typeCode());
+      }
+      
+      cc.getPieces().add(gen.new Piece("br"));
+      cc.getPieces().add(gen.new Piece(null, "Elements defined in Ancestors: ", null));
+      boolean first = true;
+      for (ElementDefn fi : ancestors) { 
+        for (ElementDefn fc : fi.getElements()) {
+          if (first)
+            first = false;
+          else
+            cc.getPieces().add(gen.new Piece(null, ", ", null));
+          cc.getPieces().add(gen.new Piece(definitions.getSrcFile(fi.getName())+".html#"+fi.getName(), fc.getName(), fc.getDefinition()));
+        }
+      }
+    }
     if (mode == RenderMode.LOGICAL) {
       String logical = e.getMappings().get("http://hl7.org/fhir/logical");
       Cell c = gen.new Cell();
@@ -155,15 +209,18 @@ public class TableGenerator extends BaseGenerator {
       for (TypeRef tr : e.getTypes()) {
         Row choicerow = gen.new Row();
         String t = tr.getName();
-        if (t.equals("Reference")) {
-          choicerow.getCells().add(gen.new Cell(null, null, e.getName().replace("[x]",  "Reference"), null, null));
+        if (isReference(t)) {
+          choicerow.getCells().add(gen.new Cell(null, null, e.getName().replace("[x]", Utilities.capitalize(t)), null, null));
           choicerow.getCells().add(gen.new Cell());
           choicerow.getCells().add(gen.new Cell(null, null, "", null, null));
           choicerow.setIcon("icon_reference.png", HierarchicalTableGenerator.TEXT_ICON_REFERENCE);
           Cell c = gen.new Cell();
           choicerow.getCells().add(c);
           if (ADD_REFERENCE_TO_TABLE) {
-            c.getPieces().add(gen.new Piece(prefix+"references.html", "Reference", null));
+            if (tr.getName().equals("canonical"))
+              c.getPieces().add(gen.new Piece(prefix+"datatypes.html#canonical", "canonical", null));
+            else
+              c.getPieces().add(gen.new Piece(prefix+"references.html#Reference", "Reference", null));
             c.getPieces().add(gen.new Piece(null, "(", null));
           }
           boolean first = true;
@@ -203,62 +260,69 @@ public class TableGenerator extends BaseGenerator {
       }
     } else
       for (ElementDefn c : e.getElements())
-        row.getSubRows().add(genElement(c, gen, false, path+'.'+c.getName(), isProfile, prefix, mode));
-    return row;
+        row.getSubRows().add(genElement(c, gen, false, path+'.'+c.getName(), isProfile, prefix, mode, false, null));
+    return row; 
+  }      
+
+  public class ConstraintsSorter implements Comparator<String> {
+
+    @Override
+    public int compare(String s0, String s1) {
+    String[] parts0 = s0.split("\\-");
+    String[] parts1 = s1.split("\\-");
+    if (parts0.length != 2 || parts1.length != 2)
+      return s0.compareTo(s1);
+    int comp = parts0[0].compareTo(parts1[0]);
+    if (comp == 0 && Utilities.isInteger(parts0[1]) && Utilities.isInteger(parts1[1]))
+      return new Integer(parts0[1]).compareTo(new Integer(parts1[1]));
+    else
+      return parts0[1].compareTo(parts1[1]);
+    }
+
   }
+  private String presentLevel(Invariant inv) {
+    if ("warning".equals(inv.getSeverity()))
+      return "Warning";
+    if ("best-practice".equals(inv.getSeverity()))
+      return "Guideline";
+    return "Rule";
+  }
+
+  
+  private boolean isReference(String t) {
+    return t.equals("Reference") || t.equals("canonical"); 
+  }  
 
   private void presentLogicalMapping(HierarchicalTableGenerator gen, Cell c, String logical, String prefix) {
-    String[] parts = logical.split(" ");
-    boolean first = true;
-    for (String p : parts) {
-      if (first)
-        first = false;
-      else
-        c.addPiece(gen.new Piece(null, " ", null));
-      if (p.contains(":")) {
-        String[] pp = p.split("\\:");
-        presentLogicalMappingWord(gen, c, pp[0], prefix);
-        c.addPiece(gen.new Piece(null, ":", null));
-        if (page.getDefinitions().hasResource(pp[1]))
-          c.addPiece(gen.new Piece(prefix+pp[1].toLowerCase()+".html", pp[1], null));
-        else
-          c.addPiece(gen.new Piece(null, pp[1], null));
-      } else if (p.contains("[")) {
-        String[] pp = p.split("\\[");
-        presentLogicalMappingWord(gen, c, pp[0], prefix);
-        c.addPiece(gen.new Piece(null, "["+pp[1], null));
-      } else {
-        presentLogicalMappingWord(gen, c, p, prefix);
-      }
-    }
+    c.addPiece(gen.new Piece(null, logical, null));
   }
 
-  private void presentLogicalMappingWord(HierarchicalTableGenerator gen, Cell c, String p, String prefix) {
-    if (p.contains(".") && page.getDefinitions().hasResource(p.substring(0, p.indexOf(".")))) {
-      String rn = p.substring(0, p.indexOf("."));
-      String rp = p.substring(p.indexOf(".")+1);
-      c.addPiece(gen.new Piece(prefix+rn.toLowerCase()+".html", rn, null));
-      c.addPiece(gen.new Piece(null, ".", null));
-      ResourceDefn r;
-      ElementDefn e; 
-      try {
-        r = page.getDefinitions().getResourceByName(rn);
-        e = r.getRoot().getElementForPath(p, page.getDefinitions(), "logical mapping", true);
-      } catch (Exception e1) {
-        r = null;
-        e = null;
-      }
-      if (e == null)
-        c.addPiece(gen.new Piece(null, rp, null));
-      else
-        c.addPiece(gen.new Piece(prefix+rn.toLowerCase()+"-definitions.html#"+p, rp, null));
-    } else if (page.getDefinitions().hasResource(p)) {
-      c.addPiece(gen.new Piece(prefix+p.toLowerCase()+".html", p, null));
-    } else {
-      c.addPiece(gen.new Piece(null, p, null));
-    }
-    
-  }
+//  private void presentLogicalMappingWord(HierarchicalTableGenerator gen, Cell c, String p, String prefix) {
+//    if (p.contains(".") && page.getDefinitions().hasResource(p.substring(0, p.indexOf(".")))) {
+//      String rn = p.substring(0, p.indexOf("."));
+//      String rp = p.substring(p.indexOf(".")+1);
+//      c.addPiece(gen.new Piece(prefix+rn.toLowerCase()+".html", rn, null));
+//      c.addPiece(gen.new Piece(null, ".", null));
+//      ResourceDefn r;
+//      ElementDefn e; 
+//      try {
+//        r = page.getDefinitions().getResourceByName(rn);
+//        e = r.getRoot().getElementForPath(p, page.getDefinitions(), "logical mapping", true);
+//      } catch (Exception e1) {
+//        r = null;
+//        e = null;
+//      }
+//      if (e == null)
+//        c.addPiece(gen.new Piece(null, rp, null));
+//      else
+//        c.addPiece(gen.new Piece(prefix+rn.toLowerCase()+"-definitions.html#"+p, rp, null));
+//    } else if (page.getDefinitions().hasResource(p)) {
+//      c.addPiece(gen.new Piece(prefix+p.toLowerCase()+".html", p, null));
+//    } else {
+//      c.addPiece(gen.new Piece(null, p, null));
+//    }
+//    
+//  }
 
   private String findPage(String rt) {
     if (rt.equalsIgnoreCase("any"))
@@ -266,5 +330,5 @@ public class TableGenerator extends BaseGenerator {
     if (rt.equalsIgnoreCase("binary"))
       return "http";
     return rt.toLowerCase();
-  }
+  } 
 }

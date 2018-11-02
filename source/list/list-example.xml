@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<List xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ..\..\schema\list.xsd">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<List xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../schema/list.xsd">
   <id value="example"/>
   <text>
     <status value="generated"/>
@@ -37,6 +37,8 @@
     <system value="urn:uuid:a9fcea7c-fcdf-4d17-a5e0-f26dda030b59"/>
     <value value="23974652"/>
   </identifier>
+  <status value="current"/>
+  <mode value="changes"/>
   <!-- This list doesn't have a code. In actual fact, 
     it's a Condition list produced at the end of an encounter 
     to a regular primary care practitioner. But the only way
@@ -45,15 +47,13 @@
   <subject>
     <reference value="Patient/example"/>
   </subject>  
-  <source>
-    <reference value="Patient/example"/>
-  </source>
   <encounter>
     <reference value="Encounter/example"/>
   </encounter>  
-  <status value="current"/>
   <date value="2012-11-25T22:17:00+11:00"/>
-  <mode value="changes"/>
+  <source>
+    <reference value="Patient/example"/>
+  </source>
   <entry>
     <flag>
       <text value="Deleted due to error"/>
@@ -67,7 +67,6 @@
     <flag>
       <text value="Added"/>
     </flag>
-    <date value="2012-11-21"/>
     <item>
       <reference value="Condition/example2"/>
     </item>

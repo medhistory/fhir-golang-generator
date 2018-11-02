@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Slot xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../schema/slot.xsd">
  <id value="1"/>
 	<text>
@@ -11,16 +11,16 @@
     <system value="http://example.org/identifiers/slots"/>
     <value value="123132"/>
   </identifier>
-	<type>
+	<serviceCategory>
 		<coding>
-			<code value="45"/>
-			<display value="Physiotherapy" />
+			<code value="17"/>
+			<display value="General Practice" />
 		</coding>
-	</type>
+	</serviceCategory>
   <schedule>
     <reference value="Schedule/example" />
   </schedule>
-  <freeBusyType value="busy" />
+  <status value="busy" />
 	<start value="2013-12-25T09:00:00Z" />
 	<end value="2013-12-25T09:15:00Z" />
 	<overbooked value="true" />

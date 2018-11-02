@@ -1,40 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <ValueSet xmlns="http://hl7.org/fhir">
-  <name value="Adjudication Codes"/>
+  <meta>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+  </meta>
+  <name value="AdjudicationValueCodes"/>
+  <title value="Adjudication Value Codes"/>
   <status value="draft"/>
   <publisher value="FHIR Project team"/>
   <contact>
     <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <description value="This value set includes a smattering of Adjudication codes."/>
+  <description value="This value set includes a smattering of Adjudication Value codes which includes codes to indicate the amounts eligible under the plan, the amount of benefit, copays etc."/>
   <copyright value="This is an example set."/>
-  <codeSystem>
-    <system value="http://hl7.org/fhir/adjudication"/>
-    <caseSensitive value="true"/>
-    <concept>
-      <code value="total"/>
-    </concept>
-    <concept>
-      <code value="copay"/>
-    </concept>
-    <concept>
-      <code value="eligible"/>
-    </concept>
-    <concept>
-      <code value="deductible"/>
-    </concept>
-    <concept>
-      <code value="eligpercent"/>
-    </concept>
-    <concept>
-      <code value="tax"/>
-    </concept>
-    <concept>
-      <code value="benefit"/>
-    </concept>
-  </codeSystem>
+  <compose>
+    <include>
+      <system value="http://terminology.hl7.org/CodeSystem/adjudication"/>
+    </include>
+  </compose>
 </ValueSet>

@@ -1,23 +1,21 @@
 <div xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/1999/xhtml ../../schema/fhir-xhtml.xsd" xmlns="http://www.w3.org/1999/xhtml">
 
 <div>
-<a name="scope"> </a>
+<a name="scope"></a>
 <h2>Scope and Usage</h2>
 <p>
 The PaymentNotice resource indicates the resource for which the payment has been indicated and 
-reports the current status information of that payment. The payment notice may be used by Payor 
-to advise the Provider or Regulatory bodies of the state of a payment (cheque in the mail/EFT sent, 
-payment cashed, payment cancelled), Employers or Exchanges may use this to advise Payors of 
+reports the current status information of that payment. The payment notice may be used by providers and payers 
+to advise the provider or regulatory bodies of the state of a payment (check in the mail/EFT sent, 
+payment cashed, payment canceled). Employers or Insurance Exchanges may use this to advise payers of 
 premium payment.
 </p>
 <p>
-Payors have the need to advise Providers and/or regulators, in jurisdictions where these 
-are supported, of the status of Claim settlement and payment completion. This same resource may 
-be used by employers and insurance exchanges to advise Payors that premium payments have been 
+Payers and/or providers may have the need to advise providers and/or regulators of the status of claim settlement and payment completion. 
+This same resource may be used by employers and insurance exchanges to advise payers that premium payments have been 
 issued and settled.
 </p>
 <p>
-Todo
 <!-- Describes some of the situations/use cases intended to be managed with the resource. May include a child div for "Storyboards" and "Related Specifications". The purpose of this section is to help implementers understand why the resource is needed and how it might be used. -->
 </p>
 </div>

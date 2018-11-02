@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <Organization xmlns="http://hl7.org/fhir">
   <id value="2"/>
@@ -15,4 +15,5 @@
     <value value="666666"/>
   </identifier>
   <name value="XYZ Insurance"/>
+  <alias value="ABC Insurance"/>
 </Organization>

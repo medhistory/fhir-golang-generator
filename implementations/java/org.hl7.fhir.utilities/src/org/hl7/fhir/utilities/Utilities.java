@@ -33,11 +33,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -49,21 +51,22 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import net.sf.saxon.TransformerFactoryImpl;
-
 import org.apache.commons.io.FileUtils;
+import org.hl7.fhir.exceptions.FHIRException;
+
+import net.sf.saxon.TransformerFactoryImpl;
 
 public class Utilities {
 
 //	 private static final String TOKEN_REGEX = "^a-z[A-Za-z0-9]*$";
 
-
-  private static final String OID_REGEX = "[0-2](\\.(0|[1-9]([0-9])*))*";
+  private static final String OID_REGEX = "[0-2](\\.(0|[1-9][0-9]*))+";
 
   /**
      * Returns the plural form of the word in the string.
@@ -88,30 +91,59 @@ public class Utilities {
      * @return the pluralized form of the word, or the word itself if it could not be pluralized
      * @see #singularize(Object)
      */
-    public static String pluralizeMe( String word ) {
-    	Inflector inf = new Inflector();
-    	return inf.pluralize(word);
+  public static String pluralizeMe( String word ) {
+    Inflector inf = new Inflector();
+    return inf.pluralize(word);
+  }
+  
+  public static String pluralize(String word, int count) {
+    if (count == 1)
+      return word;
+    Inflector inf = new Inflector();
+    return inf.pluralize(word);
+  }
+  
+  
+    public static boolean isInteger(String string) {
+      try {
+        int i = Integer.parseInt(string);
+        return i != i+1;
+      } catch (Exception e) {
+        return false;
+      }
     }
     
-  
-  	public static boolean isInteger(String string) {
-  		try {
-  			int i = Integer.parseInt(string);
-  			return i != i+1;
-  		} catch (Exception e) {
-  			return false;
-  		}
-  	}
-  	
-  	public static boolean isDecimal(String string) {
-  		try {
-  			float r = Float.parseFloat(string);
-  			return r != r + 1; // just to suppress the hint
-  		} catch (Exception e) {
-  			return false;
-  		}
-  	}
-  	
+    public static boolean isHex(String string) {
+      try {
+        int i = Integer.parseInt(string, 16);
+        return i != i+1;
+      } catch (Exception e) {
+        return false;
+      }
+    }
+    
+    public static boolean isFloat(String string) {
+      if (Utilities.noString(string))
+        return false;
+      try {
+        float r = Float.parseFloat(string);
+        return r != r + 1; // just to suppress the hint
+      } catch (Exception e) {
+        return false;
+      }
+    }
+    
+    public static boolean isDecimal(String string) {
+      if (Utilities.noString(string))
+        return false;
+      try {
+        BigDecimal bd = new BigDecimal(string);
+        return bd != null;
+      } catch (Exception e) {
+        return false;
+      }
+    }
+    
 	public static String camelCase(String value) {
 	  return new Inflector().camelCase(value.trim().replace(" ", "_"), false);
 	}
@@ -136,6 +168,18 @@ public class Utilities {
 		return b.toString();
 	}
 
+	public static String titleize(String s) {
+	  StringBuilder b = new StringBuilder();
+	  boolean up = true;
+	  for (char c : s.toCharArray()) {
+	    if (up)
+	      b.append(Character.toUpperCase(c));
+	    else
+	      b.append(c);
+	    up = c == ' ';
+	  }
+	  return b.toString();
+	}
 	
 	public static String capitalize(String s)
 	{
@@ -145,17 +189,17 @@ public class Utilities {
 		
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
-	
-  public static void copyDirectory(String sourceFolder, String destFolder, FileNotifier notifier) throws Exception {
+	  
+  public static void copyDirectory(String sourceFolder, String destFolder, FileNotifier notifier) throws IOException, FHIRException  {
     CSFile src = new CSFile(sourceFolder);
     if (!src.exists())
-      throw new Exception("Folder " +sourceFolder+" not found");
+      throw new FHIRException("Folder " +sourceFolder+" not found");
     createDirectory(destFolder);
     
    String[] files = src.list();
    for (String f : files) {
      if (new CSFile(sourceFolder+File.separator+f).isDirectory()) {
-       if (!f.startsWith(".")) // ignore .svn...
+       if (!f.startsWith(".")) // ignore .git files...
          copyDirectory(sourceFolder+File.separator+f, destFolder+File.separator+f, notifier);
      } else {
        if (notifier != null)
@@ -282,7 +326,7 @@ public class Utilities {
   }
 
 
-  public static byte[] saxonTransform(Map<String, byte[]> files, byte[] source, byte[] xslt) throws Exception {
+  public static byte[] saxonTransform(Map<String, byte[]> files, byte[] source, byte[] xslt) throws TransformerException  {
     TransformerFactory f = new net.sf.saxon.TransformerFactoryImpl();
     f.setAttribute("http://saxon.sf.net/feature/version-warning", Boolean.FALSE);
     StreamSource xsrc = new StreamSource(new ByteArrayInputStream(xslt));
@@ -297,7 +341,7 @@ public class Utilities {
     return out.toByteArray();    
   }
   
-  public static byte[] transform(Map<String, byte[]> files, byte[] source, byte[] xslt) throws Exception {
+  public static byte[] transform(Map<String, byte[]> files, byte[] source, byte[] xslt) throws TransformerException  {
     TransformerFactory f = TransformerFactory.newInstance();
     f.setAttribute("http://saxon.sf.net/feature/version-warning", Boolean.FALSE);
     StreamSource xsrc = new StreamSource(new ByteArrayInputStream(xslt));
@@ -312,14 +356,14 @@ public class Utilities {
     return out.toByteArray();    
   }
   
-  public static void bytesToFile(byte[] content, String filename) throws Exception {
+  public static void bytesToFile(byte[] content, String filename) throws IOException  {
     FileOutputStream out = new FileOutputStream(filename);
     out.write(content);
     out.close();
     
   }
 
-  public static String saxonTransform(String source, String xslt) throws Exception {
+  public static String saxonTransform(String source, String xslt) throws TransformerException, FileNotFoundException  {
     TransformerFactoryImpl f = new net.sf.saxon.TransformerFactoryImpl();
     f.setAttribute("http://saxon.sf.net/feature/version-warning", Boolean.FALSE);
     StreamSource xsrc = new StreamSource(new FileInputStream(xslt));
@@ -330,11 +374,11 @@ public class Utilities {
     return res.getOutputStream().toString();   
   }
 
-  public static void saxonTransform(String xsltDir, String source, String xslt, String dest, URIResolver alt) throws Exception {
+  public static void saxonTransform(String xsltDir, String source, String xslt, String dest, URIResolver alt) throws FileNotFoundException, TransformerException  {
   	saxonTransform(xsltDir, source, xslt, dest, alt, null);
   }
 
-  public static void saxonTransform(String xsltDir, String source, String xslt, String dest, URIResolver alt, Map<String, String> params) throws Exception {
+  public static void saxonTransform(String xsltDir, String source, String xslt, String dest, URIResolver alt, Map<String, String> params) throws FileNotFoundException, TransformerException  {
     TransformerFactoryImpl f = new net.sf.saxon.TransformerFactoryImpl();
     f.setAttribute("http://saxon.sf.net/feature/version-warning", Boolean.FALSE);
     StreamSource xsrc = new StreamSource(new FileInputStream(xslt));
@@ -352,7 +396,7 @@ public class Utilities {
     t.transform(src, res);    
   }
   
-  public static void transform(String xsltDir, String source, String xslt, String dest, URIResolver alt) throws Exception {
+  public static void transform(String xsltDir, String source, String xslt, String dest, URIResolver alt) throws FileNotFoundException, TransformerException  {
 
     TransformerFactory f = TransformerFactory.newInstance();
     StreamSource xsrc = new StreamSource(new FileInputStream(xslt));
@@ -394,7 +438,7 @@ public class Utilities {
   }
 
 
-  public static String unescapeXml(String xml) throws Exception {
+  public static String unescapeXml(String xml) throws FHIRException  {
     if (xml == null)
       return null;
     
@@ -419,7 +463,7 @@ public class Utilities {
         else if (e.toString().equals("mu"))
           b.append((char)956);          
         else
-          throw new Exception("unknown XML entity \""+e.toString()+"\"");
+          throw new FHIRException("unknown XML entity \""+e.toString()+"\"");
       }  else
         b.append(xml.charAt(i));
       i++;
@@ -430,10 +474,20 @@ public class Utilities {
 
   public static boolean isPlural(String word) {
     word = word.toLowerCase();
-    if ("restricts".equals(word) || "contains".equals(word) || "data".equals(word) || "specimen".equals(word))
+    if ("restricts".equals(word) || "contains".equals(word) || "data".equals(word) || "specimen".equals(word) || "replaces".equals(word) || "addresses".equals(word) 
+        || "supplementalData".equals(word) || "instantiates".equals(word) || "imports".equals(word))
       return false;
     Inflector inf = new Inflector();
     return !inf.singularize(word).equals(word);
+  }
+
+
+  public static String padRight(String src, char c, int len) {
+    StringBuilder s = new StringBuilder();
+    s.append(src);
+    for (int i = 0; i < len - src.length(); i++)
+      s.append(c);
+    return s.toString();
   }
 
 
@@ -443,23 +497,38 @@ public class Utilities {
       s.append(c);
     s.append(src);
     return s.toString();
-    
   }
 
 
-  public static String path(String... args) {
+  public static String path(String... args) throws IOException {
     StringBuilder s = new StringBuilder();
     boolean d = false;
+    boolean first = true;
     for(String arg: args) {
+      if (first && arg == null)
+        continue;
+      first = false;
       if (!d)
         d = !noString(arg);
       else if (!s.toString().endsWith(File.separator))
         s.append(File.separator);
       String a = arg;
+      if ("[tmp]".equals(a))
+        a = System.getProperty("java.io.tmpdir");
       a = a.replace("\\", File.separator);
+      a = a.replace("/", File.separator);
       if (s.length() > 0 && a.startsWith(File.separator))
         a = a.substring(File.separator.length());
-        
+      
+      while (a.startsWith(".."+File.separator)) {
+        String p = s.toString().substring(0, s.length()-1);
+        if (!p.contains(File.separator)) {
+          s = new StringBuilder();
+        } else {
+          s = new StringBuilder(p.substring(0,  p.lastIndexOf(File.separator))+File.separator);
+        }
+        a = a.substring(3);
+      }
       if ("..".equals(a)) {
         int i = s.substring(0, s.length()-1).lastIndexOf(File.separator);
         s = new StringBuilder(s.substring(0, i+1));
@@ -469,7 +538,7 @@ public class Utilities {
     return s.toString();
   }
 
-  public static String pathReverse(String... args) {
+  public static String pathURL(String... args) {
     StringBuilder s = new StringBuilder();
     boolean d = false;
     for(String arg: args) {
@@ -487,11 +556,13 @@ public class Utilities {
 //  public static void checkCase(String filename) {
 //    File f = new CSFile(filename);
 //    if (!f.getName().equals(filename))
-//      throw new Exception("Filename  ")
+//      throw new FHIRException("Filename  ")
 //    
 //  }
 
   public static String nmtokenize(String cs) {
+    if (cs == null)
+      return "";
     StringBuilder s = new StringBuilder();
     for (int i = 0; i < cs.length(); i++) {
       char c = cs.charAt(i);
@@ -669,9 +740,30 @@ public class Utilities {
   }
 
 
+  public static boolean charInSet(char value, char... array) {
+    for (int i : array)
+      if (value == i)
+          return true;
+    return false;
+  }
+
+
+  public static boolean charInRange(char ch, char a, char z) {
+    return ch >= a && ch <= z;
+  }
+
   public static boolean existsInList(String value, String... array) {
+    if (value == null)
+      return false;
     for (String s : array)
       if (value.equals(s))
+          return true;
+    return false;
+  }
+
+  public static boolean existsInList(int value, int... array) {
+    for (int i : array)
+      if (value == i)
           return true;
     return false;
   }
@@ -736,13 +828,15 @@ public class Utilities {
         b.append("\\r");
       else if (c == '\n')
         b.append("\\n");
+      else if (c == '\t')
+        b.append("\\t");
       else if (c == '"')
         b.append("\\\"");
-      else if (c == '\'')
-        b.append("\\'");
       else if (c == '\\')
         b.append("\\\\");
-      else 
+      else if (((int) c) < 32)
+        b.append("\\u"+Utilities.padLeft(String.valueOf((int) c), '0', 4));  
+      else
         b.append(c);
     }   
     return b.toString();
@@ -826,7 +920,7 @@ public class Utilities {
 
 
   public static boolean isOid(String cc) {
-    return cc.matches(OID_REGEX) && cc.lastIndexOf('.') > 5;
+    return cc.matches(OID_REGEX) && cc.lastIndexOf('.') >= 5;
   }
 
 
@@ -905,7 +999,131 @@ public class Utilities {
 
 
   public static boolean isAbsoluteUrl(String ref) {
-    return ref.startsWith("http:") || ref.startsWith("https:") || ref.startsWith("urn:uuid:") || ref.startsWith("urn:oid:") ;
+    return ref != null && (ref.startsWith("http:") || ref.startsWith("https:") || ref.startsWith("urn:uuid:") || ref.startsWith("urn:oid:")) ;
+  }
+
+
+  public static boolean equivalent(String l, String r) {
+    if (Utilities.noString(l) && Utilities.noString(r))
+      return true;
+    if (Utilities.noString(l) || Utilities.noString(r))
+      return false;
+    return l.toLowerCase().equals(r.toLowerCase());
+  }
+
+
+  public static boolean equivalentNumber(String l, String r) {
+    if (Utilities.noString(l) && Utilities.noString(r))
+      return true;
+    if (Utilities.noString(l) || Utilities.noString(r))
+      return false;
+    l = l.toLowerCase().trim();
+    r = r.toLowerCase().trim(); // not that this should make any difference
+    return l.startsWith(r) || r.startsWith(l);
+  }
+
+
+  public static String getFileExtension(String fn) {
+    return fn.contains(".") ? fn.substring(fn.lastIndexOf(".")+1) : "";
+  }
+
+
+  public static String unCamelCase(String name) {
+    StringBuilder b = new StringBuilder();
+    boolean first = true;
+    for (char c : name.toCharArray()) {
+      if (Character.isUpperCase(c)) {
+        if (!first)
+          b.append(" ");
+        b.append(Character.toLowerCase(c));
+      } else 
+        b.append(c);
+      first = false;        
+    }
+    return b.toString();
+  }
+
+
+  public static boolean isAbsoluteFileName(String source) {
+    if (isWindows())
+      return (source.length() > 2 && source.charAt(1) == ':') || source.startsWith("\\\\");
+    else
+      return source.startsWith("//");
+  }
+
+
+  public static boolean isWindows() {
+    return System.getProperty("os.name").startsWith("Windows");
+  }
+
+
+  public static String splitLineForLength(String line, int prefixLength, int indent, int allowedLength) {
+    List<String> list = new ArrayList<String>();
+    while (prefixLength + line.length() > allowedLength) {
+      int i = allowedLength - (list.size() == 0 ? prefixLength : indent);
+      while (i > 0 && line.charAt(i) != ' ')
+        i--;
+      if (i == 0)
+        break;
+      list.add(line.substring(0, i));
+      line = line.substring(i+1);
+    }
+    list.add(line);
+    StringBuilder b = new StringBuilder();
+    boolean first = true;
+    for (String s : list) {
+      if (first)
+        first = false;
+      else
+        b.append("\r\n"+padLeft("", ' ', indent));
+      b.append(s);
+    }
+    return b.toString();
+  }
+
+
+  public static int countFilesInDirectory(String dirName) {
+    File dir = new File(dirName);
+	 if (dir.exists() == false) {
+      return 0;
+	 }
+    int i = 0;
+    for (File f : dir.listFiles())
+      if (!f.isDirectory())
+        i++;
+    return i;
+  }
+
+  public static String makeId(String name) {
+    StringBuilder b = new StringBuilder();
+    for (char ch : name.toCharArray()) {
+      if (ch >= 'a' && ch <= 'z')
+        b.append(ch);
+      else if (ch >= 'A' && ch <= 'Z')
+        b.append(ch);
+      else if (ch >= '0' && ch <= '9')
+        b.append(ch);
+      else if (ch == '-' || ch == '.')
+        b.append(ch);
+    }
+    return b.toString();
+  }
+
+  public interface FileVisitor {
+    void visitFile(File file) throws FileNotFoundException, IOException;
+  }
+
+  public static void visitFiles(String folder, String extension, FileVisitor visitor) throws FileNotFoundException, IOException {
+    visitFiles(new File(folder), extension, visitor);
+  }
+  
+  public static void visitFiles(File folder, String extension, FileVisitor visitor) throws FileNotFoundException, IOException {
+    for (File file : folder.listFiles()) {
+      if (file.isDirectory()) 
+        visitFiles(file, extension, visitor);
+      else if (extension == null || file.getName().endsWith(extension)) 
+        visitor.visitFile(file);
+    }    
   }
 
 

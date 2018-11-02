@@ -1,86 +1,126 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Claim xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../schema/coverage.xsd">
- <id value="960150"/>
+	<id value="960150"/>
 
- <text>
-    <status value="generated"/>
-    <div xmlns="http://www.w3.org/1999/xhtml">A human-readable rendering of the Claim</div>
-  </text>
+	<text>
+		<status value="generated"/>
+		<div xmlns="http://www.w3.org/1999/xhtml">A human-readable rendering of the Claim</div>
+	</text>
 
-  <type value="institutional"/>
-  
-  <identifier>
-    <system value="http://happyhospital.com/claim"/>
-    <value value="9612345"/>
- </identifier>
- 
-  <created value="2014-08-16"/>
+	<identifier>
+		<system value="http://happyhospital.com/claim"/>
+		<value value="9612345"/>
+	</identifier>
 
- <target>
-  <reference value="Organization/2"/>
-</target>
+	<status value = "active"/>
 
- <organization>
-    <reference value="Organization/1"/>
- </organization>
+	<type>
+		<coding>
+			<system value="http://terminology.hl7.org/CodeSystem/claim-type"/>
+			<code value="institutional"/>
+		</coding>
+	</type>
 
- <use value="complete"/>
+	<subType>
+		<coding>
+			<system value="http://terminology.hl7.org/CodeSystem/ex-claimsubtype"/>
+			<code value="emergency"/>
+		</coding>
+	</subType> 
 
- <priority>
-    <code value="normal"/>
- </priority>
+	<use value="claim"/>
 
- <payee>
-   <type>
-     <code value="provider"/>
-   </type>
- </payee>
- 
-  <diagnosis>
-    <sequence value="1"/>
+	<patient>
+		<reference value="Patient/1"/>
+	</patient>
+
+	<created value="2014-08-16"/>
+
+	<enterer>
+		<identifier>
+			<system value="http://jurisdiction.org/facilities/HOSP1234/users"/>
+			<value value="UC1234"/>
+		</identifier>
+	</enterer>
+
+	<insurer>
+		<reference value="Organization/2"/>
+	</insurer>
+
+	<provider>
+		<reference value="Organization/1"/>
+	</provider>
+
+	<priority>
+		<coding>
+			<code value="normal"/>
+		</coding>
+	</priority>
+
+	<payee>
+		<type>
+			<coding>
+				<code value="provider"/>
+			</coding>
+		</type>
+	</payee>
+
+	<facility>
+		<identifier>
+			<system value="http://jurisdiction.org/facilities"/>
+			<value value="HOSP1234"/>
+		</identifier>
+	</facility>
+
+	<careTeam>
+		<sequence value="1"/>
+		<provider>
+			<reference value="Practitioner/example"/>
+		</provider>
+	</careTeam>
+
 	<diagnosis>
-	  <code value="654456"/>
-	  </diagnosis>
-  </diagnosis>
- 
- <patient>
-   <reference value="Patient/1"/>
- </patient>
- 
- <coverage>
-   <sequence value="1"/>
-   <focal value="true"/>
-   <coverage>
-     <reference value="Coverage/9876B1"/>
-   </coverage>
-   <relationship>
-     <code value="self"/>
-   </relationship>
- </coverage>
-  
- <item>
-   <sequence value="1"/>
-   <type>
-     <code value="service"/>
-   </type>
-   <provider>
-     <reference value="Practitioner/example"/>
-   </provider>
-   <service>
-     <system value="http://hl7.org/fhir/ex-serviceproduct"/>
-     <code value="exam"/> 
-   </service>
-   <serviceDate value="2014-08-16"/>
-   <unitPrice>
-      <value value="125.00"/>
-	  <system value="urn:iso:std:iso:4217"/>
-      <code value="USD"/> 
-   </unitPrice> 
-   <net>
-      <value value="125.00"/>
-	  <system value="urn:iso:std:iso:4217"/>
-      <code value="USD"/> 
-   </net> 
-  </item>
+		<sequence value="1"/>
+		<diagnosisCodeableConcept>
+			<coding>
+				<code value="654456"/>
+			</coding>
+		</diagnosisCodeableConcept>
+	</diagnosis>
 
+	<insurance>
+		<sequence value="1"/>
+		<focal value="true"/>
+		<coverage>
+			<reference value="Coverage/9876B1"/>
+		</coverage>
+	</insurance>
+
+	<item>
+		<sequence value="1"/>
+		<careTeamSequence value="1"/>
+		<billcode>
+			<coding>
+				<system value="http://hl7.org/fhir/ex-serviceproduct"/>
+				<code value="exam"/> 
+			</coding>
+		</billcode>
+		<servicedDate value="2014-08-16"/>
+		<unitPrice>
+			<value value="125.00"/>
+			<currency value="USD"/> 
+		</unitPrice> 
+		<net>
+			<value value="125.00"/>
+			<currency value="USD"/> 
+		</net> 
+		<encounter>
+			<reference value="Encounter/example"/>
+		</encounter>
+	</item>
+
+	<total>
+		<value value="125.00"/>
+		<currency value="USD"/>  
+	</total>
 </Claim>
