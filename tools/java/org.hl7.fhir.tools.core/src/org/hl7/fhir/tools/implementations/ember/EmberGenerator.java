@@ -38,7 +38,7 @@ import java.util.*;
 import org.hl7.fhir.definitions.model.Definitions;
 import org.hl7.fhir.definitions.model.ResourceDefn;
 import org.hl7.fhir.definitions.model.TypeDefn;
-import org.hl7.fhir.instance.validation.ValidationMessage;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.tools.implementations.BaseGenerator;
 import org.hl7.fhir.tools.publisher.FolderManager;
 import org.hl7.fhir.tools.publisher.PlatformGenerator;
@@ -71,13 +71,7 @@ public class EmberGenerator extends BaseGenerator implements PlatformGenerator {
     }
 
     @Override
-    public boolean isECoreGenerator() {
-        return false;
-    }
-
-    @Override
-    public void generate(Definitions definitions, String destDir, String implDir, String version, Date genDate, Logger logger, String svnRevision)
-            throws Exception {
+    public void generate(Definitions definitions, String destDir, String implDir, String actualImpl, String version, Date genDate, Logger logger, String svnRevision) throws Exception {
         final String basedDir = Utilities.path(implDir, "base");
 
         Map<String, String> dirs = new HashMap<String, String>() {{
@@ -143,27 +137,8 @@ public class EmberGenerator extends BaseGenerator implements PlatformGenerator {
     }
 
     @Override
-    public boolean compile(String rootDir, List<String> errors, Logger logger, List<ValidationMessage> issues) throws Exception {
+    public boolean compile(String rootDir, List<String> errors, Logger logger, List<ValidationMessage> issues, boolean forWeb) throws Exception {
         return false;
     }
 
-    @Override
-    public boolean doesTest() {
-        return false;
-    }
-
-    @Override
-    public void test(FolderManager folders, Collection<String> names) throws Exception {}
-
-    @Override
-    public void loadAndSave(FolderManager folders, String sourceFile, String destFile) throws Exception {}
-
-    @Override
-    public String checkFragments(FolderManager folders, String fragmentsXml) throws Exception {
-        return null;
-    }
-
-    @Override
-    public void generate(org.hl7.fhir.definitions.ecore.fhir.Definitions definitions, String destDir, String implDir, String version, Date genDate,
-                         Logger logger, String svnRevision) throws Exception {}
 }

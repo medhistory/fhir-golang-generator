@@ -43,6 +43,7 @@ public enum FHIRType {
     BACKBONEELEMENT("BackboneElement", false),
     BASE64BINARY("base64Binary", true, GoType.STRING),
     BOOLEAN("boolean", true, GoType.BOOL),
+    CANONICAL("canonical", true, GoType.STRING), // This probably isn't correct
     CODE("code", true, GoType.STRING),
     CODEABLECONCEPT("CodeableConcept", true),
     CODING("Coding", true),
@@ -82,6 +83,7 @@ public enum FHIRType {
     TIMING("Timing", true),
     UNSIGNEDINT("unsignedInt", true, GoType.UINT32),
     URI("uri", true, GoType.STRING),
+    URL("url", true, GoType.STRING),
     UUID("uuid", false, GoType.STRING),
     XHTML("xhtml", false, GoType.STRING)
     ;

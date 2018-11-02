@@ -37,6 +37,7 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.*;
 
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
 import org.hl7.fhir.definitions.model.*;
 import org.hl7.fhir.tools.implementations.GenBlock;
 import org.hl7.fhir.utilities.Utilities;
@@ -305,7 +306,7 @@ public class MgoModel {
                         boolean multipleCardinality = false;
                         if (! path.endsWith("(0)")) {
                             try {
-                                ElementDefn el = resource.getRoot().getElementForPath(path, definitions, "resolving search parameter path", true);
+                                ElementDefn el = resource.getRoot().getElementForPath(path, definitions, "resolving search parameter path", true, false);
                                 if (el.getMaxCardinality() > 1) {
                                     multipleCardinality = true;
                                 }

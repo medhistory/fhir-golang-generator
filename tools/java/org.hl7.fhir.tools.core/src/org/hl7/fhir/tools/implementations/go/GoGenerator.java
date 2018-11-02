@@ -39,7 +39,8 @@ import java.io.Writer;
 import java.util.*;
 
 import org.hl7.fhir.definitions.model.*;
-import org.hl7.fhir.instance.validation.ValidationMessage;
+import org.hl7.fhir.igtools.spreadsheets.TypeRef;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.tools.implementations.BaseGenerator;
 import org.hl7.fhir.tools.publisher.FolderManager;
 import org.hl7.fhir.tools.publisher.PlatformGenerator;
@@ -50,6 +51,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STRawGroupDir;
 import org.stringtemplate.v4.StringRenderer;
+import org.hl7.fhir.definitions.model.SearchParameterDefn.CompositeDefinition;
 
 public class GoGenerator extends BaseGenerator implements PlatformGenerator {
 
@@ -78,13 +80,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
     }
 
     @Override
-    public boolean isECoreGenerator() {
-        return false;
-    }
-
-    @Override
-    public void generate(Definitions definitions, String destDir, String implDir, String version, Date genDate, Logger logger, String svnRevision)
-            throws Exception {
+    public void generate(Definitions definitions, String destDir, String implDir, String actualImpl, String version, Date genDate, Logger logger, String svnRevision) throws Exception {
         final String basedDir = Utilities.path(implDir, "base");
 
         Map<String, String> dirs = new HashMap<String, String>() {{
@@ -356,7 +352,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
                     if (path.contains("(0)")) {
                         cleanPath = path.replaceAll("\\(0\\)", "");
                     }
-                    ElementDefn el = resource.getRoot().getElementForPath(cleanPath, definitions, "Resolving Search Parameter Path", true);
+                    ElementDefn el = resource.getRoot().getElementForPath(cleanPath, definitions, "Resolving Search Parameter Path", true, false);
                     path = enhancePath(definitions, resource, path, useArrayNotation);
                     // Special support for id since we store it as _id (TODO: this probably breaks the notion of the "internal" id)
                     if ("_id".equals(param.getName())) {
@@ -389,8 +385,8 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
             }
             param.sortPaths(); // Sort the path list so that the final result is deterministic
 
-            for (String comp : p.getComposites()) {
-                param.addComposite(comp);
+            for (CompositeDefinition comp : p.getComposites()) {
+                param.addComposite(comp.getDefinition());
             }
             param.sortComposites();
 
@@ -416,7 +412,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
                     zeroIndexer = true;
                 }
                 String partialPath = String.join(".", Arrays.copyOfRange(parts, 0, i+1));
-                ElementDefn el = resource.getRoot().getElementForPath(partialPath, definitions, "resolving search parameter path", true);
+                ElementDefn el = resource.getRoot().getElementForPath(partialPath, definitions, "resolving search parameter path", true, false);
 
                 if (useArrayNotation && el.getMaxCardinality() > 1) {
                     newPath.append(zeroIndexer ? "[0]" : "[]");
@@ -664,27 +660,7 @@ public class GoGenerator extends BaseGenerator implements PlatformGenerator {
     }
 
     @Override
-    public boolean compile(String rootDir, List<String> errors, Logger logger, List<ValidationMessage> issues) throws Exception {
+    public boolean compile(String rootDir, List<String> errors, Logger logger, List<ValidationMessage> issues, boolean forWeb) throws Exception {
         return false;
     }
-
-    @Override
-    public boolean doesTest() {
-        return false;
-    }
-
-    @Override
-    public void test(FolderManager folders, Collection<String> names) throws Exception {}
-
-    @Override
-    public void loadAndSave(FolderManager folders, String sourceFile, String destFile) throws Exception {}
-
-    @Override
-    public String checkFragments(FolderManager folders, String fragmentsXml) throws Exception {
-        return null;
-    }
-
-    @Override
-    public void generate(org.hl7.fhir.definitions.ecore.fhir.Definitions definitions, String destDir, String implDir, String version, Date genDate,
-                         Logger logger, String svnRevision) throws Exception {}
 }
