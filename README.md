@@ -1,3 +1,5 @@
+This is a fork of the [fhir-golang-generator](https://github.com/intervention-engine/fhir-golang-generator). The go generator was merged with it's base ([HL7/fhir](https://github.com/HL7/fhir)) in early 2019 to incorporate the R4 changes.
+
 FHIR Go and Ember Generator
 ===========================
 
@@ -44,8 +46,8 @@ If you prefer to install the latest Git release using Homebrew, you'll need to i
 
 ```
 $ brew update
-$ brew tap caskroom/cask
-$ brew cask install java
+$ brew tap caskroom/versions
+$ brew cask install java8
 ```
 
 Install Apache Ant
