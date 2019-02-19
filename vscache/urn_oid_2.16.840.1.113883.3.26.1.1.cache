@@ -1,5 +1,4 @@
 -------------------------------------------------------------------------------------
-
 {"code" : {
   "system" : "urn:oid:2.16.840.1.113883.3.26.1.1",
   "code" : "C106046"
@@ -7,10 +6,9 @@
 v: {
   "display" : "",
   "severity" : "error",
-  "error" : "Unable to provide support for code system urn:oid:2.16.840.1.113883.3.26.1.1"
+  "error" : "The code system \"urn:oid:2.16.840.1.113883.3.26.1.1\" is not known; The code provided (urn:oid:2.16.840.1.113883.3.26.1.1#C106046) is not  valid in the value set All codes known to the system"
 }
 -------------------------------------------------------------------------------------
-
 {"code" : {
   "system" : "urn:oid:2.16.840.1.113883.3.26.1.1",
   "code" : "C106045"
@@ -18,10 +16,9 @@ v: {
 v: {
   "display" : "",
   "severity" : "error",
-  "error" : "Unable to provide support for code system urn:oid:2.16.840.1.113883.3.26.1.1"
+  "error" : "The code system \"urn:oid:2.16.840.1.113883.3.26.1.1\" is not known; The code provided (urn:oid:2.16.840.1.113883.3.26.1.1#C106045) is not  valid in the value set All codes known to the system"
 }
 -------------------------------------------------------------------------------------
-
 {"code" : {
   "system" : "urn:oid:2.16.840.1.113883.3.26.1.1",
   "code" : "C106047"
@@ -29,10 +26,9 @@ v: {
 v: {
   "display" : "",
   "severity" : "error",
-  "error" : "Unable to provide support for code system urn:oid:2.16.840.1.113883.3.26.1.1"
+  "error" : "The code system \"urn:oid:2.16.840.1.113883.3.26.1.1\" is not known; The code provided (urn:oid:2.16.840.1.113883.3.26.1.1#C106047) is not  valid in the value set All codes known to the system"
 }
 -------------------------------------------------------------------------------------
-
 {"code" : {
   "system" : "urn:oid:2.16.840.1.113883.3.26.1.1",
   "code" : "C113844"
@@ -40,10 +36,9 @@ v: {
 v: {
   "display" : "",
   "severity" : "error",
-  "error" : "Unable to provide support for code system urn:oid:2.16.840.1.113883.3.26.1.1"
+  "error" : "The code system \"urn:oid:2.16.840.1.113883.3.26.1.1\" is not known; The code provided (urn:oid:2.16.840.1.113883.3.26.1.1#C113844) is not  valid in the value set All codes known to the system"
 }
 -------------------------------------------------------------------------------------
-
 {"code" : {
   "system" : "urn:oid:2.16.840.1.113883.3.26.1.1",
   "code" : "C101673"
@@ -51,10 +46,9 @@ v: {
 v: {
   "display" : "",
   "severity" : "error",
-  "error" : "Unable to provide support for code system urn:oid:2.16.840.1.113883.3.26.1.1"
+  "error" : "The code system \"urn:oid:2.16.840.1.113883.3.26.1.1\" is not known; The code provided (urn:oid:2.16.840.1.113883.3.26.1.1#C101673) is not  valid in the value set All codes known to the system"
 }
 -------------------------------------------------------------------------------------
-
 {"code" : {
   "system" : "urn:oid:2.16.840.1.113883.3.26.1.1",
   "code" : "C106038"
@@ -62,7 +56,7 @@ v: {
 v: {
   "display" : "",
   "severity" : "error",
-  "error" : "Unable to provide support for code system urn:oid:2.16.840.1.113883.3.26.1.1"
+  "error" : "The code system \"urn:oid:2.16.840.1.113883.3.26.1.1\" is not known; The code provided (urn:oid:2.16.840.1.113883.3.26.1.1#C106038) is not  valid in the value set All codes known to the system"
 }
 -------------------------------------------------------------------------------------
 {"hierarchical" : false, "valueSet" :{
@@ -133,8 +127,7 @@ v: {
       }]
     }]
   }
-}}
-####
+}}####
 e: {
   "error" : "Error from server: Unable to provide support for code system urn:oid:2.16.840.1.113883.3.26.1.1"
 }

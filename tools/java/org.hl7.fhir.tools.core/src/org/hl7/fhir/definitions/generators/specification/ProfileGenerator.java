@@ -159,13 +159,13 @@ public class ProfileGenerator {
     private Map<String, ElementDefinition> paths = new HashMap<String, ElementDefinition>();
   }
 
-  public ProfileGenerator(Definitions definitions, BuildWorkerContext context, ProfileKnowledgeProvider pkp, Calendar genDate, String version, Bundle dataElements, List<FHIRPathUsage> fpUsages, String rootFolder) throws FHIRException {
+  public ProfileGenerator(Definitions definitions, BuildWorkerContext context, ProfileKnowledgeProvider pkp, Calendar genDate, FHIRVersion version, Bundle dataElements, List<FHIRPathUsage> fpUsages, String rootFolder) throws FHIRException {
     super();
     this.definitions = definitions;
     this.context = context;
     this.pkp = pkp;
     this.genDate = genDate;
-    this.version = FHIRVersion.fromCode(version);
+    this.version = version;
     this.dataElements = dataElements;
     this.fpUsages = fpUsages;
     this.rootFolder = rootFolder;
@@ -256,7 +256,7 @@ public class ProfileGenerator {
     p.setDerivation(TypeDerivationRule.SPECIALIZATION);
     p.setFhirVersion(version);
     p.setVersion(version.toCode());
-    ToolingExtensions.setStandardsStatus(p, StandardsStatus.NORMATIVE);
+    ToolingExtensions.setStandardsStatus(p, StandardsStatus.NORMATIVE, "4.0.0");
 
     
     ToolResourceUtilities.updateUsage(p, "core");
@@ -265,7 +265,7 @@ public class ProfileGenerator {
     p.addContact().getTelecom().add(Factory.newContactPoint(ContactPointSystem.URL, "http://hl7.org/fhir"));
     p.setDescription("Base StructureDefinition for "+type.getCode()+" Type: "+type.getDefinition());
     p.setDate(genDate.getTime());
-    p.setStatus(PublicationStatus.fromCode("draft")); // DSTU
+    p.setStatus(PublicationStatus.fromCode("active")); // normative now
 
     Set<String> containedSlices = new HashSet<String>();
 
@@ -403,7 +403,7 @@ public class ProfileGenerator {
     p.setDerivation(TypeDerivationRule.SPECIALIZATION);
     p.setFhirVersion(version);
     p.setVersion(version.toCode());
-    ToolingExtensions.setStandardsStatus(p, StandardsStatus.NORMATIVE);
+    ToolingExtensions.setStandardsStatus(p, StandardsStatus.NORMATIVE, "4.0.0");
 
     
     ToolResourceUtilities.updateUsage(p, "core");
@@ -412,7 +412,7 @@ public class ProfileGenerator {
     p.addContact().getTelecom().add(Factory.newContactPoint(ContactPointSystem.URL, "http://hl7.org/fhir"));
     p.setDescription("Base StructureDefinition for xhtml Type");
     p.setDate(genDate.getTime());
-    p.setStatus(PublicationStatus.fromCode("draft")); // DSTU
+    p.setStatus(PublicationStatus.fromCode("active")); 
 
     Set<String> containedSlices = new HashSet<String>();
 
@@ -529,7 +529,7 @@ public class ProfileGenerator {
     p.setUserData("path", "datatypes.html#"+type.getCode());
     p.setFhirVersion(version);
     p.setVersion(version.toCode());
-    ToolingExtensions.setStandardsStatus(p, StandardsStatus.NORMATIVE);
+    ToolingExtensions.setStandardsStatus(p, StandardsStatus.NORMATIVE, "4.0.0");
 
     ToolResourceUtilities.updateUsage(p, "core");
     p.setName(type.getCode());
@@ -537,7 +537,7 @@ public class ProfileGenerator {
     p.addContact().getTelecom().add(Factory.newContactPoint(ContactPointSystem.URL, "http://hl7.org/fhir"));
     p.setDescription("Base StructureDefinition for "+type.getCode()+" type: "+type.getDefinition());
     p.setDate(genDate.getTime());
-    p.setStatus(PublicationStatus.fromCode("draft")); // DSTU
+    p.setStatus(PublicationStatus.fromCode("active")); 
 
     Set<String> containedSlices = new HashSet<String>();
 
@@ -653,7 +653,7 @@ public class ProfileGenerator {
     p.setType(t.getName());
     p.setFhirVersion(version);
     p.setVersion(version.toCode());
-    ToolingExtensions.setStandardsStatus(p, t.getStandardsStatus());
+    ToolingExtensions.setStandardsStatus(p, t.getStandardsStatus(), t.getNormativeVersion());
 
     ToolResourceUtilities.updateUsage(p, "core");
     p.setName(t.getName());
@@ -662,7 +662,7 @@ public class ProfileGenerator {
     p.setDescription("Base StructureDefinition for "+t.getName()+" Type: "+t.getDefinition());
     p.setPurpose(t.getRequirements());
     p.setDate(genDate.getTime());
-    p.setStatus(PublicationStatus.fromCode("draft")); // DSTU
+    p.setStatus(t.getStandardsStatus() == StandardsStatus.NORMATIVE ?  PublicationStatus.fromCode("active") : PublicationStatus.fromCode("draft")); 
 
 
     Set<String> containedSlices = new HashSet<String>();
@@ -708,7 +708,8 @@ public class ProfileGenerator {
     p.setUserData("path", "datatypes.html#"+pt.getName());
     p.setFhirVersion(version);
     p.setVersion(version.toCode());
-    ToolingExtensions.setStandardsStatus(p, StandardsStatus.NORMATIVE);
+    ToolingExtensions.setStandardsStatus(p, StandardsStatus.NORMATIVE, "4.0.0");
+    p.setStatus(PublicationStatus.fromCode("active")); 
 
     ToolResourceUtilities.updateUsage(p, "core");
     p.setName(pt.getName());
@@ -717,7 +718,6 @@ public class ProfileGenerator {
     p.setDescription("Base StructureDefinition for Type "+pt.getName()+": "+pt.getDefinition());
     p.setDescription(pt.getDefinition());
     p.setDate(genDate.getTime());
-    p.setStatus(PublicationStatus.fromCode("draft")); // DSTU
 
     // first, the differential
     p.setName(pt.getName());
@@ -858,7 +858,7 @@ public class ProfileGenerator {
     p.setTitle(pack.metadata("display"));
     p.setFhirVersion(version);
     p.setVersion(version.toCode());
-    ToolingExtensions.setStandardsStatus(p, r.getStatus());
+    ToolingExtensions.setStandardsStatus(p, r.getStatus(), r.getNormativeVersion());
 
     if (r.getFmmLevel() != null)
       ToolingExtensions.addIntegerExtension(p, ToolingExtensions.EXT_FMM_LEVEL, Integer.parseInt(r.getFmmLevel()));
@@ -876,7 +876,7 @@ public class ProfileGenerator {
     if (!p.hasPurpose())
       p.setPurpose(r.getRoot().getRequirements());
     p.setDate(genDate.getTime());
-    p.setStatus(PublicationStatus.fromCode("draft")); // DSTU
+    p.setStatus(r.getStatus() == StandardsStatus.NORMATIVE ?  PublicationStatus.fromCode("active") : PublicationStatus.fromCode("draft")); // DSTU
 
     Set<String> containedSlices = new HashSet<String>();
 
@@ -1000,9 +1000,9 @@ public class ProfileGenerator {
     else if (baseResource != null && baseResource.getWg() != null) 
       ToolingExtensions.setCodeExtension(p, ToolingExtensions.EXT_WORKGROUP, baseResource.getWg().getCode());      
     if (pack.hasMetadata("Standards-Status")) 
-      ToolingExtensions.setStandardsStatus(p, StandardsStatus.fromCode(pack.metadata("Standards-Status")));
+      ToolingExtensions.setStandardsStatus(p, StandardsStatus.fromCode(pack.metadata("Standards-Status")), null);
     else
-      ToolingExtensions.setStandardsStatus(p, resource.getStatus());
+      ToolingExtensions.setStandardsStatus(p, resource.getStatus(), null);
     
     if (pack.hasMetadata("status")) 
       p.setStatus(PublicationStatus.fromCode(pack.metadata("status")));
@@ -1105,10 +1105,10 @@ public class ProfileGenerator {
       context.cacheResource(sp);
       spd.setResource(sp);
       definitions.addNs(sp.getUrl(), "Search Parameter: "+sp.getName(), rn.toLowerCase()+".html#search");
-      sp.setStatus(p.getStatus());
+      sp.setStatus(spd.getStandardsStatus() == StandardsStatus.NORMATIVE ? PublicationStatus.fromCode("active") : PublicationStatus.fromCode("draft"));
       StandardsStatus sst = ToolingExtensions.getStandardsStatus(sp);
       if (sst == null || (spd.getStandardsStatus() == null && spd.getStandardsStatus().isLowerThan(sst)))
-        ToolingExtensions.setStandardsStatus(sp, spd.getStandardsStatus());
+        ToolingExtensions.setStandardsStatus(sp, spd.getStandardsStatus(), spd.getNormativeVersion());
       sp.setExperimental(p.getExperimental());
       sp.setName(spd.getCode());
       sp.setCode(spd.getCode());
@@ -1303,6 +1303,7 @@ public class ProfileGenerator {
 
   private ElementDefinitionBindingComponent generateBinding(BindingSpecification src) throws Exception {
     if (src == null)
+      
       return null;
     ElementDefinitionBindingComponent dst = new ElementDefinitionBindingComponent();
     dst.setDescription(src.getDefinition());
@@ -1322,29 +1323,30 @@ public class ProfileGenerator {
   }
 
   private String buildValueSetReference(BindingSpecification src) throws Exception {
+    String v = src.getStrength() == BindingStrength.REQUIRED ? "|"+version.toCode() : "";
     switch (src.getBinding()) {
     case Unbound: return null;
     case CodeList:
       if (src.getValueSet()!= null)
-        return src.getValueSet().getUrl();
+        return src.getValueSet().getUrl()+v;
       else if (src.getReference().startsWith("#"))
-        return "http://hl7.org/fhir/ValueSet/"+src.getReference().substring(1);
+        return "http://hl7.org/fhir/ValueSet/"+src.getReference().substring(1)+v;
       else
         throw new Exception("not done yet");
     case ValueSet: 
       if (!Utilities.noString(src.getReference()))
         if (src.getReference().startsWith("http"))
-          return src.getReference();
+          return src.getReference()+v;
         else if (src.getValueSet()!= null)
-          return src.getValueSet().getUrl();
+          return src.getValueSet().getUrl()+v;
         else if (src.getReference().startsWith("valueset-"))
-          return "http://hl7.org/fhir/ValueSet/"+src.getReference().substring(9);
+          return "http://hl7.org/fhir/ValueSet/"+src.getReference().substring(9)+v;
         else
-          return "http://hl7.org/fhir/ValueSet/"+src.getReference();
+          return "http://hl7.org/fhir/ValueSet/"+src.getReference()+v;
       else
         return null; // throw new Exception("not done yet");
     case Special: 
-      return "http://hl7.org/fhir/ValueSet/"+src.getReference().substring(1);
+      return "http://hl7.org/fhir/ValueSet/"+src.getReference().substring(1)+v;
     default: 
       throw new Exception("not done yet");
     }
@@ -1389,7 +1391,7 @@ public class ProfileGenerator {
 //    todo ce.setId(path.substring(path.indexOf(".")+1));
 
     if (e.getStandardsStatus() != null)
-      ToolingExtensions.setStandardsStatus(ce, e.getStandardsStatus());
+      ToolingExtensions.setStandardsStatus(ce, e.getStandardsStatus(), e.getNormativeVersion());
 
     ce.setId(path);
     ce.setPath(path);
@@ -2044,7 +2046,7 @@ public class ProfileGenerator {
       ToolingExtensions.addIntegerExtension(opd, ToolingExtensions.EXT_FMM_LEVEL, Integer.parseInt(rd.getFmmLevel()));
     else
       ToolingExtensions.addIntegerExtension(opd, ToolingExtensions.EXT_FMM_LEVEL, Integer.parseInt(op.getFmm()));
-    ToolingExtensions.setStandardsStatus(opd, op.getStandardsStatus() == null ? rd.getStatus() : op.getStandardsStatus());
+    ToolingExtensions.setStandardsStatus(opd, op.getStandardsStatus() == null ? rd.getStatus() : op.getStandardsStatus(), op.getNormativeVersion());
     opd.setId(FormatUtilities.makeId(id));
     opd.setUrl("http://hl7.org/fhir/OperationDefinition/"+id);
     opd.setName(op.getTitle());
@@ -2053,7 +2055,7 @@ public class ProfileGenerator {
     opd.addContact().getTelecom().add(org.hl7.fhir.r4.model.Factory.newContactPoint(ContactPointSystem.URL, "http://hl7.org/fhir"));
     opd.getContact().get(0).getTelecom().add(org.hl7.fhir.r4.model.Factory.newContactPoint(ContactPointSystem.EMAIL, "fhir@lists.hl7.org"));
     opd.setDescription(preProcessMarkdown(op.getDoco(), "Operation Documentation"));
-    opd.setStatus(PublicationStatus.DRAFT);
+    opd.setStatus(op.getStandardsStatus() == StandardsStatus.NORMATIVE ?  PublicationStatus.ACTIVE : PublicationStatus.DRAFT);
     opd.setDate(genDate.getTime());
     if (op.getKind().toLowerCase().equals("operation"))
       opd.setKind(OperationKind.OPERATION);
@@ -2144,7 +2146,7 @@ public class ProfileGenerator {
     p.setTitle(r.getName());
     p.setFhirVersion(version);
     p.setVersion(version.toCode());
-    ToolingExtensions.setStandardsStatus(p, r.getStatus());
+    ToolingExtensions.setStandardsStatus(p, r.getStatus(), null);
 
     ToolResourceUtilities.updateUsage(p, igd.getCode());
     p.setName(r.getRoot().getName());

@@ -88,6 +88,25 @@
 		</diagnosisCodeableConcept>
 	</diagnosis>
 
+	<procedure>
+		<sequence value="1"/>
+		<type>
+			<coding>
+				<code value="primary"/>
+			</coding>
+		</type>	
+		<date value="2014-08-16"/>
+		<procedureCodeableConcept>
+			<coding>
+				<code value="SDI9901"/>
+			</coding>
+			<text value="Subcutaneous diagnostic implant"/>
+		</procedureCodeableConcept>
+		<udi>
+			<reference value="Device/example"/>
+		</udi>
+	</procedure>
+
 	<insurance>
 		<sequence value="1"/>
 		<focal value="true"/>
@@ -99,12 +118,12 @@
 	<item>
 		<sequence value="1"/>
 		<careTeamSequence value="1"/>
-		<billcode>
+		<productOrService>
 			<coding>
 				<system value="http://hl7.org/fhir/ex-serviceproduct"/>
 				<code value="exam"/> 
 			</coding>
-		</billcode>
+		</productOrService>
 		<servicedDate value="2014-08-16"/>
 		<unitPrice>
 			<value value="125.00"/>

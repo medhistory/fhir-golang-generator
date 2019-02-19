@@ -3,7 +3,7 @@
 
 	<text>
 		<status value="generated"/>
-		<div xmlns="http://www.w3.org/1999/xhtml">A human-readable rendering of the ExplanationOfBenefit for a cliam that had errors, various other attributes (such as accident and hospitaliztion) are also completed.</div>
+		<div xmlns="http://www.w3.org/1999/xhtml">A human-readable rendering of the ExplanationOfBenefit for a claim that had errors, various other attributes (such as accident and hospitalization) are also completed.</div>
 	</text>
 
 	<identifier>
@@ -52,6 +52,21 @@
 		<reference value="Organization/2"/>
 	</provider>
 
+	<related>
+		<reference>
+			<system value="http://www.BenefitsInc.com/case-number"/>
+			<value value="23-56Tu-XX-47-20150M14"/>
+		</reference>
+	</related>
+
+	<prescription>
+		<reference value="MedicationRequest/medrx002"/>
+	</prescription>
+
+	<originalPrescription>
+		<reference value="MedicationRequest/medrx0301"/>
+	</originalPrescription>
+
 	<facility>
 		<reference value="Location/1"/>
 	</facility>
@@ -68,22 +83,7 @@
 
 	<disposition value="Could not process."/>
 
-	<related>
-		<reference>
-			<system value="http://www.BenefitsInc.com/case-number"/>
-			<value value="23-56Tu-XX-47-20150M14"/>
-		</reference>
-	</related>
-
-	<prescription>
-		<reference value="MedicationRequest/medrx002"/>
-	</prescription>
-
-	<originalPrescription>
-		<reference value="MedicationRequest/medrx0301"/>
-	</originalPrescription>
-
-	<information>
+	<supportingInfo>
 		<sequence value="1"/>
 		<category>
 			<coding>
@@ -95,9 +95,9 @@
 			<start value="2014-02-14"/>
 			<end value="2014-02-28"/>
 		</timingPeriod>
-	</information>
+	</supportingInfo>
 
-	<information>
+	<supportingInfo>
 		<sequence value="2"/>
 		<category>
 			<coding>
@@ -109,7 +109,7 @@
 			<start value="2014-02-14"/>
 			<end value="2014-02-16"/>
 		</timingPeriod>
-	</information>
+	</supportingInfo>
 
 	<procedure>
 		<sequence value="1"/>
@@ -120,6 +120,9 @@
 				<code value="123001" />
 			</coding>
 		</procedureCodeableConcept>
+		<udi>
+			<reference value="Device/example"/>
+		</udi>
 	</procedure>
 
 	<precedence value="2"/>
@@ -168,12 +171,12 @@
 		</amount> 
 	</total>
 
-	<form>
+	<formCode>
 		<coding>
 			<system value="http://terminology.hl7.org/CodeSystem/forms-codes" />
 			<code value="2" />
 		</coding>
-	</form>
+	</formCode>
 
 	<processNote>
 		<number value="1"/>

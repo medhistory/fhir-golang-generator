@@ -12,6 +12,11 @@ holder.txt
 /schema/datatypes
 /implementations/javascript/app
 
+# Intellij Stuff
+.idea/
+*.iml
+out/
+
 # Boring system files that don’t belong in the project repository
 .DS_Store
 source/.DS_Store
@@ -82,6 +87,10 @@ pharmacy-medRequest
 /tests/ig30/resources/ig-validation-parameters.json
 
 /implementations/r3maps/test-output
+
+source/\.antlr/
+
+images/\.antlr/
 
 *.jar
 *.class

@@ -547,7 +547,8 @@ public class SpreadsheetParser {
 	          }
 	          Operation op = new Operation(name, system, istype, instance, sheet.getColumn(row, "Type"), sheet.getColumn(row, "Title"), doco, 
 	              sheet.getColumn(row, "Footer"), examples, parseBoolean(sheet.getColumn(row, "Idempotent"), row,  false));
-	          op.setStandardsStatus(StandardsStatus.fromCode(sheet.getColumn(row, "Standards-Status")));
+            op.setStandardsStatus(StandardsStatus.fromCode(sheet.getColumn(row, "Standards-Status")));
+            op.setNormativeVersion(sheet.getColumn(row, "Normative-Version"));
             op.setFooter2(sheet.getColumn(row, "Footer2"));
             op.setFmm(sheet.getColumn(row, "fmm"));
 	          op.getExamples2().addAll(examples2);
@@ -1293,7 +1294,8 @@ public class SpreadsheetParser {
       result.setUrl("http://hl7.org/fhir/ValueSet/"+igSuffix(ig)+ref.substring(9));
       if (!result.hasTitle())
         result.setTitle(Utilities.capitalize(Utilities.unCamelCase(result.getName())));
-	    result.setExperimental(true);
+      if (!result.hasExperimental())
+  	    result.setExperimental(false);
 	    if (!result.hasVersion() || result.getUrl().startsWith("http://hl7.org/fhir"))
 	      result.setVersion(version.toCode());
       result.setUserData("filename", ref);
@@ -1716,6 +1718,7 @@ public class SpreadsheetParser {
 		}
 
     e.setStandardsStatus(StandardsStatus.fromCode(sheet.getColumn(row, "Standards-Status")));
+    e.setNormativeVersion(sheet.getColumn(row, "Normative-Version"));
 
 		if (e.getName().startsWith("@")) {
 		  e.setName(e.getName().substring(1));
@@ -2213,7 +2216,7 @@ public class SpreadsheetParser {
       }
       row++;
     }
-    ProfileGenerator gen = new ProfileGenerator(definitions, null, pkp, null, null, null, fpUsages, null);
+    ProfileGenerator gen = new ProfileGenerator(definitions, null, pkp, null, version, null, fpUsages, null);
     ProfileUtilities utils = new ProfileUtilities(this.context, issues, pkp);
     gen.convertElements(exe, ex, null);
     ex.getDifferential().getElementFirstRep().getType().clear();
