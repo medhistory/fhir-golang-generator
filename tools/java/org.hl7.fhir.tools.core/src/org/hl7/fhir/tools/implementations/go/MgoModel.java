@@ -64,7 +64,7 @@ public class MgoModel {
         generateResourceStruct(fileBlock);
         generateCustomMarshallersAndUnMarshallers(fileBlock);
         generateComponentStructs(fileBlock);
-        generateResourcePlusStruct(fileBlock);
+        //generateResourcePlusStruct(fileBlock);
 
         outputFile.createNewFile();
         Writer modelFile = new BufferedWriter(new FileWriter(outputFile));
