@@ -32,23 +32,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.igtools.spreadsheets.MappingSpace;
 import org.hl7.fhir.igtools.spreadsheets.TypeRef;
-import org.hl7.fhir.r4.context.IWorkerContext;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.NamingSystem;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.StructureDefinition.ExtensionContextType;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionContextComponent;
-import org.hl7.fhir.r4.model.TypeDetails;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.ConceptMap;
+import org.hl7.fhir.r5.model.NamingSystem;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.StructureDefinition.ExtensionContextType;
+import org.hl7.fhir.r5.model.StructureDefinition.StructureDefinitionContextComponent;
+import org.hl7.fhir.r5.model.TypeDetails;
+import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.utilities.Utilities;
 
 /**
@@ -204,6 +206,8 @@ public class Definitions {
       return baseResources.get(name).getRoot();
 		if (resources.containsKey(name))
 			root = resources.get(name).getRoot();
+		if (hasLogicalModel(name))
+		  root = getLogicalModel(name).getResource().getRoot();
 		if (root == null)
 			throw new Exception("unable to find resource or composite type " + name);
 		return root;
@@ -554,7 +558,7 @@ public class Definitions {
         ec.setExpression("Element");
       }
       if (ec.getExpression().equals("Any")) {
-        ec.setExpression("Resource");
+        ec.setExpression("Element");
       }
 
       if (ec.getExpression().equals("Element")) {
@@ -626,7 +630,7 @@ public class Definitions {
   public boolean hasLogicalModel(String name) {
     for (ImplementationGuideDefn ig : getSortedIgs()) {
       for (LogicalModel lm : ig.getLogicalModels()) {
-        if (lm.getResource() != null && lm.getResource().getName().equals(name))
+        if (lm.getResource() != null && (lm.getResource().getName().equals(name) || lm.getResource().getRoot().getName().equals(name)))
           return true;
         if (lm.getId().equals(name))
           return true;
@@ -650,7 +654,7 @@ public class Definitions {
   public LogicalModel getLogicalModel(String name) {
     for (ImplementationGuideDefn ig : getSortedIgs()) {
       for (LogicalModel lm : ig.getLogicalModels()) {
-        if (lm.getResource() != null && lm.getResource().getName().equals(name))
+        if (lm.getResource() != null && (lm.getResource().getName().equals(name) || lm.getResource().getRoot().getName().equals(name) ))
           return lm;
         if (lm.getId().equals(name))
           return lm;
@@ -827,6 +831,24 @@ public class Definitions {
 
   public int getValueSetCount() {
     return valueSetCount;
+  }
+
+  public List<String> listAllPatterns(String name) {
+    List<String> names = new ArrayList<>();
+    Queue<String> plist = new LinkedList<>();
+    plist.add(name);
+    while (!plist.isEmpty()) {
+      name = plist.remove(); 
+      names.add(name);
+      for (ImplementationGuideDefn ig : getSortedIgs()) {
+        for (LogicalModel lm : ig.getLogicalModels()) {
+          if (lm.getResource().getRoot().typeCode().equals(name)) {
+            plist.add(lm.getResource().getRoot().getName());
+          }
+        }
+      }
+    }
+    return names;
   }
 
 }

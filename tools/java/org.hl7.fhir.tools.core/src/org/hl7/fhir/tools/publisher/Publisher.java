@@ -124,98 +124,97 @@ import org.hl7.fhir.definitions.validation.FHIRPathUsage;
 import org.hl7.fhir.definitions.validation.ResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.igtools.publisher.SpecMapManager;
-import org.hl7.fhir.igtools.tests.AllGuidesTests;
-import org.hl7.fhir.r4.conformance.ProfileComparer;
-import org.hl7.fhir.r4.conformance.ProfileComparer.ProfileComparison;
-import org.hl7.fhir.r4.conformance.ProfileUtilities;
-import org.hl7.fhir.r4.conformance.ShExGenerator;
-import org.hl7.fhir.r4.conformance.ShExGenerator.HTMLLinkPolicy;
-import org.hl7.fhir.r4.elementmodel.Manager;
-import org.hl7.fhir.r4.elementmodel.Manager.FhirFormat;
-import org.hl7.fhir.r4.elementmodel.ParserBase.ValidationPolicy;
-import org.hl7.fhir.r4.formats.FormatUtilities;
-import org.hl7.fhir.r4.formats.IParser;
-import org.hl7.fhir.r4.formats.IParser.OutputStyle;
-import org.hl7.fhir.r4.formats.JsonParser;
-import org.hl7.fhir.r4.formats.RdfParser;
-import org.hl7.fhir.r4.formats.XmlParser;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestSecurityComponent;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementSoftwareComponent;
-import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
-import org.hl7.fhir.r4.model.CapabilityStatement.ReferenceHandlingPolicy;
-import org.hl7.fhir.r4.model.CapabilityStatement.ResourceInteractionComponent;
-import org.hl7.fhir.r4.model.CapabilityStatement.RestfulCapabilityMode;
-import org.hl7.fhir.r4.model.CapabilityStatement.SystemInteractionComponent;
-import org.hl7.fhir.r4.model.CapabilityStatement.SystemRestfulInteraction;
-import org.hl7.fhir.r4.model.CapabilityStatement.TypeRestfulInteraction;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CompartmentDefinition;
-import org.hl7.fhir.r4.model.CompartmentDefinition.CompartmentDefinitionResourceComponent;
-import org.hl7.fhir.r4.model.CompartmentDefinition.CompartmentType;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
-import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
-import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
-import org.hl7.fhir.r4.model.Constants;
-import org.hl7.fhir.r4.model.ContactDetail;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
-import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
-import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Factory;
-import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPageComponent;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.NamingSystem;
-import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
-import org.hl7.fhir.r4.model.NamingSystem.NamingSystemType;
-import org.hl7.fhir.r4.model.NamingSystem.NamingSystemUniqueIdComponent;
-import org.hl7.fhir.r4.model.Narrative;
-import org.hl7.fhir.r4.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.r4.model.OperationDefinition;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.terminologies.CodeSystemUtilities;
-import org.hl7.fhir.r4.terminologies.LoincToDEConvertor;
-import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
-import org.hl7.fhir.r4.terminologies.ValueSetUtilities;
-import org.hl7.fhir.r4.utils.EOperationOutcome;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
-import org.hl7.fhir.r4.utils.GraphQLSchemaGenerator;
-import org.hl7.fhir.r4.utils.GraphQLSchemaGenerator.FHIROperationType;
-import org.hl7.fhir.r4.utils.NarrativeGenerator;
-import org.hl7.fhir.r4.utils.QuestionnaireBuilder;
-import org.hl7.fhir.r4.utils.ResourceUtilities;
-import org.hl7.fhir.r4.utils.StructureMapUtilities;
-import org.hl7.fhir.r4.utils.ToolingExtensions;
-import org.hl7.fhir.r4.validation.BaseValidator;
-import org.hl7.fhir.r4.validation.ProfileValidator;
-import org.hl7.fhir.r4.validation.XmlValidator;
+import org.hl7.fhir.r5.conformance.ProfileComparer;
+import org.hl7.fhir.r5.conformance.ProfileComparer.ProfileComparison;
+import org.hl7.fhir.r5.conformance.ProfileUtilities;
+import org.hl7.fhir.r5.conformance.ShExGenerator;
+import org.hl7.fhir.r5.conformance.ShExGenerator.HTMLLinkPolicy;
+import org.hl7.fhir.r5.elementmodel.Manager;
+import org.hl7.fhir.r5.elementmodel.Manager.FhirFormat;
+import org.hl7.fhir.r5.elementmodel.ParserBase.ValidationPolicy;
+import org.hl7.fhir.r5.formats.FormatUtilities;
+import org.hl7.fhir.r5.formats.IParser;
+import org.hl7.fhir.r5.formats.IParser.OutputStyle;
+import org.hl7.fhir.r5.formats.JsonParser;
+import org.hl7.fhir.r5.formats.RdfParser;
+import org.hl7.fhir.r5.formats.XmlParser;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r5.model.Bundle.BundleType;
+import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.CapabilityStatement;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementKind;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestSecurityComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementSoftwareComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.ConditionalDeleteStatus;
+import org.hl7.fhir.r5.model.CapabilityStatement.ReferenceHandlingPolicy;
+import org.hl7.fhir.r5.model.CapabilityStatement.ResourceInteractionComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.RestfulCapabilityMode;
+import org.hl7.fhir.r5.model.CapabilityStatement.SystemInteractionComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.SystemRestfulInteraction;
+import org.hl7.fhir.r5.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.CompartmentDefinition;
+import org.hl7.fhir.r5.model.CompartmentDefinition.CompartmentDefinitionResourceComponent;
+import org.hl7.fhir.r5.model.CompartmentDefinition.CompartmentType;
+import org.hl7.fhir.r5.model.ConceptMap;
+import org.hl7.fhir.r5.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.r5.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.r5.model.ConceptMap.TargetElementComponent;
+import org.hl7.fhir.r5.model.Constants;
+import org.hl7.fhir.r5.model.ContactDetail;
+import org.hl7.fhir.r5.model.ContactPoint;
+import org.hl7.fhir.r5.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.r5.model.DomainResource;
+import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r5.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r5.model.Enumerations.BindingStrength;
+import org.hl7.fhir.r5.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.r5.model.Enumerations.FHIRVersion;
+import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r5.model.Factory;
+import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionPageComponent;
+import org.hl7.fhir.r5.model.Meta;
+import org.hl7.fhir.r5.model.MetadataResource;
+import org.hl7.fhir.r5.model.NamingSystem;
+import org.hl7.fhir.r5.model.NamingSystem.NamingSystemIdentifierType;
+import org.hl7.fhir.r5.model.NamingSystem.NamingSystemType;
+import org.hl7.fhir.r5.model.NamingSystem.NamingSystemUniqueIdComponent;
+import org.hl7.fhir.r5.model.Narrative;
+import org.hl7.fhir.r5.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.r5.model.OperationDefinition;
+import org.hl7.fhir.r5.model.Questionnaire;
+import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.ResourceType;
+import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.r5.model.StructureDefinition.TypeDerivationRule;
+import org.hl7.fhir.r5.model.UriType;
+import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.terminologies.CodeSystemUtilities;
+import org.hl7.fhir.r5.terminologies.LoincToDEConvertor;
+import org.hl7.fhir.r5.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
+import org.hl7.fhir.r5.terminologies.ValueSetUtilities;
+import org.hl7.fhir.r5.utils.EOperationOutcome;
+import org.hl7.fhir.r5.utils.FHIRPathEngine;
+import org.hl7.fhir.r5.utils.GraphQLSchemaGenerator;
+import org.hl7.fhir.r5.utils.GraphQLSchemaGenerator.FHIROperationType;
+import org.hl7.fhir.r5.utils.NarrativeGenerator;
+import org.hl7.fhir.r5.utils.QuestionnaireBuilder;
+import org.hl7.fhir.r5.utils.ResourceUtilities;
+import org.hl7.fhir.r5.utils.StructureMapUtilities;
+import org.hl7.fhir.r5.utils.ToolingExtensions;
+import org.hl7.fhir.r5.validation.BaseValidator;
+import org.hl7.fhir.r5.validation.ProfileValidator;
+import org.hl7.fhir.r5.validation.XmlValidator;
 import org.hl7.fhir.rdf.RDFValidator;
 import org.hl7.fhir.tools.converters.CDAGenerator;
 import org.hl7.fhir.tools.converters.DSTU3ValidationConvertor;
@@ -236,6 +235,7 @@ import org.hl7.fhir.utilities.Logger.LogMessageType;
 import org.hl7.fhir.utilities.NDJsonWriter;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.XsltUtilities;
 import org.hl7.fhir.utilities.ZipGenerator;
 import org.hl7.fhir.utilities.json.JSONUtil;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -442,6 +442,8 @@ public class Publisher implements URIResolver, SectionNumberer {
 
   private boolean isPostPR;
 
+  private String validateId;
+
 
   public static void main(String[] args) throws Exception {
     //
@@ -478,6 +480,7 @@ public class Publisher implements URIResolver, SectionNumberer {
       pub.page.setPublicationType(PageProcessor.CI_PUB_NAME);
       pub.page.setPublicationNotice(PageProcessor.CI_PUB_NOTICE);
     }
+    pub.validateId = getNamedParam(args, "-validate");
     String dir = hasParam(args, "-folder") ? getNamedParam(args, "-folder") : System.getProperty("user.dir");
     pub.outputdir = hasParam(args, "-output") ? getNamedParam(args, "-output") : null; 
     pub.isCIBuild = dir.contains("/ubuntu/agents/"); 
@@ -559,12 +562,12 @@ public class Publisher implements URIResolver, SectionNumberer {
       }
       if (!buildFlags.get("all")) {
         if (!noSound) {
-          Utilities.tone(1000, 10);
-          Utilities.tone(1400, 10);
-          Utilities.tone(1800, 10);
-          Utilities.tone(1000, 10);
-          Utilities.tone(1400, 10);
-          Utilities.tone(1800, 10);
+          AudioUtilities.tone(1000, 10);
+          AudioUtilities.tone(1400, 10);
+          AudioUtilities.tone(1800, 10);
+          AudioUtilities.tone(1000, 10);
+          AudioUtilities.tone(1400, 10);
+          AudioUtilities.tone(1800, 10);
         }
         page.log("Partial Build (if you want a full build, just run the build again)", LogMessageType.Process);
         CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
@@ -574,7 +577,7 @@ public class Publisher implements URIResolver, SectionNumberer {
         page.log("  Build: "+b.toString(), LogMessageType.Process);
       } else {
         if (!noSound) 
-          Utilities.tone(1200, 30);
+          AudioUtilities.tone(1200, 30);
         page.log("Full Build", LogMessageType.Process);
       }
       if (isGenerate && page.getBuildId() == null)
@@ -645,11 +648,11 @@ public class Publisher implements URIResolver, SectionNumberer {
       } else
         page.log("This was a Full Build", LogMessageType.Process);
       if (!noSound) {
-        Utilities.tone(800, 10);
-        Utilities.tone(1000, 10);
-        Utilities.tone(1200, 10);
-        Utilities.tone(1000, 10);
-        Utilities.tone(800, 10);
+        AudioUtilities.tone(800, 10);
+        AudioUtilities.tone(1000, 10);
+        AudioUtilities.tone(1200, 10);
+        AudioUtilities.tone(1000, 10);
+        AudioUtilities.tone(800, 10);
       }
       page.log("Finished publishing FHIR @ " + Config.DATE_FORMAT().format(Calendar.getInstance().getTime()), LogMessageType.Process);
     } catch (Exception e) {
@@ -673,27 +676,27 @@ public class Publisher implements URIResolver, SectionNumberer {
       } else
         page.log("This was a Full Build", LogMessageType.Process);
       if (!noSound) {
-        Utilities.tone(800, 20);
-        Utilities.tone(1000, 20);
-        Utilities.tone(1200, 20);
+        AudioUtilities.tone(800, 20);
+        AudioUtilities.tone(1000, 20);
+        AudioUtilities.tone(1200, 20);
       }
       try {
         Thread.sleep(50);
       } catch (InterruptedException e1) {
       }
       if (!noSound) {
-        Utilities.tone(800, 20);
-        Utilities.tone(1000, 20);
-        Utilities.tone(1200, 20);
+        AudioUtilities.tone(800, 20);
+        AudioUtilities.tone(1000, 20);
+        AudioUtilities.tone(1200, 20);
       }
       try {
         Thread.sleep(50);
       } catch (InterruptedException e1) {
       }
       if (!noSound) {
-        Utilities.tone(800, 20);
-        Utilities.tone(1000, 20);
-        Utilities.tone(1200, 20);
+        AudioUtilities.tone(800, 20);
+        AudioUtilities.tone(1000, 20);
+        AudioUtilities.tone(1200, 20);
       }
       page.log("FHIR build failure @ " + Config.DATE_FORMAT().format(Calendar.getInstance().getTime()), LogMessageType.Process);
       System.out.println("Error: " + e.getMessage());
@@ -980,7 +983,7 @@ public class Publisher implements URIResolver, SectionNumberer {
 
   private void processExtension(StructureDefinition ex) throws Exception {
     StructureDefinition bd = page.getDefinitions().getSnapShotForBase(ex.getBaseDefinition());
-    new ProfileUtilities(page.getWorkerContext(), page.getValidationErrors(), page).generateSnapshot(bd, ex, ex.getUrl(), ex.getName());
+    new ProfileUtilities(page.getWorkerContext(), page.getValidationErrors(), page).generateSnapshot(bd, ex, ex.getUrl(), null, ex.getName());
   }
 
   private Profile makeConformancePack(ResourceDefn r) {
@@ -1091,7 +1094,7 @@ public class Publisher implements URIResolver, SectionNumberer {
         if (profile.getResource().hasBaseDefinition() && !profile.getResource().hasSnapshot()) {
           // cause it probably doesn't, coming from the profile directly
           StructureDefinition base = getSnapShotForProfile(profile.getResource().getBaseDefinition());
-          new ProfileUtilities(page.getWorkerContext(), page.getValidationErrors(), page).generateSnapshot(base, profile.getResource(), profile.getResource().getBaseDefinition().split("#")[0], profile.getResource().getName());
+          new ProfileUtilities(page.getWorkerContext(), page.getValidationErrors(), page).generateSnapshot(base, profile.getResource(), profile.getResource().getBaseDefinition().split("#")[0], null, profile.getResource().getName());
         }
         if (page.getProfiles().containsKey(profile.getResource().getUrl()))
           throw new Exception("Duplicate Profile URL "+profile.getResource().getUrl());
@@ -1164,7 +1167,7 @@ public class Publisher implements URIResolver, SectionNumberer {
       StructureDefinition base = getIgProfile(ae.getBaseDefinition());
       if (base == null)
         base = new ProfileUtilities(page.getWorkerContext(), page.getValidationErrors(), page).getProfile(null, ae.getBaseDefinition());
-      new ProfileUtilities(page.getWorkerContext(), page.getValidationErrors(), page).generateSnapshot(base, ae, ae.getBaseDefinition().split("#")[0], ae.getName());
+      new ProfileUtilities(page.getWorkerContext(), page.getValidationErrors(), page).generateSnapshot(base, ae, ae.getBaseDefinition().split("#")[0], null, ae.getName());
       if (page.getProfiles().containsKey(ae.getUrl()))
         throw new Exception("Duplicate Profile URL "+ae.getUrl());
       page.getProfiles().put(ae.getUrl(), ae);
@@ -1641,10 +1644,11 @@ public class Publisher implements URIResolver, SectionNumberer {
           rest.addOperation().setName(op.getName()).setDefinition("http://hl7.org/fhir/OperationDefinition/"+r.getName().toLowerCase()+"-"+op.getName());
       }
     } else {
-      CapabilityStatementRestResourceComponent res = new CapabilityStatement.CapabilityStatementRestResourceComponent();
-      rest.getResource().add(res);
-      res.setType("CapabilityStatement");
-      genConfInteraction(cpbs, res, TypeRestfulInteraction.READ, "Read CapabilityStatement Resource");
+      // don't add anything - the metadata operation is implicit
+//      CapabilityStatementRestResourceComponent res = new CapabilityStatement.CapabilityStatementRestResourceComponent();
+//      rest.getResource().add(res);
+//      res.setType("CapabilityStatement");
+//      genConfInteraction(cpbs, res, TypeRestfulInteraction.READ, "Read CapabilityStatement Resource");
     }
 
     if (register) {
@@ -1826,6 +1830,7 @@ public class Publisher implements URIResolver, SectionNumberer {
   private void validate() throws Exception {
     page.log("Validating", LogMessageType.Process);
     ResourceValidator val = new ResourceValidator(page.getDefinitions(), page.getTranslations(), page.getCodeSystems(), page.getFolders().srcDir, fpUsages, page.getSuppressedMessages(), page.getWorkerContext());
+    val.resolvePatterns();
     ProfileValidator valp = new ProfileValidator();
     valp.setContext(page.getWorkerContext());
 
@@ -1845,6 +1850,7 @@ public class Publisher implements URIResolver, SectionNumberer {
     for (Compartment cmp : page.getDefinitions().getCompartments())
       page.getValidationErrors().addAll(val.check(cmp));
     
+    page.setPatternFinder(val.getPatternFinder());
     val.report();
     val.summariseSearchTypes(page.getSearchTypeUsage());
     val.dumpParams();
@@ -1878,9 +1884,9 @@ public class Publisher implements URIResolver, SectionNumberer {
       s.write("<page name=\""+pn.getName()+"\" wg=\""+pn.getWgCode()+"\" fmm=\""+pn.getFmm()+"\"/>\r\n");
     }
     try {
-      s.write(new String(Utilities.saxonTransform(page.getFolders().dstDir + "profiles-resources.xml", xslt)));
-      s.write(new String(Utilities.saxonTransform(page.getFolders().dstDir + "profiles-types.xml", xslt)));
-      s.write(new String(Utilities.saxonTransform(page.getFolders().dstDir + "profiles-others.xml", xslt)));
+      s.write(new String(XsltUtilities.saxonTransform(page.getFolders().dstDir + "profiles-resources.xml", xslt)));
+      s.write(new String(XsltUtilities.saxonTransform(page.getFolders().dstDir + "profiles-types.xml", xslt)));
+      s.write(new String(XsltUtilities.saxonTransform(page.getFolders().dstDir + "profiles-others.xml", xslt)));
     } catch (Exception e) {
       for (ValidationMessage err : page.getValidationErrors()) {
         if (!page.getSuppressedMessages().contains(err.getDisplay()))
@@ -1902,14 +1908,22 @@ public class Publisher implements URIResolver, SectionNumberer {
 
     String xslt2 = Utilities.path(page.getFolders().rootDir, "implementations", "xmltools", "CategorizeWarnings.xslt");
     FileOutputStream s2 = new FileOutputStream(page.getFolders().dstDir + "work-group-warnings.xml");
-    s2.write(Utilities.saxonTransform(page.getFolders().dstDir + "warnings.xml", xslt2).getBytes("UTF8"));
+    try {
+      s2.write(XsltUtilities.saxonTransform(page.getFolders().dstDir + "warnings.xml", xslt2).getBytes("UTF8"));
+    } catch (Exception e) {
+      // nothing - do not want to know.
+    }
     s2.flush();
     s2.close();
 
     String xslt3 = Utilities.path(page.getFolders().rootDir, "implementations", "xmltools", "RenderWarnings.xslt");
-    String hw = Utilities.saxonTransform(page.getFolders().dstDir + "work-group-warnings.xml", xslt3);
-    if (!showOnlyErrors)
-      page.log(hw, LogMessageType.Process);
+    try {
+      String hw = XsltUtilities.saxonTransform(page.getFolders().dstDir + "work-group-warnings.xml", xslt3);
+      if (!showOnlyErrors)
+        page.log(hw, LogMessageType.Process);
+    } catch (Exception e) {
+      // nothing - do not want to know.
+    }
 
     int i = 0;
     int w = 0;
@@ -2243,8 +2257,8 @@ public class Publisher implements URIResolver, SectionNumberer {
 
     produceSchemaZip();
 
-    page.log("Load R3 Definitions", LogMessageType.Process);
-    loadR3Definitions();
+    page.log("Load R4 Definitions", LogMessageType.Process);
+    loadR4Definitions();
     page.log("Produce Content", LogMessageType.Process);
     produceSpec();
 
@@ -2264,31 +2278,31 @@ public class Publisher implements URIResolver, SectionNumberer {
   }
 
 
-  private void loadR3Definitions() throws FileNotFoundException, FHIRException, IOException {
-    loadR3DefinitionBundle(page.getDiffEngine().getOriginal().getTypes(), Utilities.path(page.getFolders().srcDir, "release3", "profiles-types.xml"));
-    loadR3DefinitionBundle(page.getDiffEngine().getOriginal().getResources(), Utilities.path(page.getFolders().srcDir, "release3", "profiles-resources.xml"));
-    loadR3DefinitionBundle(page.getDiffEngine().getOriginal().getExtensions(), Utilities.path(page.getFolders().srcDir, "release3", "extension-definitions.xml"));
-    loadR3DefinitionBundle(page.getDiffEngine().getOriginal().getProfiles(), Utilities.path(page.getFolders().srcDir, "release3", "profiles-others.xml"));
-    loadValueSetBundle(page.getDiffEngine().getOriginal().getExpansions(), Utilities.path(page.getFolders().srcDir, "release3", "expansions.xml"));
-    loadValueSetBundle(page.getDiffEngine().getOriginal().getValuesets(), Utilities.path(page.getFolders().srcDir, "release3", "valuesets.xml"));
+  private void loadR4Definitions() throws FileNotFoundException, FHIRException, IOException {
+    loadR4DefinitionBundle(page.getDiffEngine().getOriginal().getTypes(), Utilities.path(page.getFolders().srcDir, "release4", "profiles-types.xml"));
+    loadR4DefinitionBundle(page.getDiffEngine().getOriginal().getResources(), Utilities.path(page.getFolders().srcDir, "release4", "profiles-resources.xml"));
+    loadR4DefinitionBundle(page.getDiffEngine().getOriginal().getExtensions(), Utilities.path(page.getFolders().srcDir, "release4", "extension-definitions.xml"));
+    loadR4DefinitionBundle(page.getDiffEngine().getOriginal().getProfiles(), Utilities.path(page.getFolders().srcDir, "release4", "profiles-others.xml"));
+    loadValueSetBundle(page.getDiffEngine().getOriginal().getExpansions(), Utilities.path(page.getFolders().srcDir, "release4", "expansions.xml"));
+    loadValueSetBundle(page.getDiffEngine().getOriginal().getValuesets(), Utilities.path(page.getFolders().srcDir, "release4", "valuesets.xml"));
   }
 
-  private void loadR3DefinitionBundle(Map<String, StructureDefinition> map, String fn) throws FHIRException, FileNotFoundException, IOException {
-    org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) new org.hl7.fhir.dstu3.formats.XmlParser().parse(new FileInputStream(fn));
-    for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent be : bundle.getEntry()) {
-      if (be.getResource() instanceof org.hl7.fhir.dstu3.model.StructureDefinition) {
-        org.hl7.fhir.dstu3.model.StructureDefinition sd = (org.hl7.fhir.dstu3.model.StructureDefinition) be.getResource();
-        map.put(sd.getName(), VersionConvertor_30_40.convertStructureDefinition(sd));
+  private void loadR4DefinitionBundle(Map<String, StructureDefinition> map, String fn) throws FHIRException, FileNotFoundException, IOException {
+    org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) new org.hl7.fhir.r4.formats.XmlParser().parse(new FileInputStream(fn));
+    for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent be : bundle.getEntry()) {
+      if (be.getResource() instanceof org.hl7.fhir.r4.model.StructureDefinition) {
+        org.hl7.fhir.r4.model.StructureDefinition sd = (org.hl7.fhir.r4.model.StructureDefinition) be.getResource();
+        map.put(sd.getName(), org.hl7.fhir.convertors.conv40_50.StructureDefinition.convertStructureDefinition(sd));
       }
     }
   }
   
   private static void loadValueSetBundle(Map<String, ValueSet> map, String fn) throws FHIRException, FileNotFoundException, IOException {
-    org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) new org.hl7.fhir.dstu3.formats.XmlParser().parse(new FileInputStream(fn));
-    for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent be : bundle.getEntry()) {
-      if (be.getResource() instanceof org.hl7.fhir.dstu3.model.ValueSet) {
-        org.hl7.fhir.dstu3.model.ValueSet sd = (org.hl7.fhir.dstu3.model.ValueSet) be.getResource();
-        map.put(sd.getName(), VersionConvertor_30_40.convertValueSet(sd));
+    org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) new org.hl7.fhir.r4.formats.XmlParser().parse(new FileInputStream(fn));
+    for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent be : bundle.getEntry()) {
+      if (be.getResource() instanceof org.hl7.fhir.r4.model.ValueSet) {
+        org.hl7.fhir.r4.model.ValueSet sd = (org.hl7.fhir.r4.model.ValueSet) be.getResource();
+        map.put(sd.getName(), org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(sd));
       }
     }    
   }
@@ -2778,6 +2792,12 @@ public class Publisher implements URIResolver, SectionNumberer {
       zip.addFileName("fhir.schema.json.zip", page.getFolders().dstDir + "fhir.schema.json.zip", false);
       zip.close();
 
+      zip = new ZipGenerator(page.getFolders().dstDir + "definitions.xlsx.zip");
+      for (String rn : page.getDefinitions().sortedResourceNames()) {
+        zip.addFileName(rn.toLowerCase()+".xlsx", page.getFolders().dstDir + rn.toLowerCase()+".xlsx", false);
+      }
+      zip.close();
+
       // this is the actual package used by the validator. 
       zip = new ZipGenerator(page.getFolders().dstDir + "validator.pack");
       // conformance resources
@@ -2873,12 +2893,12 @@ public class Publisher implements URIResolver, SectionNumberer {
       zip.close();
       System.gc();
 
-      page.log("....dstu2 in dstu3 format", LogMessageType.Process);
+      page.log("....r4 in r5 format", LogMessageType.Process);
       zip = new ZipGenerator(page.getFolders().dstDir + "definitions-r2asr3.xml.zip");
-      page.getDiffEngine().saveR2AsR3(zip, FhirFormat.XML);
+      page.getDiffEngine().saveR4AsR5(zip, FhirFormat.XML);
       zip.close();
       zip = new ZipGenerator(page.getFolders().dstDir + "definitions-r2asr3.json.zip");
-      page.getDiffEngine().saveR2AsR3(zip, FhirFormat.JSON);
+      page.getDiffEngine().saveR4AsR5(zip, FhirFormat.JSON);
       zip.close();
             
       zip = new ZipGenerator(page.getFolders().dstDir + "all-valuesets.zip");
@@ -2892,7 +2912,7 @@ public class Publisher implements URIResolver, SectionNumberer {
       zip.addFileName("v3-codesystems.json", page.getFolders().dstDir + "v3-codesystems.json", false);
       zip.close();
     
-      page.log("....IG Builder (1)", LogMessageType.Process);
+      page.log("....IG Builder Resources", LogMessageType.Process);
       zip = new ZipGenerator(page.getFolders().tmpDir + "ig-template.zip");
       zip.addFolder(Utilities.path(page.getFolders().rootDir, "tools", "ig"), "", false, null);
       zip.close();
@@ -2920,7 +2940,6 @@ public class Publisher implements URIResolver, SectionNumberer {
       zip.addFiles(Utilities.path(page.getFolders().rootDir, "publish", ""), "", ".gif", null);
       zip.close();
       page.log("....IG Builder (2)", LogMessageType.Process);
-      javaReferencePlatform.buildIGPublisher(page.getFolders().dstDir + "igpack.zip");
 
       SpecNPMPackageGenerator self = new SpecNPMPackageGenerator();
       self.generate(page.getFolders().dstDir, page.getBaseURL(), false, new SimpleDateFormat("yyyyMMddHHmmss").format(page.getGenDate().getTime()));
@@ -3198,17 +3217,18 @@ public class Publisher implements URIResolver, SectionNumberer {
     check(ed.hasPath(), sd, "Element has no path");
     Set<String> codes = new HashSet<String>();
     for (TypeRefComponent tr : ed.getType()) {
-      if (codes.contains(tr.getCode()))
-        check(false, sd, ed.getPath()+": type '"+tr.getCode()+"' is duplicated");
+      String tc = tr.getWorkingCode();
+      if (codes.contains(tc))
+        check(false, sd, ed.getPath()+": type '"+tc+"' is duplicated");
         
-      if ((!inDiff || tr.hasCode()) && tr.getCode() != null)
+      if ((!inDiff || tr.hasCode()) && tc != null)
         if (ed.getPath().contains("."))
-          check(page.getDefinitions().hasBaseType(tr.getCode()) || tr.getCode().equals("Resource"), sd, ed.getPath()+": type '"+tr.getCode()+"' is not valid (a)");
+          check(page.getDefinitions().hasBaseType(tc) || tc.equals("Resource"), sd, ed.getPath()+": type '"+tc+"' is not valid (a)");
         else if (sd.hasBaseDefinition()) {
           if (sd.getDerivation() == TypeDerivationRule.CONSTRAINT)
-            check(page.getDefinitions().hasConcreteResource(tr.getCode()) || page.getDefinitions().hasBaseType(tr.getCode()) , sd, ed.getPath()+": type '"+tr.getCode()+"' is not valid (b)");
+            check(page.getDefinitions().hasConcreteResource(tc) || page.getDefinitions().hasBaseType(tc) , sd, ed.getPath()+": type '"+tc+"' is not valid (b)");
           else
-            check(page.getDefinitions().hasAbstractResource(tr.getCode()) || tr.getCode().equals("Element"), sd, ed.getPath()+": type '"+tr.getCode()+"' is not valid (c)");
+            check(page.getDefinitions().hasAbstractResource(tc) || tc.equals("Element"), sd, ed.getPath()+": type '"+tc+"' is not valid (c)");
         }
       if (tr.hasProfile()) {
         check(tr.getProfile().size() == 1, sd, ed.getPath()+": multiple profiles found: "+tr.getProfile());
@@ -3532,7 +3552,7 @@ public class Publisher implements URIResolver, SectionNumberer {
       byte[] xslt = IOUtils.toByteArray( new FileInputStream(Utilities.path(page.getFolders().rootDir, "implementations", "xmltools", "AnnotationStripper.xslt")));
       String scrs = new String(src);
       String xslts = new String(xslt);
-      return new ByteArrayInputStream(Utilities.transform(new HashMap<String, byte[]>(), src, xslt));
+      return new ByteArrayInputStream(XsltUtilities.transform(new HashMap<String, byte[]>(), src, xslt));
     } catch (Exception e) {
       if (web) {
         e.printStackTrace();
@@ -4013,11 +4033,11 @@ public class Publisher implements URIResolver, SectionNumberer {
         String type = base.getAttribute("fragment");
         if (!page.getDefinitions().hasPrimitiveType(type)) {
           if (f.isJson()) {
-            org.hl7.fhir.r4.elementmodel.JsonParser p = new org.hl7.fhir.r4.elementmodel.JsonParser(page.getWorkerContext());
+            org.hl7.fhir.r5.elementmodel.JsonParser p = new org.hl7.fhir.r5.elementmodel.JsonParser(page.getWorkerContext());
             p.setupValidation(ValidationPolicy.QUICK, null);
             p.parse(base.getTextContent(), type);
           } else {
-            org.hl7.fhir.r4.elementmodel.XmlParser p = new org.hl7.fhir.r4.elementmodel.XmlParser(page.getWorkerContext());
+            org.hl7.fhir.r5.elementmodel.XmlParser p = new org.hl7.fhir.r5.elementmodel.XmlParser(page.getWorkerContext());
             p.setupValidation(ValidationPolicy.QUICK, null);
             p.parse(XMLUtil.getFirstChild(base), type);
           }
@@ -4055,6 +4075,13 @@ public class Publisher implements URIResolver, SectionNumberer {
     zip.addFiles(page.getFolders().dstDir, "", ".schema.json", null);
     zip.close();
     Utilities.copyFile(new CSFile(page.getFolders().tmpResDir + "fhir.schema.json.zip"), f);
+    f = new CSFile(page.getFolders().dstDir + "fhir.schema.graphql.zip");
+    if (f.exists())
+      f.delete();
+    zip = new ZipGenerator(page.getFolders().tmpResDir + "fhir.schema.graphql.zip");
+    zip.addFiles(page.getFolders().dstDir, "", ".graphql", null);
+    zip.close();
+    Utilities.copyFile(new CSFile(page.getFolders().tmpResDir + "fhir.schema.graphql.zip"), f);
   }
 
   private void produceResource1(ResourceDefn resource, boolean isAbstract) throws Exception {
@@ -4227,6 +4254,8 @@ public class Publisher implements URIResolver, SectionNumberer {
     }
     tmp.delete();
 
+    new ProfileUtilities(page.getWorkerContext(), page.getValidationErrors(), page).generateXlsx(new FileOutputStream(Utilities.path(page.getFolders().dstDir, n + ".xlsx")), resource.getProfile(), false, false);
+    
     // because we'll pick up a little more information as we process the
     // resource
     StructureDefinition p = generateProfile(resource, n, xml, json, ttl, !logicalOnly);
@@ -4415,7 +4444,7 @@ public class Publisher implements URIResolver, SectionNumberer {
       //    if (web) {
       HashMap<String, String> params = new HashMap<String, String>();
       params.put("suppressWarnings", "true");
-      Utilities.saxonTransform(
+      XsltUtilities.saxonTransform(
           Utilities.path(page.getFolders().rootDir, "implementations", "xmltools"), // directory for xslt references
           page.getFolders().dstDir + prefix+ profile.getId().toLowerCase() + "-questionnaire.xml",  // source to run xslt on
           Utilities.path(page.getFolders().rootDir, "implementations", "xmltools", "QuestionnaireToHTML.xslt"), // xslt file to run
@@ -4614,7 +4643,7 @@ public class Publisher implements URIResolver, SectionNumberer {
     e.setResourceName(resn.getName());
     String canonical = "http://hl7.org/fhir/";
     
-    org.hl7.fhir.r4.elementmodel.Element ex = Manager.parse(page.getWorkerContext(), new CSFileInputStream(page.getFolders().dstDir + prefix+n + ".xml"), FhirFormat.XML);
+    org.hl7.fhir.r5.elementmodel.Element ex = Manager.parse(page.getWorkerContext(), new CSFileInputStream(page.getFolders().dstDir + prefix+n + ".xml"), FhirFormat.XML);
     new DefinitionsUsageTracker(page.getDefinitions()).updateUsage(ex);
     Manager.compose(page.getWorkerContext(), ex, new FileOutputStream(page.getFolders().dstDir + prefix+n + ".json"), FhirFormat.JSON, OutputStyle.PRETTY, canonical); 
 //    Manager.compose(page.getWorkerContext(), ex, new FileOutputStream(Utilities.changeFileExt(destName, ".canonical.json")), FhirFormat.JSON, OutputStyle.CANONICAL); 
@@ -5446,6 +5475,16 @@ public class Publisher implements URIResolver, SectionNumberer {
         page.getFolders().dstDir + fn + "-mappings.html");
     page.getHTMLChecker().registerFile(fn+"-mappings.html", "Formal Mappings for " + n, HTMLLinkChecker.XHTML_TYPE, true);
 
+    src = TextFile.fileToString(page.getFolders().srcDir + "template-logical-analysis.html");
+    if (lm.hasResource())
+      TextFile.stringToFile(
+          insertSectionNumbers(page.processResourceIncludes(n, lm.getResource(), "", "", "", tx, dict, src, mappings, mappingsList, "res-Analysis", n + "-analysis.html", ig, values, lm.getWg(), examples), st, n + "-analysis.html", ig.getLevel(), null),
+          page.getFolders().dstDir + fn + "-analysis.html");
+    else
+      TextFile.stringToFile(insertSectionNumbers(new LogicalModelProcessor(n, page, ig, lm.getDefinition().getId(), "logical-model", n+".html", lm.getDefinition(), tx, dict, examples, ig.getLogicalModels(), page.getDefinitions()).process(src), st, n + "-analysis.html", ig.getLevel(), null),
+        page.getFolders().dstDir + fn + "-analysis.html");
+    page.getHTMLChecker().registerFile(fn+"-analysis.html", "Analysis for " + n, HTMLLinkChecker.XHTML_TYPE, true);
+
     tmp.delete();
   }
 
@@ -5694,7 +5733,7 @@ public class Publisher implements URIResolver, SectionNumberer {
       for (int i = 0; i < level; i++)
         s = "../"+s;
       img.attribute("src", s);
-      img.attribute("style", "text-align: baseline");
+      img.attribute("style", "vertical-align: baseline");
     }
 
     if (node.getNodeType() == NodeType.Element
@@ -5826,7 +5865,8 @@ public class Publisher implements URIResolver, SectionNumberer {
             ImplementationGuideDefn ig = e.getIg() == null ? null : page.getDefinitions().getIgs().get(e.getIg());
             if (ig != null)
               n = ig.getCode()+File.separator+n;
-            ei.validate(n, rname);
+            if (validateId == null || validateId.equals(n))
+              ei.validate(n, rname);
           }
 
           for (Profile e : r.getConformancePackages()) {
@@ -5834,7 +5874,8 @@ public class Publisher implements URIResolver, SectionNumberer {
               ImplementationGuideDefn ig = en.getIg() == null ? null : page.getDefinitions().getIgs().get(en.getIg());
               String prefix = (ig == null || ig.isCore()) ? "" : ig.getCode()+File.separator;
               String n = prefix+Utilities.changeFileExt(en.getTitle(), "");
-              ei.validate(n, rname, e.getProfiles().get(0).getResource());
+              if (validateId == null || validateId.equals(n))
+                ei.validate(n, rname, e.getProfiles().get(0).getResource());
             }
           }
         }
@@ -5853,15 +5894,24 @@ public class Publisher implements URIResolver, SectionNumberer {
         }
       }
       if (buildFlags.get("all")) {
-        ei.validate("v2-tables", "Bundle");
-        ei.validate("v3-codesystems", "Bundle");
-        ei.validate("valuesets", "Bundle");
-        ei.validate("conceptmaps", "Bundle");
-        ei.validate("profiles-types", "Bundle");
-        ei.validate("profiles-resources", "Bundle");
-        ei.validate("profiles-others", "Bundle");
-        ei.validate("search-parameters", "Bundle");
-        ei.validate("extension-definitions", "Bundle");
+        if (validateId == null || validateId.equals("v2-tables"))
+          ei.validate("v2-tables", "Bundle");
+        if (validateId == null || validateId.equals("v3-codesystems"))
+          ei.validate("v3-codesystems", "Bundle");
+        if (validateId == null || validateId.equals("valuesets"))
+          ei.validate("valuesets", "Bundle");
+        if (validateId == null || validateId.equals("conceptmaps"))
+          ei.validate("conceptmaps", "Bundle");
+        if (validateId == null || validateId.equals("profiles-types"))
+          ei.validate("profiles-types", "Bundle");
+        if (validateId == null || validateId.equals("profiles-resources"))
+          ei.validate("profiles-resources", "Bundle");
+        if (validateId == null || validateId.equals("profiles-others"))
+          ei.validate("profiles-others", "Bundle");
+        if (validateId == null || validateId.equals("search-parameters"))
+          ei.validate("search-parameters", "Bundle");
+        if (validateId == null || validateId.equals("extension-definitions"))
+          ei.validate("extension-definitions", "Bundle");
       }
       ei.summarise();
 

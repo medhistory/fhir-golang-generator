@@ -81,31 +81,31 @@ import org.hl7.fhir.definitions.model.TypeDefn;
 import org.hl7.fhir.definitions.model.W5Entry;
 import org.hl7.fhir.definitions.model.WorkGroup;
 import org.hl7.fhir.definitions.validation.FHIRPathUsage;
-import org.hl7.fhir.r4.model.Constants;
+import org.hl7.fhir.r5.model.Constants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.igtools.spreadsheets.CodeSystemConvertor;
 import org.hl7.fhir.igtools.spreadsheets.MappingSpace;
 import org.hl7.fhir.igtools.spreadsheets.TypeParser;
 import org.hl7.fhir.igtools.spreadsheets.TypeRef;
-import org.hl7.fhir.r4.conformance.ProfileUtilities;
-import org.hl7.fhir.r4.formats.FormatUtilities;
-import org.hl7.fhir.r4.formats.XmlParser;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
-import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionContextComponent;
-import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.utils.ToolingExtensions;
+import org.hl7.fhir.r5.conformance.ProfileUtilities;
+import org.hl7.fhir.r5.formats.FormatUtilities;
+import org.hl7.fhir.r5.formats.XmlParser;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r5.model.Bundle.BundleType;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Composition;
+import org.hl7.fhir.r5.model.Enumerations.FHIRVersion;
+import org.hl7.fhir.r5.model.MetadataResource;
+import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.StructureDefinition.StructureDefinitionContextComponent;
+import org.hl7.fhir.r5.model.StructureDefinition.TypeDerivationRule;
+import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.utils.ToolingExtensions;
 import org.hl7.fhir.tools.publisher.BuildWorkerContext;
 import org.hl7.fhir.tools.publisher.PageProcessor;
 import org.hl7.fhir.tools.publisher.PageProcessor.PageInfo;
@@ -1137,7 +1137,7 @@ public class SourceParser {
     errors.addAll(sparser.getErrors());
     root.setWg(wg);
     root.setFmmLevel(ini.getStringProperty("fmm", n.toLowerCase()));
-    root.setNormativeBallotPackage(ini.getStringProperty("normative-ballot", root.getName()));
+    root.setNormativePackage(ini.getStringProperty("normative-package", root.getName()));
     root.setNormativeVersion(ini.getStringProperty("first-normative-version", root.getName()));
     root.setApproval(FMGApproval.fromCode(ini.getStringProperty("fmg-approval", root.getName())));
     String sc = ini.getStringProperty("security-categorization", root.getName().toLowerCase());
@@ -1158,7 +1158,7 @@ public class SourceParser {
       definitions.getKnownResources().put(root.getName(), new DefinedCode(root.getName(), root.getRoot().getDefinition(), n));
       context.getResourceNames().add(root.getName());
     }
-    if (root.getNormativeVersion() != null || root.getNormativeBallotPackage() != null)
+    if (root.getNormativeVersion() != null || root.getNormativePackage() != null)
       root.setStatus(StandardsStatus.NORMATIVE);
     File f = new File(Utilities.path(srcDir, folder, n+".svg"));
     if (f.exists()) 

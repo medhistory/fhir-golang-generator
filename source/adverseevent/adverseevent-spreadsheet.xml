@@ -17,6 +17,7 @@
   
   <TabRatio>837</TabRatio>
   <ActiveSheet>1</ActiveSheet>
+  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -740,10 +741,10 @@
  </Worksheet>
  <Worksheet ss:Name="Data Elements">
   <Names>
-   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R29C25"/>
+   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R28C25"/>
   </Names>
-  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="41" ss:StyleID="s69" x:FullColumns="1" x:FullRows="1">
-   <Column ss:AutoFitWidth="0" ss:StyleID="s69" ss:Width="285.0"/>
+  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="40" ss:StyleID="s69" x:FullColumns="1" x:FullRows="1">
+   <Column ss:AutoFitWidth="0" ss:StyleID="s69" ss:Width="298.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s69" ss:Width="61.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s69" ss:Width="28.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s69" ss:Width="40.0"/>
@@ -794,7 +795,8 @@
     <Cell ss:Index="5"><Data ss:Type="String">DomainResource</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="10"><Data ss:Type="String">clinical.general</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="15"><Data ss:Type="String">Medical care, research study or other healthcare event causing physical injury </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">Actual or  potential/avoided event causing unintended physical injury resulting from or contributed to by medical care, a research study or other healthcare setting factors that requires additional monitoring, treatment, or hospitalization, or that results in death</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">An event (i.e. any change to current patient status) that may be related to unintended effects on a patient or research subject.  The unintended effects may require additional monitoring, treatment or hospitalization or may result in death.  The AdverseEvent resource also extends to potential or avoided events that could have had such effects.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="20"><Data ss:Type="String">Act</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="23"><Data ss:Type="String">0;0</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14">
@@ -828,20 +830,20 @@
     <Cell><Data ss:Type="String">The overall type of event, intended for search and filtering purposes.  </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="72">
-    <Cell><Data ss:Type="String">AdverseEvent.event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">AdverseEvent.code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="9"><Data ss:Type="String">AdverseEventType</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">what</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">Type of the event itself in relation to the subject</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">This element defines the specific type of event that occurred or that was prevented from occurring.  </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">Event or incident that occurred or was averted</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">Specific event that occurred or that was averted, such as patient fall, wrong organ removed, or wrong blood transfused.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
     <Cell><Data ss:Type="String">AdverseEvent.subject</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">patient</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">Reference(Patient|Group|Practitioner|RelatedPerson)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="10"><Data ss:Type="String">who</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="10"><Data ss:Type="String">who.focus</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="15"><Data ss:Type="String">Subject impacted by event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">This subject or group impacted by the event.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">Allows for exposure of biohazard (such as legionella) to a group of individuals in a hospital</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -853,7 +855,7 @@
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">Reference (Encounter)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="10"><Data ss:Type="String">context</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">Encounter created as part of</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">The Encounter during which this AdverseEvent was created</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">The Encounter during which AdverseEvent was created or to which the creation of this record is tightly associated.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="18"><Data ss:Type="String">This will typically be the encounter the event occurred within, but some activities may be initiated prior to or after the official completion of an encounter but still be tied to the context of the encounter.  For example, if a medication administration was considered an adverse event because it resulted in a rash, then the encounter when the medication administration was given is the context.  If the patient reports the AdverseEvent during a second encounter, that second encounter is not the context.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="25"><Data ss:Type="String">GF#14458</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -902,23 +904,17 @@
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="9" ss:StyleID="s69"><Data ss:Type="String">AdverseEventSeriousness</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">Seriousness of the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">Assessment whether this event was of real importance</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="14" ss:StyleID="s79">
-    <Cell><Data ss:Type="String">AdverseEvent.severity</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="9" ss:StyleID="s69"><Data ss:Type="String">AdverseEventSeverity</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">mild | moderate | severe</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">Describes the severity of the adverse event, in relation to the subject. Contrast to AdverseEvent.seriousness - a severe rash might not be serious, but a mild heart problem is.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">Seriousness or gravity of the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">Assessment whether this event, or averted event, was of clinical importance</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="18"><Data ss:Type="String">Using an example, a rash can have an AdverseEvent.resultingCondition.severity = severe, yet an AdverseEvent.seriousness = non-serious.  Alternatively, a medication given with the wrong dose (chemotherapy given with too low of a dose) can have an AdverseEvent.resultingCondition.severity = mild, yet a AdverseEvent.seriousness = serious.  Another example would be a beta blocker clinical trial where patients with asthma should be excluded, yet a patient with asthma was included and had an asthmatic episode where  AdverseEvent.resultingCondition.severity = mild, yet a AdverseEvent.seriousness = serious</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">GF#22740, GF#22994, GF#22995</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14" ss:StyleID="s78">
     <Cell ss:StyleID="s80"><Data ss:Type="String">AdverseEvent.outcome</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="9" ss:StyleID="s69"><Data ss:Type="String">AdverseEventOutcome</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15" ss:StyleID="s79"><Data ss:Type="String">resolved | recovering | ongoing | resolvedWithSequelae | fatal | unknown</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15" ss:StyleID="s79"><Data ss:Type="String">resolved | recovering | ongoing | resolved-with-sequelae | fatal | unknown</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">Describes the type of outcome from the adverse event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14" ss:StyleID="s78">
@@ -957,7 +953,7 @@
     <Cell><Data ss:Type="String">AdverseEvent.suspectEntity.instance[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">Substance or Medication or Device</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept | Reference(Immunization|Procedure|Substance|Medication|MedicationAdministration|MedicationStatement|Device)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept | Reference(Immunization|Procedure|Substance|Medication|MedicationAdministration|MedicationUsage|Device)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="15"><Data ss:Type="String">Refers to the specific entity that caused the adverse event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">Identifies the actual instance of what caused the adverse event.  May be a substance, medication, medication administration, medication statement or a device</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="25"><Data ss:Type="String">GF#13698</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -968,55 +964,65 @@
     <Cell ss:Index="5"><Data ss:Type="String">Backbone Element</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="15" ss:StyleID="s79"><Data ss:Type="String">Information on the possible cause of the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">Information on the possible cause of the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="19"><Data ss:Type="String">is this meant to be a backbone element?</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14">
-    <Cell><Data ss:Type="String">AdverseEvent.suspectEntity.causality.assessment</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">AdverseEvent.suspectEntity.causality.assessmentMethod</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">AdverseEventCausalityMethod</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15" ss:StyleID="s79"><Data ss:Type="String">Method of evaluating the relatedness of the suspected entity to the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">The method of evaluating the relatedness of the suspected entity to the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">GF#20593</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14">
+    <Cell><Data ss:Type="String">AdverseEvent.suspectEntity.causality.entityRelatedness</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="9"><Data ss:Type="String">AdverseEventCausalityAssessment</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15" ss:StyleID="s79"><Data ss:Type="String">Assessment of if the entity caused the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="19"><Data ss:Type="String">what is difference between assessment and result?</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="14">
-    <Cell><Data ss:Type="String">AdverseEvent.suspectEntity.causality.productRelatedness</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">string</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">AdverseEvent.suspectEntity.causalityProductRelatedness</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">Result of the assessment regarding the relatedness of the suspected entity to the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">The result of the assessment regarding the relatedness of the suspected entity to the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">GF#20593</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14">
     <Cell><Data ss:Type="String">AdverseEvent.suspectEntity.causality.author</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">Reference(Practitioner|PractitionerRole)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">AdverseEvent.suspectEntity.causalityAuthor</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">Reference(Practitioner|PractitionerRole|Patient | RelatedPerson)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">Author of the information on the possible cause of the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">The author of the information on the possible cause of the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">GF#20593</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14">
-    <Cell><Data ss:Type="String">AdverseEvent.suspectEntity.causality.method</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">AdverseEvent.supportingInfo</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">Backbone Element</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">Supporting information relevant to the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">Supporting information relevant to the event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">GF#20593</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">AdverseEvent.supportingInfo.item</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">Reference(Condition|Observation|AllergyIntolerance|FamilyMemberHistory|Immunization|Procedure|DocumentReference)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">Subject medical history or document relevant to this adverse event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">Relevant past history for the subject.  In a clinical care context, an example being a patient had an adverse event following a penciliin administration and the patient had a previously documented penicillin allergy.  In a clinical trials context, an example is a bunion or rash that was present prior to the study.&#10;Additionally, the supporting item can be a document that is relevant to this instance of the adverse event that is not part of the subject's medical history.  For example, a clinical note, staff list, or material safety data sheet (MSDS)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">GF#14151, GF#20593</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14">
+    <Cell><Data ss:Type="String">AdverseEvent.supportingInfo.contributingFactor</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="9"><Data ss:Type="String">AdverseEventCausalityMethod</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15" ss:StyleID="s79"><Data ss:Type="String">ProbabilityScale | Bayesian | Checklist</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="29">
-    <Cell><Data ss:Type="String">AdverseEvent.subjectMedicalHistory</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">Reference(Condition|Observation|AllergyIntolerance|FamilyMemberHistory|Immunization|Procedure|Media|DocumentReference)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">AdverseEvent.subjectMedicalHistory</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="25"><Data ss:Type="String">GF#14151</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="14">
-    <Cell><Data ss:Type="String">AdverseEvent.referenceDocument</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">Reference(DocumentReference)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">AdverseEvent.referenceDocument</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">boolean</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">If true, the item has been assessed to be a contributing factor of the adverse event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">If true, the item has been assessed to be a contributing factor of the adverse event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">GF#20593</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14">
     <Cell><Data ss:Type="String">AdverseEvent.study</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="3"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">Reference(ResearchStudy)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">AdverseEvent.study</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">Research study that the subject is enrolled in</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">The research study that the subject is enrolled in</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Index="33">
+   <Row ss:AutoFitHeight="0" ss:Index="32">
     <Cell ss:StyleID="s82"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -1061,7 +1067,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>11</TopRowBottomPane>
+   <TopRowBottomPane>13</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -1564,7 +1570,7 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="=Search!R1C1:R1C5"/>
   </Names>
-  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="28" ss:StyleID="s98" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="27" ss:StyleID="s98" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s98" ss:Width="76.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s98" ss:Width="61.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s98" ss:Width="117.0"/>
@@ -1590,10 +1596,10 @@
     <Cell ss:StyleID="s103"><Data ss:Type="String">AdverseEvent.category</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s104"><Data ss:Type="String">event</Data></Cell>
+    <Cell ss:StyleID="s104"><Data ss:Type="String">code</Data></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s102"/>
-    <Cell ss:StyleID="s101"><Data ss:Type="String">AdverseEvent.event</Data></Cell>
+    <Cell ss:StyleID="s101"><Data ss:Type="String">AdverseEvent.code</Data></Cell>
     <Cell ss:StyleID="s103"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -1631,13 +1637,6 @@
     <Cell ss:StyleID="s101"><Data ss:Type="String">AdverseEvent.seriousness</Data></Cell>
     <Cell ss:StyleID="s103"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="16">
-    <Cell ss:StyleID="s104"><Data ss:Type="String">severity</Data></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">token</Data></Cell>
-    <Cell ss:StyleID="s102"/>
-    <Cell ss:StyleID="s101"><Data ss:Type="String">AdverseEvent.severity</Data></Cell>
-    <Cell ss:StyleID="s103"/>
-   </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s104"><Data ss:Type="String">recorder</Data></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">reference</Data></Cell>
@@ -1660,17 +1659,17 @@
     <Cell ss:StyleID="s105"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s104"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="String">patient</Data></Cell>
+    <Cell ss:StyleID="s102"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s102"/>
-    <Cell ss:StyleID="s102"/>
-    <Cell ss:StyleID="s101"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">AdverseEvent.subject</Data></Cell>
     <Cell ss:StyleID="s80"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s104"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="String">identifier</Data></Cell>
+    <Cell ss:StyleID="s102"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s102"/>
-    <Cell ss:StyleID="s102"/>
-    <Cell ss:StyleID="s101"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">AdverseEvent.identifier</Data></Cell>
     <Cell ss:StyleID="s103"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -3336,7 +3335,7 @@
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s101"/>
-    <Cell ss:StyleID="s125"/>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">GF#22746</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45" ss:StyleID="s111">
     <Cell ss:StyleID="s103"><Data ss:Type="String">AdverseEventOutcome</Data></Cell>
@@ -4842,7 +4841,7 @@
   </AutoFilter>
  </Worksheet>
  <Worksheet ss:Name="adverse-event-seriousness">
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="52" ss:StyleID="s127" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="45" ss:StyleID="s127" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s127" ss:Width="216.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s127" ss:Width="37.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s127" ss:Width="38.0"/>
@@ -4863,103 +4862,26 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Additional notes about the code.  Not published</Font>       </ss:Data></Comment></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Non-serious</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">non-serious</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s143"><Data ss:Type="String">Non-serious</Data></Cell>
-    <Cell ss:StyleID="s143"><Data ss:Type="String">Non-serious</Data></Cell>
+    <Cell ss:StyleID="s143"><Data ss:Type="String">This event is considered not to have the potential for persistent or costly injury or consequence</Data></Cell>
     <Cell ss:StyleID="s113"/>
     <Cell ss:StyleID="s113"/>
-    <Cell ss:StyleID="s132"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">GF#22994</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Serious</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">serious</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>
     <Cell><Data ss:Type="String">Serious</Data></Cell>
-    <Cell><Data ss:Type="String">Serious</Data></Cell>
+    <Cell><Data ss:Type="String">This event is considered to have the potential for persistent or costly injury or consequence</Data></Cell>
     <Cell ss:StyleID="s113"/>
     <Cell ss:StyleID="s113"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="75">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">SeriousResultsInDeath</Data></Cell>
-    <Cell ss:StyleID="s116"><Data ss:Type="Number">3</Data></Cell>
-    <Cell ss:StyleID="s101"/>
-    <Cell ss:StyleID="s116"><Data ss:Type="String">Serious</Data></Cell>
-    <Cell><Data ss:Type="String">Results in death</Data></Cell>
-    <Cell><Data ss:Type="String">Results in death</Data></Cell>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s135"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">SeriousIsLifeThreatening</Data></Cell>
-    <Cell ss:StyleID="s116"><Data ss:Type="Number">4</Data></Cell>
-    <Cell ss:StyleID="s101"/>
-    <Cell ss:StyleID="s116"><Data ss:Type="String">Serious</Data></Cell>
-    <Cell><Data ss:Type="String">Is Life-threatening</Data></Cell>
-    <Cell><Data ss:Type="String">Is Life-threatening</Data></Cell>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s135"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="29">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">SeriousResultsInHospitalization</Data></Cell>
-    <Cell ss:StyleID="s116"><Data ss:Type="Number">5</Data></Cell>
-    <Cell ss:StyleID="s101"/>
-    <Cell ss:StyleID="s116"><Data ss:Type="String">Serious</Data></Cell>
-    <Cell><Data ss:Type="String">Requires or prolongs inpatient hospitalization</Data></Cell>
-    <Cell><Data ss:Type="String">Requires inpatient hospitalization or causes prolongation of existing hospitalization</Data></Cell>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s135"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">SeriousResultsInDisability</Data></Cell>
-    <Cell ss:StyleID="s116"><Data ss:Type="Number">6</Data></Cell>
-    <Cell ss:StyleID="s101"/>
-    <Cell ss:StyleID="s116"><Data ss:Type="String">Serious</Data></Cell>
-    <Cell><Data ss:Type="String">Results in persistent or significant disability/incapacity</Data></Cell>
-    <Cell><Data ss:Type="String">Results in persistent or significant disability/incapacity</Data></Cell>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s135"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">SeriousIsBirthDefect</Data></Cell>
-    <Cell ss:StyleID="s116"><Data ss:Type="Number">7</Data></Cell>
-    <Cell ss:StyleID="s101"/>
-    <Cell ss:StyleID="s116"><Data ss:Type="String">Serious</Data></Cell>
-    <Cell><Data ss:Type="String">Is a congenital anomaly/birth defect</Data></Cell>
-    <Cell><Data ss:Type="String">Is a congenital anomaly/birth defect</Data></Cell>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s135"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="36">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">SeriousRequiresPreventImpairment</Data></Cell>
-    <Cell ss:StyleID="s116"><Data ss:Type="Number">8</Data></Cell>
-    <Cell ss:StyleID="s101"/>
-    <Cell ss:StyleID="s116"><Data ss:Type="String">Serious</Data></Cell>
-    <Cell><Data ss:Type="String">Requires intervention to prevent permanent impairment</Data></Cell>
-    <Cell><Data ss:Type="String">Requires intervention to prevent permanent impairment or damage (i.e., an important medical event that requires medical judgement)</Data></Cell>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s135"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s133"/>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s101"/>
-    <Cell ss:StyleID="s144"/>
-    <Cell ss:StyleID="s144"/>
-    <Cell ss:StyleID="s144"/>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">GF#22994</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s133"/>
@@ -5482,7 +5404,7 @@
     <Cell ss:StyleID="s135"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">resolvedWithSequelae</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">resolved-with-sequelae</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>
@@ -6037,7 +5959,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="135">
-    <Cell ss:StyleID="s129"><Data ss:Type="String">Certain</Data></Cell>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">certain</Data></Cell>
     <Cell ss:StyleID="s113"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s112"/>
     <Cell ss:StyleID="s143"/>
@@ -6048,7 +5970,7 @@
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="79">
-    <Cell ss:StyleID="s129"><Data ss:Type="String">Probably-Likely</Data></Cell>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">probably-likely</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>
@@ -6059,7 +5981,7 @@
     <Cell ss:StyleID="s135"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Possible</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">possible</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>
@@ -6070,7 +5992,7 @@
     <Cell ss:StyleID="s135"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="58">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Unlikely</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">unlikely</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>
@@ -6081,7 +6003,7 @@
     <Cell ss:StyleID="s135"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="47">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Conditional-Classified</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">conditional-classified</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">5</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>
@@ -6092,7 +6014,7 @@
     <Cell ss:StyleID="s135"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Unassessable-Unclassifiable</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">unassessable-unclassifiable</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">6</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>
@@ -6591,7 +6513,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>2</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -6627,7 +6549,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Additional notes about the code.  Not published</Font>       </ss:Data></Comment></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s129"><Data ss:Type="String">ProbabilityScale</Data></Cell>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">probability-scale</Data></Cell>
     <Cell ss:StyleID="s113"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s112"/>
     <Cell ss:StyleID="s143"/>
@@ -6638,7 +6560,7 @@
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s129"><Data ss:Type="String">Bayesian</Data></Cell>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">bayesian</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>
@@ -6649,7 +6571,7 @@
     <Cell ss:StyleID="s135"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Checklist</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">checklist</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s144"/>

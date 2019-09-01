@@ -11,7 +11,7 @@ import org.hl7.fhir.definitions.model.ElementDefn;
 import org.hl7.fhir.definitions.model.Invariant;
 import org.hl7.fhir.definitions.model.ProfiledType;
 import org.hl7.fhir.igtools.spreadsheets.TypeRef;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.tools.publisher.PageProcessor;
 import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.Utilities;
@@ -180,7 +180,7 @@ public class TableGenerator extends BaseGenerator {
       ElementDefn f = definitions.getElementDefn(e.typeCode());
       while (f != null) {
         ancestors.add(0, f);
-        f = Utilities.noString(f.typeCode()) ? null : definitions.getElementDefn(f.typeCode());
+        f = Utilities.noString(f.typeCode()) || "Logical".equals(f.typeCode()) ? null : definitions.getElementDefn(f.typeCode());
       }
       
       cc.getPieces().add(gen.new Piece("br"));

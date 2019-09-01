@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.igtools.spreadsheets.TypeRef;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r5.model.Type;
 import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.Utilities;
 
@@ -501,6 +501,38 @@ public class ElementDefn {
 		}
 		return tn.toString();
 	}
+
+  public String resolvedTypeCode(Definitions definitions) {
+    StringBuilder tn = new StringBuilder();
+    boolean first = true;
+    for (TypeRef t : types) {
+      if (!first)
+        tn.append("|");
+      first = false;
+      tn.append(t.getName());
+      if (t.hasParams()) {
+        tn.append("(");
+        boolean f = true;
+        for (String s : t.getParams()) {
+          if (definitions.hasLogicalModel(s)) {
+            for (String sn : definitions.getLogicalModel(s).getImplementations()) {
+              if (!f)
+                tn.append("|");
+              f = false;
+              tn.append(sn);
+            }
+          } else {
+            if (!f)
+              tn.append("|");
+            f = false;
+            tn.append(s);
+          }
+        }
+        tn.append(")");
+      }
+    }
+    return tn.toString();
+  }
 
 	
 	public boolean usesCompositeType() {
@@ -1029,7 +1061,7 @@ public class ElementDefn {
     else
       return rd.getNormativeVersion();
   }
-  
+
   
 }
 
